@@ -12,17 +12,17 @@ var express = require('express'),
      debug = require('debug')('kb:main'),
      passport = require('passport'),
      busboy = require('busboy'),
-     LocalStrategy = require('passport-local').Strategy;
-
+     LocalStrategy = require('passport-local').Strategy;,
+     config=require('./config');
 var Account = require('./models/User');
-var databaseURI = 'mongodb://localhost/kanban_db';
 
-mongoose.connect(databaseURI, function(err) {
+
+mongoose.connect(config.MongoDbURL, function(err) {
   if (err) {
-    debug(databaseURI + ' connection error. ', err);
+    debug(config. MongoDbURL+ ' connection error. ', err);
     throw(err);
   } else /*if(process.env.NODE_ENV === 'development')*/{
-    debug(databaseURI + ' connected.');
+    debug(config. MongoDbURL + ' connected.');
   }
 });
 
