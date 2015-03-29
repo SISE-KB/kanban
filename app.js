@@ -12,7 +12,7 @@ var express = require('express'),
      debug = require('debug')('kb:main'),
      passport = require('passport'),
      busboy = require('busboy'),
-     LocalStrategy = require('passport-local').Strategy;,
+     LocalStrategy = require('passport-local').Strategy,
      config=require('./config');
 var Account = require('./models/User');
 
