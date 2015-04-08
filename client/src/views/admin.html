@@ -1,0 +1,27 @@
+<h1>Admin</h1>
+<p>
+	<a href="#/" ng-click="logout()">Logout</a>
+</p>
+<h1>广播</h1>
+<form ng-submit="sendMsg(msg)">
+  <div class="form-group">
+    <label class="control-label">标题</label>
+  	<input type="text" placeholder="Please input text" ng-model="msg.title" />
+  </div>
+   <div class="form-group">
+	  <label class="control-label">内容</label>
+	  <textarea  cols="40" rows="10"
+		ng-model="msg.text"
+		ng-maxlength="200">
+	</textarea>
+  </div>
+  <p>
+    <button type="submit" class="btn btn-primary">发送</button>
+</form>
+</p>
+ <form action="/upload" enctype="multipart/form-data" method="post">
+      <input type="file" name="upload" multiple="multiple"><br>
+      <input type="submit" value="Upload">
+ </form>
+
+ 
