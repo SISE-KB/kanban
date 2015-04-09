@@ -19,13 +19,19 @@
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
-                <a class="navbar-brand">SISE-GAME KanBan<span ng-if="user!=null">[当前用户：{{user.name}}]</span></a>
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+         <a class="navbar-brand">SISE-GAME KanBan<span ng-if="user!=null">[当前用户：{{user.name}}]</span></a>
         </div>
       
         <div class="navbar-collapse collapse"  ng-controller="UserCtrl"  ng-if="user==null">
           <form class="navbar-form navbar-right" ng-submit="login()">
             <div class="form-group">
-                <input type="text" placeholder="手机号" ng-model="user.mobileNo"  class="form-control" style="width:120px">
+                <input type="text" placeholder="手机号" ng-model="user.username"  class="form-control" style="width:120px">
             </div>
             <div class="form-group">
               <input type="password" placeholder="密码"  ng-model="user.password"  class="form-control" style="width:120px">
@@ -40,11 +46,11 @@
 	<div style="margin-left:30%">
        <ng-view></ng-view>
     </div>
-     <br>
-     <footer>
+      <br>
+      <footer>
         <p>&copy; SISE GAME 2014</p>
-     </footer>
-</div> <!-- /container -->
+      </footer>
+    </div> <!-- /container -->
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="./libs/jquery.js"></script>

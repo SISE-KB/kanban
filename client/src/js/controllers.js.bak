@@ -90,7 +90,6 @@ angular.module('myApp')
         $scope.socket.emit('message', msg);//in $rootScope
         $http.post('/api/messages', msg).success(function(m){
            $scope.tip="OK";
-
         }).error(function(){
            $scope.tip = 'Save failed.';
        });

@@ -9,7 +9,7 @@ exports = module.exports = function(auth){
 	var pre='/messages';
 	/* GET /projects listing. */
 	router.get(pre+'/', function(req, res, next) {
-	 Message.find().limit(6).sort('-recDate').exec(function (err, data) {// order by recDate
+	 Message.find().limit(10).sort('-recDate').exec(function (err, data) {// order by recDate
 		if (err) return next(err);
 		res.json(data);
 		debug(data);

@@ -1,5 +1,5 @@
 # Set EOL to lf to avoid problems when building a package
-#* text eol=lf
+* text eol=lf
 
 # Explicitly declare text files
 *.js text
@@ -10,11 +10,5 @@
 
 # Declare binary files
 *.png -text
-*.doc -text
-*.docx -text
-*.ppt -text
-*.pptx -text
-*.xls -text
-*.xlsx -text
 *.jpeg -text
 *.jpg -text

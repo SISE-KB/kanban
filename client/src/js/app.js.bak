@@ -89,7 +89,7 @@ angular.module('myApp', ['ngResource', 'ngRoute','ui.bootstrap', 'hc.marked','ng
 }) // end of config()
 .run(function($rootScope, $http,$log){
   
-    var socket =$rootScope.socket=io();
+    var socket =io();
    
     socket.on('message', function (data) {
         $rootScope.$broadcast('socket:message', data);
