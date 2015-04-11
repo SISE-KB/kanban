@@ -5,7 +5,7 @@ var mongoose = require('mongoose'),
      ObjectId = Schema.ObjectId;
 
 
-var SprintSchema = new Schema({
+var ProductBacklogSchema = new Schema({
   name: String,
   desc : String,
   priority : Number ,
@@ -14,4 +14,4 @@ var SprintSchema = new Schema({
  
 });
 
-exports=module.exports = mongoose.model('Sprint', SprintSchema);
+exports=module.exports = mongoose.model('ProductBacklog', ProductBacklogSchema);

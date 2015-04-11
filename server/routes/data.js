@@ -1,15 +1,26 @@
 var express = require('express')
+ ,mongoose = require('mongoose')
  ,debug = require('debug')('kb:route:data')
+ /*
+ require('../models/users')
+ require('../models/projects')
+ require('../models/messages')
+ require('../models/productbacklogs')
+ require('../models/sprints')
+ require('../models/tasks')*/
+ 
 exports.addRoutes = function(app, config) {
 var dbRouter = express.Router()
+
+
 dbRouter
   .route('/:collection/:id?')
   .get(function (req, res) {
 	  var id=req.params.id
 	  var cname=req.params.collection
 	  console.log('query: ',req.query)
-	  m=require('../models/'+cname)
-	  
+	  var m=require('../models/'+cname)
+
       if(!!id)  m.findById(id,function(err,data){
 		  res.json(data)
 	  })
@@ -20,7 +31,7 @@ dbRouter
   .put(function (req, res) {
 	  var id=req.params.id
 	  var cname=req.params.collection
-	  m=require('../models/'+cname)
+	  var m=require('../models/'+cname)
       if(!!id)   m.findByIdAndUpdate(id, req.body, function (err, post) {
 		if (err) return next(err);
 		res.json(post);
@@ -31,7 +42,7 @@ dbRouter
   })
   .post(function (req, res) {
 	  var cname=req.params.collection
-	  m=require('../models/'+cname)
+	  var m=require('../models/'+cname)
       m.create(req.body, function (err, post) {
 		if (err) return next(err);
 		debug(post)
@@ -41,7 +52,7 @@ dbRouter
   .delete(function (req, res) {
 	  var id=req.params.id
 	  var cname=req.params.collection
-	  m=require('../models/'+cname)
+	  var m=require('../models/'+cname)
        if(!!id)  m.findByIdAndRemove(req.params.id, req.body, function (err, post) {
 		if (err) return next(err);
 		res.json(post);
