@@ -1,8 +1,7 @@
 var mongoose     = require('mongoose')
   , parseArgs = require('minimist')
-  , mongoose  = require('mongoose')
   , config  = require('../config')
- // 
+ 
 
 function connectDB(cb){
 	var degug= parseArgs(process.argv)['debug']

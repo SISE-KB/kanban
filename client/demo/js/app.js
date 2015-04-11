@@ -4,6 +4,10 @@
  * Main Application
  **********************************************************************/
 angular.module('myApp', ['ngResource', 'ngRoute','ui.bootstrap', 'hc.marked','ngFileUpload'])
+.constant('APP_CONFIG', {
+   staticDir: '/static/'
+  ,imagesDir: '/static/files/'
+})
 .config(function($routeProvider, $locationProvider, $httpProvider,markedProvider) {
     markedProvider.setOptions({gfm: true});
 
@@ -61,7 +65,7 @@ angular.module('myApp', ['ngResource', 'ngRoute','ui.bootstrap', 'hc.marked','ng
 
     $routeProvider
       .when('/', {
-        templateUrl: 'views/home.html',
+        templateUrl: '/static/views/home.html',
         controller: 'HomeCtrl',
         resolve: {
            data: loadMsgs
@@ -69,18 +73,18 @@ angular.module('myApp', ['ngResource', 'ngRoute','ui.bootstrap', 'hc.marked','ng
         }
       })
       .when('/admin', {
-        templateUrl: 'views/admin.html',
+        templateUrl: '/static/views/admin.html',
         controller: 'AdminCtrl',
         resolve: {
           loggedin: checkLoggedin
         }
       })
       .when('/login', {
-        templateUrl: 'views/login.html',
+        templateUrl: '/static/views/login.html',
         controller: 'UserCtrl'
       })
       .when('/register', {
-        templateUrl: 'views/register.html',
+        templateUrl: '/static/views/register.html',
         controller: 'UserCtrl'
       })
       .otherwise({

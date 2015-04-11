@@ -2,6 +2,9 @@
 <p>
 	<a href="#/" ng-click="logout()">Logout</a>
 </p>
+<p>
+	<a href="#/" >Home</a>
+</p>
 <div style="float:left; margin-right: 10px;">
 	<h1>广播</h1>
 	<form ng-submit="sendMsg(msg)">
@@ -24,7 +27,7 @@
 	</p> 
 	<form name="myForm">
 		<fieldset><legend>上传图片示例</legend>
-			上传者: <input type="text" name="userName" ng-model="username" size="39" required>
+			上传者: <input type="text" name="userName" ng-model="username"  size="39" required>
 			<i ng-show="myForm.userName.$error.required">*required</i><br>
 			图片文件: <input type="file" ng-file-select ng-model="picFile" name="file" accept="image/*" 
 			ng-file-change="generateThumb(picFile[0], $files)" required>

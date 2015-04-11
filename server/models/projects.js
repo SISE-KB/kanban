@@ -3,7 +3,7 @@
 var mongoose = require('mongoose'),
      Schema = mongoose.Schema,
      ObjectId = Schema.ObjectId;
-var User = require('./User');   
+var User = require('./users');   
 //var deepPopulate = require('mongoose-deep-populate');  
   
 var RoleSchema = new Schema({

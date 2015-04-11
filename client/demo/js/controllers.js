@@ -3,7 +3,7 @@
  * Home controller
  **********************************************************************/
 angular.module('myApp')
-.controller('HomeCtrl', function($scope,$log, data,files) {
+.controller('HomeCtrl', function($scope,$log,APP_CONFIG, data,files) {
   $scope.msgs=data;
   var ds=$scope.msgs;
   $scope.$on('socket:message', function(event,msg){
@@ -18,7 +18,7 @@ angular.module('myApp')
    $scope.myInterval = 5000;
    var idx=1;
    $scope.addSlide = function(fn) {
-      var imgurl='/' +fn;
+      var imgurl=APP_CONFIG.imagesDir+fn;
       slides.push({
         image: imgurl,
         text: ''
@@ -78,6 +78,7 @@ angular.module('myApp')
  **********************************************************************/
 .controller('AdminCtrl', function($scope,$http,$upload,$timeout,loggedin) {
 	$scope.tip = '';
+	$scope.username='demo'
 	$scope.msg = {title:'this is title',
 	  text:'# 1级标题\n'+
            '## 2级标题\n'+
