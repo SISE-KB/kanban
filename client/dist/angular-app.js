@@ -14,25 +14,24 @@ angular.module('app', [
   'ui.bootstrap.tpls']);
 
 angular.module('app').constant('MONGOLAB_CONFIG', {
-  BASE_URL: 'https://api.mongolab.com/api/1/databases/'
-  ,apiKey: '4fb51e55e4b02e56a67b0b66'  
- , DB_NAME: 'ascrum'
+  BASE_URL: '/databases/',
+  DB_NAME: 'ascrum'
 });
 
 //TODO: move those messages to a separate module
 angular.module('app').constant('I18N.MESSAGES', {
-  'errors.route.changeError':'Route change error',
-  'crud.user.save.success':"A user with id '{{id}}' was saved successfully.",
-  'crud.user.remove.success':"A user with id '{{id}}' was removed successfully.",
-  'crud.user.remove.error':"Something went wrong when removing user with id '{{id}}'.",
-  'crud.user.save.error':"Something went wrong when saving a user...",
-  'crud.project.save.success':"A project with id '{{id}}' was saved successfully.",
-  'crud.project.remove.success':"A project with id '{{id}}' was removed successfully.",
-  'crud.project.save.error':"Something went wrong when saving a project...",
-  'login.reason.notAuthorized':"You do not have the necessary access permissions.  Do you want to login as someone else?",
-  'login.reason.notAuthenticated':"You must be logged in to access this part of the application.",
-  'login.error.invalidCredentials': "Login failed.  Please check your credentials and try again.",
-  'login.error.serverError': "There was a problem with authenticating: {{exception}}."
+  'errors.route.changeError':'前端路由出错',
+  'crud.user.save.success':"保存成功用户'{{id}}'",
+  'crud.user.remove.success':"'删除成功{{id}}'",
+  'crud.user.remove.error':"删除'{{id}}'出错",
+  'crud.user.save.error':"保存用户出错...",
+  'crud.project.save.success':"项目'{{id}}' 保存成功",
+  'crud.project.remove.success':"项目'{{id}}' 删除成功",
+  'crud.project.save.error':"保存项目出错...",
+  'login.reason.notAuthorized':"无权操作！",
+  'login.reason.notAuthenticated':"必须登录后才能访问！",
+  'login.error.invalidCredentials': "登录失败，请检查输入是否正确！",
+  'login.error.serverError': "服务端错误： {{exception}}."
 });
 
 angular.module('app').config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
@@ -85,6 +84,7 @@ angular.module('app').controller('HeaderCtrl', ['$scope', '$location', '$route',
 }]);
 
 angular.module('admin', ['admin-projects', 'admin-users']);
+
 angular.module('dashboard', ['resources.projects', 'resources.tasks'])
 
 .config(['$routeProvider', function ($routeProvider) {
@@ -116,7 +116,7 @@ angular.module('dashboard', ['resources.projects', 'resources.tasks'])
     $location.path('/projects/' + projectId + '/sprints');
   };
 }]);
-angular.module('projects', ['resources.projects', 'productbacklog', 'sprints', 'security.authorization'])
+angular.module('projects', ['resources.projects', 'productbacklogs', 'sprints', 'security.authorization'])
 
 .config(['$routeProvider', 'securityAuthorizationProvider', function ($routeProvider, securityAuthorizationProvider) {
   $routeProvider.when('/projects', {
@@ -139,8 +139,8 @@ angular.module('projects', ['resources.projects', 'productbacklog', 'sprints', '
     $location.path('/projects/'+project.$id());
   };
 
-  $scope.manageBacklog = function (project) {
-    $location.path('/projects/'+project.$id()+'/productbacklog');
+  $scope.manageBacklogs = function (project) {
+    $location.path('/projects/'+project.$id()+'/productbacklogs');
   };
 
   $scope.manageSprints = function (project) {
@@ -170,116 +170,13 @@ angular.module('projectsinfo', [], ['$routeProvider', function($routeProvider){
 angular.module('projectsinfo').controller('ProjectsInfoListCtrl', ['$scope', 'projects', function($scope, projects){
   $scope.projects = projects;
 }]);
-
-angular.module('resources.productbacklog', ['mongolabResourceHttp']);
-angular.module('resources.productbacklog').factory('ProductBacklog', ['$mongolabResourceHttp', function ($mongolabResourceHttp) {
-  var ProductBacklog = $mongolabResourceHttp('productbacklogs');
-
-  ProductBacklog.forProject = function (projectId) {
-    return ProductBacklog.query({projectId:projectId});
-  };
-
-  return ProductBacklog;
-}]);
-
-angular.module('resources.projects', ['mongolabResourceHttp']);
-angular.module('resources.projects').factory('Projects', ['$mongolabResourceHttp', function ($mongolabResourceHttp) {
-
-  var Projects = $mongolabResourceHttp('projects');
-
-  Projects.forUser = function(userId, successcb, errorcb) {
-    //TODO: get projects for this user only (!)
-    return Projects.query({}, successcb, errorcb);
-  };
-
-  Projects.prototype.isProductOwner = function (userId) {
-    return this.productOwner === userId;
-  };
-  Projects.prototype.canActAsProductOwner = function (userId) {
-    return !this.isScrumMaster(userId) && !this.isDevTeamMember(userId);
-  };
-  Projects.prototype.isScrumMaster = function (userId) {
-    return this.scrumMaster === userId;
-  };
-  Projects.prototype.canActAsScrumMaster = function (userId) {
-    return !this.isProductOwner(userId);
-  };
-  Projects.prototype.isDevTeamMember = function (userId) {
-    return this.teamMembers.indexOf(userId) >= 0;
-  };
-  Projects.prototype.canActAsDevTeamMember = function (userId) {
-    return !this.isProductOwner(userId);
-  };
-
-  Projects.prototype.getRoles = function (userId) {
-    var roles = [];
-    if (this.isProductOwner(userId)) {
-      roles.push('PO');
-    } else {
-      if (this.isScrumMaster(userId)){
-        roles.push('SM');
-      }
-      if (this.isDevTeamMember(userId)){
-        roles.push('DEV');
-      }
-    }
-    return roles;
-  };
-
-  return Projects;
-}]);
-angular.module('resources.sprints', ['mongolabResourceHttp']);
-angular.module('resources.sprints').factory('Sprints', ['$mongolabResourceHttp', function ($mongolabResourceHttp) {
-
-  var Sprints = $mongolabResourceHttp('sprints');
-  Sprints.forProject = function (projectId) {
-    return Sprints.query({projectId:projectId});
-  };
-  return Sprints;
-}]);
-angular.module('resources.tasks', ['mongolabResourceHttp']);
-angular.module('resources.tasks').factory('Tasks', ['$mongolabResourceHttp', function ($mongolabResourceHttp) {
-
-  var Tasks = $mongolabResourceHttp('tasks');
-
-  Tasks.statesEnum = ['TODO', 'IN_DEV', 'BLOCKED', 'IN_TEST', 'DONE'];
-
-  Tasks.forProductBacklogItem = function (productBacklogItem) {
-    return Tasks.query({productBacklogItem:productBacklogItem});
-  };
-
-  Tasks.forSprint = function (sprintId) {
-    return Tasks.query({sprintId:sprintId});
-  };
-
-  Tasks.forUser = function (userId) {
-    return Tasks.query({userId:userId});
-  };
-
-  Tasks.forProject = function (projectId) {
-    return Tasks.query({projectId:projectId});
-  };
-
-  return Tasks;
-}]);
-angular.module('resources.users', ['mongolabResourceHttp']);
-angular.module('resources.users').factory('Users', ['$mongolabResourceHttp', function ($mongolabResourceHttp) {
-
-  var userResource = $mongolabResourceHttp('users');
-  userResource.prototype.getFullName = function () {
-    return this.lastName + " " + this.firstName + " (" + this.email + ")";
-  };
-
-  return userResource;
-}]);
-
-
 angular.module('admin-projects', [
   'resources.projects',
   'resources.users',
   'services.crud',
   'security.authorization'
 ])
+
 .config(['crudRouteProvider', 'securityAuthorizationProvider', function (crudRouteProvider, securityAuthorizationProvider) {
 
   var getAllUsers = ['Projects', 'Users', '$route', function(Projects, Users, $route){
@@ -375,7 +272,7 @@ angular.module('admin-projects', [
 angular.module('admin-users-edit',[
   'services.crud',
   'services.i18nNotifications',
-  'admin-users-edit-uniqueEmail',
+  'admin-users-edit-uniqueMobileNo',
   'admin-users-edit-validateEquals'
 ])
 
@@ -399,6 +296,7 @@ angular.module('admin-users-edit',[
   };
 
 }]);
+
 angular.module('admin-users-list', [
   'services.crud',
   'services.i18nNotifications'
@@ -431,7 +329,6 @@ angular.module('admin-users', [
   
   'services.crud',
   'security.authorization'
- // ,'directives.gravatar'
 ])
 
 .config(['crudRouteProvider', 'securityAuthorizationProvider', function (crudRouteProvider, securityAuthorizationProvider) {
@@ -452,13 +349,14 @@ angular.module('admin-users', [
       currentUser: securityAuthorizationProvider.requireAdminUser
     });
 }]);
-angular.module('admin-users-edit-uniqueEmail', ['resources.users'])
+
+angular.module('admin-users-edit-uniqueMobileNo', ['resources.users'])
 
 /**
  * A validation directive to ensure that the model contains a unique email address
  * @param  Users service to provide access to the server's user database
   */
-.directive('uniqueEmail', ["Users", function (Users) {
+.directive('uniqueMobileNo', ["Users", function (Users) {
   return {
     require:'ngModel',
     restrict:'A',
@@ -472,9 +370,9 @@ angular.module('admin-users-edit-uniqueEmail', ['resources.users'])
         if (viewValue) {
           Users.query({email:viewValue}, function (users) {
             if (users.length === 0) {
-              ctrl.$setValidity('uniqueEmail', true);
+              ctrl.$setValidity('uniqueMobileNo', true);
             } else {
-              ctrl.$setValidity('uniqueEmail', false);
+              ctrl.$setValidity('uniqueMobileNo', false);
             }
           });
           return viewValue;
@@ -483,6 +381,7 @@ angular.module('admin-users-edit-uniqueEmail', ['resources.users'])
     }
   };
 }]);
+
 angular.module('admin-users-edit-validateEquals', [])
 
 /**
@@ -518,7 +417,7 @@ angular.module('admin-users-edit-validateEquals', [])
     }
   };
 });
-angular.module('productbacklog', ['resources.productbacklog', 'services.crud'])
+angular.module('productbacklogs', ['resources.productbacklogs', 'services.crud'])
 
   .config(['crudRouteProvider', function(crudRouteProvider){
   
@@ -531,28 +430,28 @@ angular.module('productbacklog', ['resources.productbacklog', 'services.crud'])
   
   
     // Create the CRUD routes for editing the product backlog
-    crudRouteProvider.routesFor('ProductBacklog', 'projects', 'projects/:projectId')
+    crudRouteProvider.routesFor('ProductBacklogs', 'projects', 'projects/:projectId')
       // How to handle the "list product backlog items" route
       .whenList({
         projectId: projectId,
-        backlog : ['$route', 'ProductBacklog', function($route, ProductBacklog){
-          return ProductBacklog.forProject($route.current.params.projectId);
+        backlog : ['$route', 'ProductBacklogs', function($route, ProductBacklogs){
+          return ProductBacklogs.forProject($route.current.params.projectId);
         }]
       })
       
       // How to handle the "create a new product backlog item" route
       .whenNew({
         projectId: projectId,
-        backlogItem : ['$route', 'ProductBacklog', function($route, ProductBacklog){
-          return new ProductBacklog({projectId:$route.current.params.projectId});
+        backlogItem : ['$route', 'ProductBacklogs', function($route, ProductBacklogs){
+          return new ProductBacklogs({projectId:$route.current.params.projectId});
         }]
       })
     
       // How to handle the "edit a product backlog item" route
       .whenEdit({
         projectId: projectId,
-        backlogItem : ['$route', 'ProductBacklog', function($route, ProductBacklog){
-          return ProductBacklog.getById($route.current.params.itemId);
+        backlogItem : ['$route', 'ProductBacklogs', function($route, ProductBacklogs){
+          return ProductBacklogs.getById($route.current.params.itemId);
         }]
       });
   }])
@@ -560,24 +459,24 @@ angular.module('productbacklog', ['resources.productbacklog', 'services.crud'])
   
   
   // The controller for listing product backlog items
-  .controller('ProductBacklogListCtrl', ['$scope', 'crudListMethods', 'projectId', 'backlog', function($scope, crudListMethods, projectId, backlog){
+  .controller('ProductBacklogsListCtrl', ['$scope', 'crudListMethods', 'projectId', 'backlog', function($scope, crudListMethods, projectId, backlog){
   
     $scope.backlog = backlog;
     
-    angular.extend($scope, crudListMethods('/projects/'+projectId+'/productbacklog'));
+    angular.extend($scope, crudListMethods('/projects/'+projectId+'/productbacklogs'));
   
   }])
   
   
   
   // The controller for editing a product backlog item
-  .controller('ProductBacklogEditCtrl', ['$scope', '$location', 'projectId', 'backlogItem', function($scope, $location, projectId, backlogItem){
+  .controller('ProductBacklogsEditCtrl', ['$scope', '$location', 'projectId', 'backlogItem', function($scope, $location, projectId, backlogItem){
   
     $scope.backlogItem = backlogItem;
   
     $scope.onSave = function () {
       //TODO: missing message
-      $location.path('/projects/'+projectId+'/productbacklog');
+      $location.path('/projects/'+projectId+'/productbacklogs');
     };
   
     $scope.onError = function () {
@@ -595,8 +494,8 @@ angular.module('sprints', ['resources.sprints', 'services.crud', 'tasks'])
     return $route.current.params.projectId;
   }];
 
-  var productBacklog = ['$route', 'ProductBacklog', function ($route, ProductBacklog) {
-    return ProductBacklog.forProject($route.current.params.projectId);
+  var productBacklogs = ['$route', 'ProductBacklogs', function ($route, ProductBacklogs) {
+    return ProductBacklogs.forProject($route.current.params.projectId);
   }];
 
   crudRouteProvider.routesFor('Sprints', 'projects', 'projects/:projectId')
@@ -612,7 +511,7 @@ angular.module('sprints', ['resources.sprints', 'services.crud', 'tasks'])
     sprint: ['$route', 'Sprints', function($route, Sprints){
       return new Sprints({projectId:$route.current.params.projectId});
     }],
-    productBacklog : productBacklog
+    productBacklogs : productBacklogs
   })
 
   .whenEdit({
@@ -620,7 +519,7 @@ angular.module('sprints', ['resources.sprints', 'services.crud', 'tasks'])
     sprint: ['$route', 'Sprints', function($route, Sprints){
       return Sprints.getById($route.current.params.itemId);
     }],
-    productBacklog : productBacklog
+    productBacklogs : productBacklogs
   });
 
 }])
@@ -635,9 +534,9 @@ angular.module('sprints', ['resources.sprints', 'services.crud', 'tasks'])
   };
 }])
 
-.controller('SprintsEditCtrl', ['$scope', '$location', 'projectId', 'sprint', 'productBacklog', function($scope, $location, projectId, sprint, productBacklog){
+.controller('SprintsEditCtrl', ['$scope', '$location', 'projectId', 'sprint', 'productBacklogs', function($scope, $location, projectId, sprint, productBacklogs){
 
-  $scope.productBacklog = productBacklog;
+  $scope.productBacklogs = productBacklogs;
   $scope.sprint = sprint;
 
   $scope.onSave = function () {
@@ -647,35 +546,35 @@ angular.module('sprints', ['resources.sprints', 'services.crud', 'tasks'])
     $scope.updateError = true;
   };
   
-  $scope.sprint.sprintBacklog = $scope.sprint.sprintBacklog || [];
+  $scope.sprint.sprintBacklogs = $scope.sprint.sprintBacklogs || [];
 
   $scope.productBacklogLookup = {};
-  angular.forEach($scope.productBacklog, function (productBacklogItem) {
+  angular.forEach($scope.productBacklogs, function (productBacklogItem) {
     $scope.productBacklogLookup[productBacklogItem.$id()] = productBacklogItem;
   });
 
   $scope.viewProductBacklogItem = function (productBacklogItemId) {
-    $location.path('/projects/'+projectId+'/productbacklog/'+productBacklogItemId);
+    $location.path('/projects/'+projectId+'/productbacklogs/'+productBacklogItemId);
   };
 
   $scope.addBacklogItem = function (backlogItem) {
-    $scope.sprint.sprintBacklog.push(backlogItem.$id());
+    $scope.sprint.sprintBacklogs.push(backlogItem.$id());
   };
 
   $scope.removeBacklogItem = function (backlogItemId) {
-    $scope.sprint.sprintBacklog.splice($scope.sprint.sprintBacklog.indexOf(backlogItemId),1);
+    $scope.sprint.sprintBacklogs.splice($scope.sprint.sprintBacklogs.indexOf(backlogItemId),1);
   };
 
   $scope.estimationInTotal = function () {
     var totalEstimation = 0;
-    angular.forEach(sprint.sprintBacklog, function (backlogItemId) {
+    angular.forEach(sprint.sprintBacklogs, function (backlogItemId) {
       totalEstimation += $scope.productBacklogLookup[backlogItemId].estimation;
     });
     return totalEstimation;
   };
 
   $scope.notSelected = function (productBacklogItem) {
-    return $scope.sprint.sprintBacklog.indexOf(productBacklogItem.$id())===-1;
+    return $scope.sprint.sprintBacklogs.indexOf(productBacklogItem.$id())===-1;
   };
 }]);
 
@@ -683,10 +582,10 @@ angular.module('tasks', ['resources.tasks', 'services.crud'])
 
 .config(['crudRouteProvider', function (crudRouteProvider) {
 
-  var sprintBacklogItems = ['Sprints', 'ProductBacklog', '$route', function (Sprints, ProductBacklog, $route) {
+  var sprintBacklogItems = ['Sprints', 'ProductBacklogs', '$route', function (Sprints, ProductBacklogs, $route) {
     var sprintPromise = Sprints.getById($route.current.params.sprintId);
     return sprintPromise.then(function (sprint) {
-      return ProductBacklog.getByObjectIds(sprint.sprintBacklog);
+      return ProductBacklogs.getByObjectIds(sprint.sprintBacklogs);
     });
   }];
 

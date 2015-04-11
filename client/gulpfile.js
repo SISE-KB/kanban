@@ -1,85 +1,154 @@
-var gulp = require('gulp'),
-    $ = require('gulp-load-plugins')(),
-    fs = require('fs'),
-    karma = require('karma').server,
-    path = require('path');
+var gulp = require('gulp');
+var templateCache = require('gulp-angular-templatecache');
+var jshint = require('gulp-jshint');
+var concat = require('gulp-concat');
+//var uglify = require('gulp-uglify');
+//var template = require('gulp-template');
+//var header = require('gulp-header');
+//var htmlmin = require('gulp-htmlmin');
+var protractor = require("gulp-protractor").protractor;
 
-var express = require('express'),
-    http = require('http'),
-    server = http.createServer(express().use(express.static(__dirname + '/test/e2e/app/')));
-var mongoose = require('mongoose');
-mongoose.connect("mongodb://localhost/test", function(err) {
-  if (err) {
-    console.log(' connection error. ', err);
-    throw(err);
-  } else /*if(process.env.NODE_ENV === 'development')*/{
-    console.log( 'mongodb connected.');
+var merge = require('merge-stream');
+var rimraf = require('rimraf');
+var _ = require('lodash');
+
+var karma = require('karma').server;
+
+var package = require('./package.json');
+
+var karmaCommonConf = {
+  browsers: process.env.TRAVIS ? ['SL_Chrome', 'SL_Firefox', 'SL_Safari', 'SL_IE_11'] : ['Chrome'],
+  customLaunchers: {
+    'SL_Chrome': {
+      base: 'SauceLabs',
+      browserName: 'chrome',
+      platform: 'Linux',
+      version: '36'
+    },
+    'SL_Firefox': {
+      base: 'SauceLabs',
+      browserName: 'firefox',
+      platform: 'Linux',
+      version: '31'
+    },
+    'SL_Safari': {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      platform: 'OS X 10.9',
+      version: '7'
+    },
+    'SL_IE_11': {
+      base: 'SauceLabs',
+      browserName: 'internet explorer',
+      platform: 'Windows 8.1',
+      version: '11'
+    }
+  },
+  frameworks: ['jasmine'],
+  preprocessors: {
+    'src/**/*.tpl.html': ['ng-html2js']
+  },
+  files: [
+    'bower_components/jquery/dist/jquery.js',
+    'bower_components/angular/angular.js',
+    'bower_components/angular-route/angular-route.js',
+    'bower_components/angularjs-mongolab/src/angular-mongolab.js',
+    'bower_components/angular-mocks/angular-mocks.js',
+    'bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
+    'src/**/*.tpl.html',
+    'src/**/*.js',
+    'test/unit/**/*.spec.js'
+  ],
+  reporters: process.env.TRAVIS ? ['dots'] : ['progress'],
+  ngHtml2JsPreprocessor: {
+    cacheIdFromPath: function(filepath) {
+      //cut off src/common/ and src/app/ prefixes, if present
+      //we do this so in directives we can refer to templates in a way
+      //that those templates can be served by a web server during dev time
+      //without any need to bundle them
+      return filepath.replace('src/common/', '').replace('src/app/', '');
+    }
   }
+};
+
+var htmlMinOpts = {
+    collapseWhitespace: true,
+    conservativeCollapse: true
+  };
+  
+
+gulp.task('build-app-temps', function () {
+	 return    gulp.src('src/app/**/*.tpl.html')
+      .pipe(templateCache({standalone: true, module: 'templates.app'}))
+      .pipe(concat('templates-app.js'))
+     .pipe(gulp.dest('dist'));
 });
-var files=['models/*.js','test/unit/*.js'];
-gulp.task('jshint', function () {
-  gulp.src(files)
-    .pipe($.jshint())
-    .pipe($.jshint.reporter('default'));
+gulp.task('build-common-temps', function () {
+
+	 return    gulp.src('src/common/**/*.tpl.html')
+	 //.pipe(htmlmin(htmlMinOpts))
+      .pipe(templateCache({standalone: true, module: 'templates.common'}))
+      .pipe(concat('templates-common.js'))
+     .pipe(gulp.dest('dist'));
 });
 
-gulp.task('js', ['jshint'], function () {
-  return gulp.src('js/**/*.js')
-    .pipe($.plumber())
-    .pipe($.concat('myApp.js'))
-    .pipe(gulp.dest('dist'))
-    .pipe($.uglify({ mangle: false }))
-    .pipe($.rename({ suffix: '.min' }))
+gulp.task('build-comm-js', function () {
+  return  gulp.src('src/common/**/*.js')
+    .pipe(concat('angular-common.js'))
     .pipe(gulp.dest('dist'));
 });
-
-
-
-gulp.task('test', function () {
-  karma.start({
-    configFile: path.join(__dirname, 'test/karma.conf.js'),
-     // browsers: ['PhantomJS'],
-      reporters: ['progress', 'coverage'],
-    singleRun: true
-  }, function (code) {
-    console.info('[Karma] exited with ', code);
-    if (!process.env.TRAVIS) { return code; }
-    console.info('[Coverage] Launching...');
-    gulp.src('test/coverage/**/lcov.info')
-      .pipe($.coveralls())
-      .on('end', function() {
-        process.exit(code);
-      });
-  });
+gulp.task('build-app-js', function () {
+  return  gulp.src('src/app/**/*.js')
+    .pipe(concat('angular-app.js'))
+    .pipe(gulp.dest('dist'));
+});
+gulp.task('copy-static', function () {
+  return merge(
+    gulp.src('bower_components/bootstrap-css/css/*.css').pipe(gulp.dest('dist/css')),
+    gulp.src('bower_components/bootstrap-css/css/*.css.map').pipe(gulp.dest('dist/css')),
+    gulp.src('bower_components/bootstrap-css/fonts/*').pipe(gulp.dest('dist/fonts')),
+    gulp.src('src/*.*').pipe(gulp.dest('dist')),
+    merge(
+      gulp.src('src/assets/**/*.*'),
+      gulp.src(['bower_components/angular/angular.js', 'bower_components/angular-route/angular-route.js']).pipe(concat('angular.js')),
+      gulp.src('bower_components/angular-bootstrap/ui-bootstrap-tpls.js'),
+      gulp.src('bower_components/jquery/dist/jquery.js')
+   ).pipe(gulp.dest('dist'))
+  );
 });
 
-
-gulp.task('e2e:server', function (callback) {
-  server.listen(8001, callback);
+gulp.task('clean', function (done) {
+  return rimraf('dist', done);
 });
 
-gulp.task('e2e:run', ['e2e:server'], function (callback) {
-  gulp.src('test/e2e/*.js')
-    .pipe($.protractor.protractor(
-      {
-        configFile: 'test/protractor.conf.js',
-        args: ['--baseUrl', 'http://' + server.address().address + ':' + server.address().port]
-      }
-    )).on('error', function (e) {
-      server.close();
-      callback(e);
-    }).on('end', function () {
-      server.close();
-      callback();
-    });
+gulp.task('lint', function () {
+  return gulp.src(['src/**/*.js', 'test/unit/**/*.js']).pipe(jshint())
+    .pipe(jshint.reporter('default'))
+    .pipe(jshint.reporter('fail'));
 });
 
-gulp.task('e2e:update', function () {
-  $.protractor.webdriver_update();
+gulp.task('test', function (done) {
+  karma.start(_.assign({}, karmaCommonConf, {singleRun: true}), done);
 });
 
-gulp.task('watch', function () {
-  gulp.watch('js/**/*.js', ['js']);
+gulp.task('tdd', function (done) {
+  karma.start(karmaCommonConf, done);
 });
 
-gulp.task('default', ['js',  'watch']);
+gulp.task('e2e', function() {
+  return gulp.src(['./test/e2e/**/*.js'], false)
+            .pipe(protractor({ configFile: 'test/protractor.conf.js' }));
+});
+
+gulp.task('watch', ['lint', 'build'], function () {
+
+  gulp.watch('src/**/*.js', ['lint', 'build-js']);
+  gulp.watch('src/**/*.tpl.html', ['build-js']);
+  gulp.watch('src/assets/**/*.*', ['copy-static']);
+
+});
+gulp.task('build-js', ['build-common-temps', 'build-app-temps', 'build-comm-js', 'build-app-js']);
+gulp.task('build', ['copy-static', 'build-js']);
+gulp.task('default', ['lint', 'test', 'build']);
+
+

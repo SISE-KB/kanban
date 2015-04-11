@@ -1,0 +1,11 @@
+<ul class="nav navbar-nav navbar-right">
+  <li>
+      <p class="navbar-text" ng-show="isAuthenticated()">{{currentUser.firstName}} {{currentUser.lastName}}</p>
+  </li>
+  <li>
+    <form class="navbar-form">
+      <button ng-show="isAuthenticated()" class="btn btn-default logout" ng-click="logout()">Log out</button>
+      <button ng-show="!isAuthenticated()" class="btn btn-default login" ng-click="login()">Log in</button>
+    </form>
+  </li>
+</ul>

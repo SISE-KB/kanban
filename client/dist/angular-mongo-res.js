@@ -1,14 +1,13 @@
-angular.module('mongolabResourceHttp', [])
-    .factory('$mongolabResourceHttp', ['MONGOLAB_CONFIG', '$http', '$q', function (MONGOLAB_CONFIG, $http, $q) {
+angular.module('mongoResourceHttp', [])
+    .factory('$mongoResourceHttp', ['$http', '$q', function ($http, $q) {
 
-    function MmongolabResourceFactory(collectionName) {
+    function MongoResourceFactory(collectionName) {
       var config = {
             BASE_URL: 'http://localhost:3000/api/'
-          ,apiKey: '4fb51e55e4b02e56a67b0b66'  
         };
-        var dbUrl = config.BASE_URL;// + config.DB_NAME;
-        var collectionUrl = dbUrl + collectionName;//'/collections/' + collectionName;
-        var defaultParams = {apiKey: config.API_KEY};
+        var dbUrl = config.BASE_URL;
+        var collectionUrl = dbUrl + collectionName;
+        var defaultParams = {};//apiKey: config.API_KEY
 
         var resourceRespTransform = function (response) {
             return new Resource(response.data);
@@ -119,5 +118,5 @@ angular.module('mongolabResourceHttp', [])
         return Resource;
     }
 
-    return MmongolabResourceFactory;
+    return MongoResourceFactory;
 }]);

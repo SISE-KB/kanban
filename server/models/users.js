@@ -4,8 +4,7 @@ var mongoose = require('mongoose'),
     passportLocalMongoose = require('passport-local-mongoose'),
     Schema = mongoose.Schema,
     ObjectId = Schema.ObjectId;
- 
-     
+      
 
 var UserSchema = new Schema({
   name : String,	
@@ -13,7 +12,7 @@ var UserSchema = new Schema({
   skills : [String],
   catalog : [String],
   isActive :  {type: Boolean,default: true},
-  regDate : Date,
+  regDate :  { type: Date, default: Date.now },
   sex : String,
   code : String,
   hostel : String,
