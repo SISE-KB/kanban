@@ -1,33 +1,33 @@
 angular.module('resources.projects', ['mongoResourceHttp']);
-angular.module('resources.projects').factory('Projects', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', function ($mongoResourceHttp) {
 
-  var Projects = $mongoResourceHttp('projects');
+  var Project = $mongoResourceHttp('projects');
 
-  Projects.forUser = function(userId, successcb, errorcb) {
+  Project.forUser = function(userId, successcb, errorcb) {
     //TODO: get projects for this user only (!)
-    return Projects.query({}, successcb, errorcb);
+    return Project.query({}, successcb, errorcb);
   };
 
-  Projects.prototype.isProductOwner = function (userId) {
+  Project.prototype.isProductOwner = function (userId) {
     return this.productOwner === userId;
   };
-  Projects.prototype.canActAsProductOwner = function (userId) {
+  Project.prototype.canActAsProductOwner = function (userId) {
     return !this.isScrumMaster(userId) && !this.isDevTeamMember(userId);
   };
-  Projects.prototype.isScrumMaster = function (userId) {
+  Project.prototype.isScrumMaster = function (userId) {
     return this.scrumMaster === userId;
   };
-  Projects.prototype.canActAsScrumMaster = function (userId) {
+  Project.prototype.canActAsScrumMaster = function (userId) {
     return !this.isProductOwner(userId);
   };
-  Projects.prototype.isDevTeamMember = function (userId) {
+  Project.prototype.isDevTeamMember = function (userId) {
     return this.teamMembers.indexOf(userId) >= 0;
   };
-  Projects.prototype.canActAsDevTeamMember = function (userId) {
+  Project.prototype.canActAsDevTeamMember = function (userId) {
     return !this.isProductOwner(userId);
   };
 
-  Projects.prototype.getRoles = function (userId) {
+  Project.prototype.getRoles = function (userId) {
     var roles = [];
     if (this.isProductOwner(userId)) {
       roles.push('PO');
@@ -42,5 +42,5 @@ angular.module('resources.projects').factory('Projects', ['$mongoResourceHttp', 
     return roles;
   };
 
-  return Projects;
+  return Project;
 }]);

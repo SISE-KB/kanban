@@ -7,22 +7,22 @@ angular.module('admin-projects', [
 
 .config(['crudRouteProvider', 'securityAuthorizationProvider', function (crudRouteProvider, securityAuthorizationProvider) {
 
-  var getAllUsers = ['Projects', 'Users', '$route', function(Projects, Users, $route){
-    return Users.all();
+  var getAllUsers = ['Project', 'User', '$route', function(Project, User, $route){
+    return User.all();
   }];
 
   crudRouteProvider.routesFor('Projects', 'admin')
     .whenList({
-      projects: ['Projects', function(Projects) { return Projects.all(); }],
+      projects: ['Project', function(Project) { return Project.all(); }],
       adminUser: securityAuthorizationProvider.requireAdminUser
     })
     .whenNew({
-      project: ['Projects', function(Projects) { return new Projects(); }],
+      project: ['Project', function(Project) { return new Project(); }],
       users: getAllUsers,
       adminUser: securityAuthorizationProvider.requireAdminUser
     })
     .whenEdit({
-      project: ['Projects', 'Users', '$route', function(Projects, Users, $route) { return Projects.getById($route.current.params.itemId); }],
+      project: ['Project', 'User', '$route', function(Project, User, $route) { return Project.getById($route.current.params.itemId); }],
       users: getAllUsers,
       adminUser: securityAuthorizationProvider.requireAdminUser
     });

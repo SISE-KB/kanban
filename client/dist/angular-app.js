@@ -13,26 +13,7 @@ angular.module('app', [
   'templates.common',
   'ui.bootstrap.tpls']);
 
-angular.module('app').constant('MONGOLAB_CONFIG', {
-  BASE_URL: '/databases/',
-  DB_NAME: 'ascrum'
-});
 
-//TODO: move those messages to a separate module
-angular.module('app').constant('I18N.MESSAGES', {
-  'errors.route.changeError':'前端路由出错',
-  'crud.user.save.success':"保存成功用户'{{id}}'",
-  'crud.user.remove.success':"'删除成功{{id}}'",
-  'crud.user.remove.error':"删除'{{id}}'出错",
-  'crud.user.save.error':"保存用户出错...",
-  'crud.project.save.success':"项目'{{id}}' 保存成功",
-  'crud.project.remove.success':"项目'{{id}}' 删除成功",
-  'crud.project.save.error':"保存项目出错...",
-  'login.reason.notAuthorized':"无权操作！",
-  'login.reason.notAuthenticated':"必须登录后才能访问！",
-  'login.error.invalidCredentials': "登录失败，请检查输入是否正确！",
-  'login.error.serverError': "服务端错误： {{exception}}."
-});
 
 angular.module('app').config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
   $locationProvider.html5Mode(true);
@@ -83,6 +64,21 @@ angular.module('app').controller('HeaderCtrl', ['$scope', '$location', '$route',
   };
 }]);
 
+angular.module('app').constant('I18N.MESSAGES', {
+  'errors.route.changeError':'前端路由出错',
+  'crud.user.save.success':"保存成功用户'{{id}}'",
+  'crud.user.remove.success':"'删除成功{{id}}'",
+  'crud.user.remove.error':"删除'{{id}}'出错",
+  'crud.user.save.error':"保存用户出错...",
+  'crud.project.save.success':"项目'{{id}}' 保存成功",
+  'crud.project.remove.success':"项目'{{id}}' 删除成功",
+  'crud.project.save.error':"保存项目出错...",
+  'login.reason.notAuthorized':"无权操作！",
+  'login.reason.notAuthenticated':"必须登录后才能访问！",
+  'login.error.invalidCredentials': "登录失败，请检查输入是否正确！",
+  'login.error.serverError': "服务端错误： {{exception}}."
+});
+
 angular.module('admin', ['admin-projects', 'admin-users']);
 
 angular.module('dashboard', ['resources.projects', 'resources.tasks'])
@@ -92,13 +88,13 @@ angular.module('dashboard', ['resources.projects', 'resources.tasks'])
     templateUrl:'dashboard/dashboard.tpl.html',
     controller:'DashboardCtrl',
     resolve:{
-      projects:['Projects', function (Projects) {
+      projects:['Project', function (Project) {
         //TODO: need to know the current user here
-        return Projects.all();
+        return Project.all();
       }],
-      tasks:['Tasks', function (Tasks) {
+      tasks:['Task', function (Task) {
         //TODO: need to know the current user here
-        return Tasks.all();
+        return Task.all();
       }]
     }
   });
@@ -108,14 +104,15 @@ angular.module('dashboard', ['resources.projects', 'resources.tasks'])
   $scope.projects = projects;
   $scope.tasks = tasks;
 
-  $scope.manageBacklog = function (projectId) {
-    $location.path('/projects/' + projectId + '/productbacklog');
+  $scope.manageBacklogs = function (projectId) {
+    $location.path('/projects/' + projectId + '/productbacklogs');
   };
 
   $scope.manageSprints = function (projectId) {
     $location.path('/projects/' + projectId + '/sprints');
   };
 }]);
+
 angular.module('projects', ['resources.projects', 'productbacklogs', 'sprints', 'security.authorization'])
 
 .config(['$routeProvider', 'securityAuthorizationProvider', function ($routeProvider, securityAuthorizationProvider) {
@@ -123,9 +120,9 @@ angular.module('projects', ['resources.projects', 'productbacklogs', 'sprints', 
     templateUrl:'projects/projects-list.tpl.html',
     controller:'ProjectsViewCtrl',
     resolve:{
-      projects:['Projects', function (Projects) {
+      projects:['Project', function (Project) {
         //TODO: fetch only for the current user
-        return Projects.all();
+        return Project.all();
       }],
       authenticatedUser: securityAuthorizationProvider.requireAuthenticatedUser
     }
@@ -160,8 +157,8 @@ angular.module('projectsinfo', [], ['$routeProvider', function($routeProvider){
     templateUrl:'projectsinfo/list.tpl.html',
     controller:'ProjectsInfoListCtrl',
     resolve:{
-      projects:['Projects', function(Projects){
-        return Projects.all();
+      projects:['Project', function(Project){
+        return Project.all();
       }]
     }
   });
@@ -170,6 +167,112 @@ angular.module('projectsinfo', [], ['$routeProvider', function($routeProvider){
 angular.module('projectsinfo').controller('ProjectsInfoListCtrl', ['$scope', 'projects', function($scope, projects){
   $scope.projects = projects;
 }]);
+
+angular.module('resources.productbacklogs', ['mongoResourceHttp']);
+angular.module('resources.productbacklogs').factory('ProductBacklog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+  var ProductBacklog = $mongoResourceHttp('productbacklogs');
+
+  ProductBacklog.forProject = function (projectId) {
+    return ProductBacklog.query({projectId:projectId});
+  };
+
+  return ProductBacklog;
+}]);
+
+angular.module('resources.projects', ['mongoResourceHttp']);
+angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var Project = $mongoResourceHttp('projects');
+
+  Project.forUser = function(userId, successcb, errorcb) {
+    //TODO: get projects for this user only (!)
+    return Project.query({}, successcb, errorcb);
+  };
+
+  Project.prototype.isProductOwner = function (userId) {
+    return this.productOwner === userId;
+  };
+  Project.prototype.canActAsProductOwner = function (userId) {
+    return !this.isScrumMaster(userId) && !this.isDevTeamMember(userId);
+  };
+  Project.prototype.isScrumMaster = function (userId) {
+    return this.scrumMaster === userId;
+  };
+  Project.prototype.canActAsScrumMaster = function (userId) {
+    return !this.isProductOwner(userId);
+  };
+  Project.prototype.isDevTeamMember = function (userId) {
+    return this.teamMembers.indexOf(userId) >= 0;
+  };
+  Project.prototype.canActAsDevTeamMember = function (userId) {
+    return !this.isProductOwner(userId);
+  };
+
+  Project.prototype.getRoles = function (userId) {
+    var roles = [];
+    if (this.isProductOwner(userId)) {
+      roles.push('PO');
+    } else {
+      if (this.isScrumMaster(userId)){
+        roles.push('SM');
+      }
+      if (this.isDevTeamMember(userId)){
+        roles.push('DEV');
+      }
+    }
+    return roles;
+  };
+
+  return Project;
+}]);
+
+angular.module('resources.sprints', ['mongoResourceHttp']);
+angular.module('resources.sprints').factory('Sprint', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var Sprint = $mongoResourceHttp('sprints');
+  Sprint.forProject = function (projectId) {
+    return Sprint.query({projectId:projectId});
+  };
+  return Sprint;
+}]);
+
+angular.module('resources.tasks', ['mongoResourceHttp']);
+angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var Task = $mongoResourceHttp('tasks');
+
+  Task.statesEnum = ['TODO', 'IN_DEV', 'BLOCKED', 'IN_TEST', 'DONE'];
+
+  Task.forProductBacklogItem = function (productBacklogItem) {
+    return Task.query({productBacklogItem:productBacklogItem});
+  };
+
+  Task.forSprint = function (sprintId) {
+    return Task.query({sprintId:sprintId});
+  };
+
+  Task.forUser = function (userId) {
+    return Task.query({userId:userId});
+  };
+
+  Task.forProject = function (projectId) {
+    return Task.query({projectId:projectId});
+  };
+
+  return Task;
+}]);
+
+angular.module('resources.users', ['mongoResourceHttp']);
+angular.module('resources.users').factory('User', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var userResource = $mongoResourceHttp('users');
+  /*userResource.prototype.getFullName = function () {
+    return this.lastName + " " + this.firstName + " (" + this.email + ")";
+  };*/
+
+  return userResource;
+}]);
+
 angular.module('admin-projects', [
   'resources.projects',
   'resources.users',
@@ -179,22 +282,22 @@ angular.module('admin-projects', [
 
 .config(['crudRouteProvider', 'securityAuthorizationProvider', function (crudRouteProvider, securityAuthorizationProvider) {
 
-  var getAllUsers = ['Projects', 'Users', '$route', function(Projects, Users, $route){
-    return Users.all();
+  var getAllUsers = ['Project', 'User', '$route', function(Project, User, $route){
+    return User.all();
   }];
 
   crudRouteProvider.routesFor('Projects', 'admin')
     .whenList({
-      projects: ['Projects', function(Projects) { return Projects.all(); }],
+      projects: ['Project', function(Project) { return Project.all(); }],
       adminUser: securityAuthorizationProvider.requireAdminUser
     })
     .whenNew({
-      project: ['Projects', function(Projects) { return new Projects(); }],
+      project: ['Project', function(Project) { return new Project(); }],
       users: getAllUsers,
       adminUser: securityAuthorizationProvider.requireAdminUser
     })
     .whenEdit({
-      project: ['Projects', 'Users', '$route', function(Projects, Users, $route) { return Projects.getById($route.current.params.itemId); }],
+      project: ['Project', 'User', '$route', function(Project, User, $route) { return Project.getById($route.current.params.itemId); }],
       users: getAllUsers,
       adminUser: securityAuthorizationProvider.requireAdminUser
     });
@@ -269,6 +372,7 @@ angular.module('admin-projects', [
     }
   };
 }]);
+
 angular.module('admin-users-edit',[
   'services.crud',
   'services.i18nNotifications',
@@ -335,16 +439,16 @@ angular.module('admin-users', [
 
   crudRouteProvider.routesFor('Users', 'admin')
     .whenList({
-      users: ['Users', function(Users) { return Users.all(); }],
+      users: ['User', function(User) { return User.all(); }],
       currentUser: securityAuthorizationProvider.requireAdminUser
     })
     .whenNew({
-      user: ['Users', function(Users) { return new Users(); }],
+      user: ['User', function(User) { return new User(); }],
       currentUser: securityAuthorizationProvider.requireAdminUser
     })
     .whenEdit({
-      user:['$route', 'Users', function ($route, Users) {
-        return Users.getById($route.current.params.itemId);
+      user:['$route', 'User', function ($route, User) {
+        return User.getById($route.current.params.itemId);
       }],
       currentUser: securityAuthorizationProvider.requireAdminUser
     });
@@ -356,7 +460,7 @@ angular.module('admin-users-edit-uniqueMobileNo', ['resources.users'])
  * A validation directive to ensure that the model contains a unique email address
  * @param  Users service to provide access to the server's user database
   */
-.directive('uniqueMobileNo', ["Users", function (Users) {
+.directive('uniqueMobileNo', ["User", function (User) {
   return {
     require:'ngModel',
     restrict:'A',
@@ -368,7 +472,7 @@ angular.module('admin-users-edit-uniqueMobileNo', ['resources.users'])
       ctrl.$parsers.push(function (viewValue) {
 
         if (viewValue) {
-          Users.query({email:viewValue}, function (users) {
+          User.query({mobileNo:viewValue}, function (users) {
             if (users.length === 0) {
               ctrl.$setValidity('uniqueMobileNo', true);
             } else {
@@ -418,40 +522,31 @@ angular.module('admin-users-edit-validateEquals', [])
   };
 });
 angular.module('productbacklogs', ['resources.productbacklogs', 'services.crud'])
-
   .config(['crudRouteProvider', function(crudRouteProvider){
-  
-  
-    // projectId is a helper method wrapped with DI annotation that will be used in
-    // route resolves in this file.
-    var projectId = ['$route', function($route) {
-      return $route.current.params.projectId;
-    }];
-  
-  
-    // Create the CRUD routes for editing the product backlog
-    crudRouteProvider.routesFor('ProductBacklogs', 'projects', 'projects/:projectId')
-      // How to handle the "list product backlog items" route
+      var projectId = ['$route', function($route) {
+         return $route.current.params.projectId;
+       }];
+     crudRouteProvider.routesFor('ProductBacklogs', 'projects', 'projects/:projectId')
       .whenList({
         projectId: projectId,
-        backlog : ['$route', 'ProductBacklogs', function($route, ProductBacklogs){
-          return ProductBacklogs.forProject($route.current.params.projectId);
+        backlog : ['$route', 'ProductBacklog', function($route, ProductBacklog){
+          return ProductBacklog.forProject($route.current.params.projectId);
         }]
       })
       
       // How to handle the "create a new product backlog item" route
       .whenNew({
         projectId: projectId,
-        backlogItem : ['$route', 'ProductBacklogs', function($route, ProductBacklogs){
-          return new ProductBacklogs({projectId:$route.current.params.projectId});
+        backlogItem : ['$route', 'ProductBacklog', function($route, ProductBacklog){
+          return new ProductBacklog({projectId:$route.current.params.projectId});
         }]
       })
     
       // How to handle the "edit a product backlog item" route
       .whenEdit({
         projectId: projectId,
-        backlogItem : ['$route', 'ProductBacklogs', function($route, ProductBacklogs){
-          return ProductBacklogs.getById($route.current.params.itemId);
+        backlogItem : ['$route', 'ProductBacklog', function($route, ProductBacklog){
+          return ProductBacklog.getById($route.current.params.itemId);
         }]
       });
   }])
@@ -494,30 +589,30 @@ angular.module('sprints', ['resources.sprints', 'services.crud', 'tasks'])
     return $route.current.params.projectId;
   }];
 
-  var productBacklogs = ['$route', 'ProductBacklogs', function ($route, ProductBacklogs) {
-    return ProductBacklogs.forProject($route.current.params.projectId);
+  var productBacklogs = ['$route', 'ProductBacklog', function ($route, ProductBacklog) {
+    return ProductBacklog.forProject($route.current.params.projectId);
   }];
 
   crudRouteProvider.routesFor('Sprints', 'projects', 'projects/:projectId')
   .whenList({
     projectId: projectId,
-    sprints: ['$route', 'Sprints', function($route, Sprints){
-      return Sprints.forProject($route.current.params.projectId);
+    sprints: ['$route', 'Sprint', function($route, Sprint){
+      return Sprint.forProject($route.current.params.projectId);
     }]
   })
 
   .whenNew({
     projectId: projectId,
-    sprint: ['$route', 'Sprints', function($route, Sprints){
-      return new Sprints({projectId:$route.current.params.projectId});
+    sprint: ['$route', 'Sprint', function($route, Sprint){
+      return new Sprint({projectId:$route.current.params.projectId});
     }],
     productBacklogs : productBacklogs
   })
 
   .whenEdit({
     projectId: projectId,
-    sprint: ['$route', 'Sprints', function($route, Sprints){
-      return Sprints.getById($route.current.params.itemId);
+    sprint: ['$route', 'Sprint', function($route, Sprint){
+      return Sprint.getById($route.current.params.itemId);
     }],
     productBacklogs : productBacklogs
   });
@@ -582,25 +677,25 @@ angular.module('tasks', ['resources.tasks', 'services.crud'])
 
 .config(['crudRouteProvider', function (crudRouteProvider) {
 
-  var sprintBacklogItems = ['Sprints', 'ProductBacklogs', '$route', function (Sprints, ProductBacklogs, $route) {
+  var sprintBacklogItems = ['Sprint', 'ProductBacklog', '$route', function (Sprint, ProductBacklog, $route) {
     var sprintPromise = Sprints.getById($route.current.params.sprintId);
     return sprintPromise.then(function (sprint) {
-      return ProductBacklogs.getByObjectIds(sprint.sprintBacklogs);
+      return ProductBacklog.getByObjectIds(sprint.sprintBacklogs);
     });
   }];
 
-  var teamMembers = ['Projects', 'Users', '$route', function (Projects, Users, $route) {
-    var projectPromise = Projects.getById($route.current.params.projectId);
+  var teamMembers = ['Project', 'User', '$route', function (Project, User, $route) {
+    var projectPromise = Project.getById($route.current.params.projectId);
     return projectPromise.then(function(project){
-      return Users.getByObjectIds(project.teamMembers);
+      return User.getByObjectIds(project.teamMembers);
     });
   }];
 
   crudRouteProvider.routesFor('Tasks', 'projects/sprints', 'projects/:projectId/sprints/:sprintId')
 
   .whenList({
-    tasks:['Tasks', '$route', function (Tasks, $route) {
-      return Tasks.forSprint($route.current.params.sprintId);
+    tasks:['Task', '$route', function (Task, $route) {
+      return Task.forSprint($route.current.params.sprintId);
     }]
   })
 

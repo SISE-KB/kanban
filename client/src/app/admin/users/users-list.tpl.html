@@ -2,17 +2,14 @@
     <thead>
     <tr>
         <th></th>
-        <th>E-mail</th>
-        <th>Last name</th>
-        <th>First name</th>
+        <th>Mobile No</th>
+        <th>name</th>
     </tr>
     </thead>
     <tbody>
     <tr ng-repeat="user in users" ng-click="edit(user.$id())">
-        <td><gravatar email="user.email" size="50" default-image="'monsterid'"></gravatar></td>
-        <td>{{user.email}}</td>
-        <td>{{user.lastName}}</td>
-        <td>{{user.firstName}}</td>
+        <td>{{user.mobileNo}}</td>
+        <td>{{user.name}}</td>
         <td><button class="btn btn-danger remove" ng-click="remove(user, $index, $event)">Remove</button></td>
     </tr>
     </tbody>

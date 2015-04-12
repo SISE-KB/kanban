@@ -30,7 +30,7 @@
                 </div>
                 <div class="form-group">
                     <label>Assigned to</label>
-                    <select name="state" ng-model="task.assignedUserId" class="form-control" ng-options="teamMember.$id() as teamMember.getFullName() for teamMember in teamMembers"></select>
+                    <select name="state" ng-model="task.assignedUserId" class="form-control" ng-options="teamMember.$id() as teamMember.name for teamMember in teamMembers"></select>
                 </div>
             </div>
         </form>

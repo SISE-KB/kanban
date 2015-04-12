@@ -2,8 +2,8 @@
 
 var mongoose = require('mongoose')
    , server = require('./app')
-   ,  config=require('./config')
-     
+   , config=require('./config')
+   , User=require('./models/users')   
 var port=config.server.listenPort
 
 mongoose.connect(config.mongo.MongoDB, function(err) {
@@ -12,6 +12,14 @@ mongoose.connect(config.mongo.MongoDB, function(err) {
     throw(err)
   } else{
     console.log(config.mongo.MongoDB + ' connected.')
+    User.find({isAdmin:true},function(err,data){
+	  if(data&&data.length<1) User.create({
+		  isAdmin:true
+		 ,name: 'admin'
+		 ,mobileNo:'114'
+		 ,password:'114'
+	  }) 
+	})
   }
 })
 

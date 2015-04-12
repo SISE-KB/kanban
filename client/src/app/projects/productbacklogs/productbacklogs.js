@@ -1,38 +1,29 @@
 angular.module('productbacklogs', ['resources.productbacklogs', 'services.crud'])
-
   .config(['crudRouteProvider', function(crudRouteProvider){
-  
-  
-    // projectId is a helper method wrapped with DI annotation that will be used in
-    // route resolves in this file.
-    var projectId = ['$route', function($route) {
-      return $route.current.params.projectId;
-    }];
-  
-  
-    // Create the CRUD routes for editing the product backlog
-    crudRouteProvider.routesFor('ProductBacklogs', 'projects', 'projects/:projectId')
-      // How to handle the "list product backlog items" route
+      var projectId = ['$route', function($route) {
+         return $route.current.params.projectId;
+       }];
+     crudRouteProvider.routesFor('ProductBacklogs', 'projects', 'projects/:projectId')
       .whenList({
         projectId: projectId,
-        backlog : ['$route', 'ProductBacklogs', function($route, ProductBacklogs){
-          return ProductBacklogs.forProject($route.current.params.projectId);
+        backlog : ['$route', 'ProductBacklog', function($route, ProductBacklog){
+          return ProductBacklog.forProject($route.current.params.projectId);
         }]
       })
       
       // How to handle the "create a new product backlog item" route
       .whenNew({
         projectId: projectId,
-        backlogItem : ['$route', 'ProductBacklogs', function($route, ProductBacklogs){
-          return new ProductBacklogs({projectId:$route.current.params.projectId});
+        backlogItem : ['$route', 'ProductBacklog', function($route, ProductBacklog){
+          return new ProductBacklog({projectId:$route.current.params.projectId});
         }]
       })
     
       // How to handle the "edit a product backlog item" route
       .whenEdit({
         projectId: projectId,
-        backlogItem : ['$route', 'ProductBacklogs', function($route, ProductBacklogs){
-          return ProductBacklogs.getById($route.current.params.itemId);
+        backlogItem : ['$route', 'ProductBacklog', function($route, ProductBacklog){
+          return ProductBacklog.getById($route.current.params.itemId);
         }]
       });
   }])

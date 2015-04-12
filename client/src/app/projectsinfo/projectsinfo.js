@@ -4,8 +4,8 @@ angular.module('projectsinfo', [], ['$routeProvider', function($routeProvider){
     templateUrl:'projectsinfo/list.tpl.html',
     controller:'ProjectsInfoListCtrl',
     resolve:{
-      projects:['Projects', function(Projects){
-        return Projects.all();
+      projects:['Project', function(Project){
+        return Project.all();
       }]
     }
   });

@@ -1,6 +1,7 @@
 'use strict';
 
 var mongoose = require('mongoose'),
+    passwdPlugin = require('./passwordPlugin'),
     passportLocalMongoose = require('passport-local-mongoose'),
     Schema = mongoose.Schema,
     ObjectId = Schema.ObjectId;
@@ -9,6 +10,8 @@ var mongoose = require('mongoose'),
 var UserSchema = new Schema({
   name : String,	
   mobileNo : String,
+  password:String,
+  isAdmin:{type: Boolean,default: false},
   skills : [String],
   catalog : [String],
   isActive :  {type: Boolean,default: true},
@@ -16,13 +19,17 @@ var UserSchema = new Schema({
   sex : String,
   code : String,
   hostel : String,
-  description : String,
-  projects : [{type: ObjectId, ref: 'Project'} ]
+  desc : String
+
+ // projects : [{type: ObjectId, ref: 'Project'} ]
 });
 
 UserSchema.plugin(passportLocalMongoose,{
-	usernameField :'mobileNo'
+	usernameField :'mobileNo',
+	hashField:'password'
 });
+UserSchema.plugin(passwdPlugin);
+
 UserSchema.statics.JoinProject = function (userId,pid,cb) {
    this.findById(userId,function(err,u){
 		  if(err) throw err;

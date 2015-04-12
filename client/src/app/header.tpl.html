@@ -1,17 +1,17 @@
 <div ng-controller="HeaderCtrl">
     <div class="navbar navbar-default" role="navigation">
         <div class="navbar-header">
-            <a class="navbar-brand" ng-click="home()">SISE-GAME Project Manage Platform</a>
+            <a class="navbar-brand" ng-click="home()">SISE-GAME 实践项目辅助平台</a>
         </div>
         <div>
             <ul class="nav navbar-nav">
-                <li ng-class="{active:isNavbarActive('projectsinfo')}"><a href="/projectsinfo">进行项目</a></li>
+                <li ng-class="{active:isNavbarActive('projectsinfo')}"><a href="/projectsinfo">进行中的项目</a></li>
             </ul>
 
             <ul class="nav navbar-nav" ng-show="isAuthenticated()">
                 <li ng-class="{active:isNavbarActive('projects')}"><a href="/projects">我的项目</a></li>
                 <li class="dropdown" ng-class="{active:isNavbarActive('admin'), open:isAdminOpen}" ng-show="isAdmin()">
-                    <a id="adminmenu" role="button" class="dropdown-toggle" ng-click="isAdminOpen=!isAdminOpen">Admin<b class="caret"></b></a>
+                    <a id="adminmenu" role="button" class="dropdown-toggle" ng-click="isAdminOpen=!isAdminOpen">资料维护<b class="caret"></b></a>
                     <ul class="dropdown-menu" role="menu" aria-labelledby="adminmenu">
                         <li><a tabindex="-1" href="/admin/projects" ng-click="isAdminOpen=false">项目信息维护</a></li>
                         <li><a tabindex="-1" href="/admin/users" ng-click="isAdminOpen=false">用户信息维护</a></li>

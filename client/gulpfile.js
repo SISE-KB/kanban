@@ -149,6 +149,7 @@ gulp.task('watch', ['lint', 'build'], function () {
 });
 gulp.task('build-js', ['build-common-temps', 'build-app-temps', 'build-comm-js', 'build-app-js']);
 gulp.task('build', ['copy-static', 'build-js']);
-gulp.task('default', ['lint', 'test', 'build']);
+gulp.task('all', ['lint', 'test', 'build']);
+gulp.task('default', ['build']);
 
 

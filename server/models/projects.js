@@ -4,13 +4,14 @@ var mongoose = require('mongoose'),
      Schema = mongoose.Schema,
      ObjectId = Schema.ObjectId;
 var User = require('./users');   
-//var deepPopulate = require('mongoose-deep-populate');  
+
   
 var RoleSchema = new Schema({
 	  _id:Number,
 	  role : String,
 	  user : {type: ObjectId, ref: 'User'} 
 });
+/*
 var DeliverableSchema = new Schema({
 	  _id:Number,
 	  code : String,
@@ -29,22 +30,26 @@ var StageSchema = new Schema({
 	  deliverCodes : [String],
 	  tasks : [{type: ObjectId, ref: 'Task'} ]
 });
-
+*/
 
 var ProjectSchema = new Schema({
   name : String,
   catalog : [String],
   tags : [String],
-  manager : {type: ObjectId, ref: 'User'} ,
+  
+ // manager : {type: ObjectId, ref: 'User'} ,
   isSample : {type: Boolean,default: false},
   planDate : Date,
   iterationDuration :  {type: Number,default: 2},
   state  :  {type: Number,default: 1},
   finishDate : Date,
-  description : String,
-  deliverables :[DeliverableSchema],
-  stages  : [StageSchema],
-  members   : [RoleSchema]
+  desc : String,
+//  deliverables :[DeliverableSchema],
+//  stages  : [StageSchema],
+  productOwner: ObjectId,
+  scrumMaster: ObjectId,
+  teamMembers: [ObjectId]
+  //members   : [RoleSchema]
 });
 
 ProjectSchema.methods.SetManager = function (userId,cb) {

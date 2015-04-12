@@ -10,16 +10,16 @@ angular.module('admin-users', [
 
   crudRouteProvider.routesFor('Users', 'admin')
     .whenList({
-      users: ['Users', function(Users) { return Users.all(); }],
+      users: ['User', function(User) { return User.all(); }],
       currentUser: securityAuthorizationProvider.requireAdminUser
     })
     .whenNew({
-      user: ['Users', function(Users) { return new Users(); }],
+      user: ['User', function(User) { return new User(); }],
       currentUser: securityAuthorizationProvider.requireAdminUser
     })
     .whenEdit({
-      user:['$route', 'Users', function ($route, Users) {
-        return Users.getById($route.current.params.itemId);
+      user:['$route', 'User', function ($route, User) {
+        return User.getById($route.current.params.itemId);
       }],
       currentUser: securityAuthorizationProvider.requireAdminUser
     });

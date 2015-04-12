@@ -16,14 +16,14 @@
                 <div class="form-group">
                     <label>Product Owner</label>
                     <select class="form-control" ng-model="project.productOwner"
-                            ng-options="user.$id() as user.getFullName() for user in productOwnerCandidates()" required>
+                            ng-options="user.$id() as user.name for user in productOwnerCandidates()" required>
                         <option value="">-- choose --</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Scrum Master</label>
                     <select class="form-control" ng-model="project.scrumMaster"
-                            ng-options="user.$id() as user.getFullName() for user in scrumMasterCandidates()" required>
+                            ng-options="user.$id() as user.name for user in scrumMasterCandidates()" required>
                         <option value="">-- choose --</option>
                     </select>
                 </div>
@@ -37,14 +37,14 @@
                     </thead>
                     <tbody>
                     <tr ng-repeat="userId in project.teamMembers">
-                        <td>{{usersLookup[userId].getFullName()}}</td>
+                        <td>{{usersLookup[userId].name}}</td>
                         <td>
                             <button class="btn btn-default btn-sm" ng-click="removeTeamMember(userId)">Remove</button>
                         </td>
                     </tr>
                     <tr>
                         <td><select class="form-control" ng-model="selTeamMember"
-                                    ng-options="user.$id() as user.getFullName() for user in teamMemberCandidates()"></select>
+                                    ng-options="user.$id() as user.name for user in teamMemberCandidates()"></select>
                         </td>
                         <td>
                             <button class="btn btn-default btn-sm" ng-click="addTeamMember(selTeamMember)" ng-disabled="!selTeamMember">Add

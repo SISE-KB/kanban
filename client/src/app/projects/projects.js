@@ -5,9 +5,9 @@ angular.module('projects', ['resources.projects', 'productbacklogs', 'sprints', 
     templateUrl:'projects/projects-list.tpl.html',
     controller:'ProjectsViewCtrl',
     resolve:{
-      projects:['Projects', function (Projects) {
+      projects:['Project', function (Project) {
         //TODO: fetch only for the current user
-        return Projects.all();
+        return Project.all();
       }],
       authenticatedUser: securityAuthorizationProvider.requireAuthenticatedUser
     }

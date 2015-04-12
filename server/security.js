@@ -6,11 +6,10 @@ var filterUser = function(user) {
   if ( user ) {
     return {
       user : {
-        id: user._id.$oid,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        admin: user.admin
+        id: user._id,
+        mobileNo: user.mobileNo,
+        name: user.name,
+        isAdmin: user.isAdmin
       }
     };
   } else {
@@ -54,8 +53,11 @@ var security = {
     })
   },
   sendCurrentUser: function(req, res, next) {
-    res.status(200).json(filterUser(req.user));
-    //res.end();
+	  var data=filterUser(req.user);
+	  console.log('sendCurrentUser:',data);
+	  res.json(data);
+      //res.status(200).json(data);
+
   },
   login: function(req, res, next) {
     function authenticationFailed(err, user, info){
@@ -66,11 +68,12 @@ var security = {
         return res.json(filterUser(user));
       });
     }
+   //  res.json(filterUser({name:'alex',isAdmin:true,_id:1234}));
     return passport.authenticate('local', authenticationFailed)(req, res, next);
   },
   logout: function(req, res, next) {
     req.logout();
-    res.send(204);
+    res.sendStatus(204);
   }
 };
 

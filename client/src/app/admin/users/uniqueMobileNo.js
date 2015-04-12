@@ -4,7 +4,7 @@ angular.module('admin-users-edit-uniqueMobileNo', ['resources.users'])
  * A validation directive to ensure that the model contains a unique email address
  * @param  Users service to provide access to the server's user database
   */
-.directive('uniqueMobileNo', ["Users", function (Users) {
+.directive('uniqueMobileNo', ["User", function (User) {
   return {
     require:'ngModel',
     restrict:'A',
@@ -16,7 +16,7 @@ angular.module('admin-users-edit-uniqueMobileNo', ['resources.users'])
       ctrl.$parsers.push(function (viewValue) {
 
         if (viewValue) {
-          Users.query({email:viewValue}, function (users) {
+          User.query({mobileNo:viewValue}, function (users) {
             if (users.length === 0) {
               ctrl.$setValidity('uniqueMobileNo', true);
             } else {

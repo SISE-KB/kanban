@@ -6,7 +6,7 @@ var mongoose = require('mongoose'),
 
 
 var TaskSchema = new Schema({
-  title: String,
+ /* title: String,
   project: ObjectId,
   planEffort : Number,
   start : Date ,
@@ -16,7 +16,15 @@ var TaskSchema = new Schema({
   spec : String,
   examiner : [{type: ObjectId, ref: 'User'} ],
   offset : Number,
-  finishDate  : Date
+  finishDate  : Date*/
+  name: String,
+  productBacklogItemId: ObjectId,
+  desc: String,
+  estimation : Number,
+  remaining  : Number,
+  state: String,
+  assignedUserId: ObjectId,
+  sprintId: ObjectId
 });
 
 exports=module.exports = mongoose.model('Task', TaskSchema);

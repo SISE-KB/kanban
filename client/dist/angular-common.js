@@ -1,108 +1,3 @@
-angular.module('resources.productbacklogs', ['mongoResourceHttp']);
-angular.module('resources.productbacklogs').factory('ProductBacklogs', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-  var ProductBacklogs = $mongoResourceHttp('productbacklogs');
-
-  ProductBacklogs.forProject = function (projectId) {
-    return ProductBacklogs.query({projectId:projectId});
-  };
-
-  return ProductBacklogs;
-}]);
-
-angular.module('resources.projects', ['mongoResourceHttp']);
-angular.module('resources.projects').factory('Projects', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var Projects = $mongoResourceHttp('projects');
-
-  Projects.forUser = function(userId, successcb, errorcb) {
-    //TODO: get projects for this user only (!)
-    return Projects.query({}, successcb, errorcb);
-  };
-
-  Projects.prototype.isProductOwner = function (userId) {
-    return this.productOwner === userId;
-  };
-  Projects.prototype.canActAsProductOwner = function (userId) {
-    return !this.isScrumMaster(userId) && !this.isDevTeamMember(userId);
-  };
-  Projects.prototype.isScrumMaster = function (userId) {
-    return this.scrumMaster === userId;
-  };
-  Projects.prototype.canActAsScrumMaster = function (userId) {
-    return !this.isProductOwner(userId);
-  };
-  Projects.prototype.isDevTeamMember = function (userId) {
-    return this.teamMembers.indexOf(userId) >= 0;
-  };
-  Projects.prototype.canActAsDevTeamMember = function (userId) {
-    return !this.isProductOwner(userId);
-  };
-
-  Projects.prototype.getRoles = function (userId) {
-    var roles = [];
-    if (this.isProductOwner(userId)) {
-      roles.push('PO');
-    } else {
-      if (this.isScrumMaster(userId)){
-        roles.push('SM');
-      }
-      if (this.isDevTeamMember(userId)){
-        roles.push('DEV');
-      }
-    }
-    return roles;
-  };
-
-  return Projects;
-}]);
-
-angular.module('resources.sprints', ['mongoResourceHttp']);
-angular.module('resources.sprints').factory('Sprints', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var Sprints = $mongoResourceHttp('sprints');
-  Sprints.forProject = function (projectId) {
-    return Sprints.query({projectId:projectId});
-  };
-  return Sprints;
-}]);
-
-angular.module('resources.tasks', ['mongoResourceHttp']);
-angular.module('resources.tasks').factory('Tasks', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var Tasks = $mongoResourceHttp('tasks');
-
-  Tasks.statesEnum = ['TODO', 'IN_DEV', 'BLOCKED', 'IN_TEST', 'DONE'];
-
-  Tasks.forProductBacklogItem = function (productBacklogItem) {
-    return Tasks.query({productBacklogItem:productBacklogItem});
-  };
-
-  Tasks.forSprint = function (sprintId) {
-    return Tasks.query({sprintId:sprintId});
-  };
-
-  Tasks.forUser = function (userId) {
-    return Tasks.query({userId:userId});
-  };
-
-  Tasks.forProject = function (projectId) {
-    return Tasks.query({projectId:projectId});
-  };
-
-  return Tasks;
-}]);
-
-angular.module('resources.users', ['mongoResourceHttp']);
-angular.module('resources.users').factory('Users', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var userResource = $mongoResourceHttp('users');
-  userResource.prototype.getFullName = function () {
-    return this.lastName + " " + this.firstName + " (" + this.email + ")";
-  };
-
-  return userResource;
-}]);
-
 angular.module('security.authorization', ['security.service'])
 
 // This service provides guard methods to support AngularJS routes.
@@ -353,7 +248,7 @@ angular.module('security.service', [
 
     // Is the current user an adminstrator?
     isAdmin: function() {
-      return !!(service.currentUser && service.currentUser.admin);
+      return !!(service.currentUser && service.currentUser.isAdmin);
     }
   };
 

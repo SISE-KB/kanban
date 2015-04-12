@@ -6,30 +6,30 @@ angular.module('sprints', ['resources.sprints', 'services.crud', 'tasks'])
     return $route.current.params.projectId;
   }];
 
-  var productBacklogs = ['$route', 'ProductBacklogs', function ($route, ProductBacklogs) {
-    return ProductBacklogs.forProject($route.current.params.projectId);
+  var productBacklogs = ['$route', 'ProductBacklog', function ($route, ProductBacklog) {
+    return ProductBacklog.forProject($route.current.params.projectId);
   }];
 
   crudRouteProvider.routesFor('Sprints', 'projects', 'projects/:projectId')
   .whenList({
     projectId: projectId,
-    sprints: ['$route', 'Sprints', function($route, Sprints){
-      return Sprints.forProject($route.current.params.projectId);
+    sprints: ['$route', 'Sprint', function($route, Sprint){
+      return Sprint.forProject($route.current.params.projectId);
     }]
   })
 
   .whenNew({
     projectId: projectId,
-    sprint: ['$route', 'Sprints', function($route, Sprints){
-      return new Sprints({projectId:$route.current.params.projectId});
+    sprint: ['$route', 'Sprint', function($route, Sprint){
+      return new Sprint({projectId:$route.current.params.projectId});
     }],
     productBacklogs : productBacklogs
   })
 
   .whenEdit({
     projectId: projectId,
-    sprint: ['$route', 'Sprints', function($route, Sprints){
-      return Sprints.getById($route.current.params.itemId);
+    sprint: ['$route', 'Sprint', function($route, Sprint){
+      return Sprint.getById($route.current.params.itemId);
     }],
     productBacklogs : productBacklogs
   });

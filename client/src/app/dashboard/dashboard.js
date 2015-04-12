@@ -5,13 +5,13 @@ angular.module('dashboard', ['resources.projects', 'resources.tasks'])
     templateUrl:'dashboard/dashboard.tpl.html',
     controller:'DashboardCtrl',
     resolve:{
-      projects:['Projects', function (Projects) {
+      projects:['Project', function (Project) {
         //TODO: need to know the current user here
-        return Projects.all();
+        return Project.all();
       }],
-      tasks:['Tasks', function (Tasks) {
+      tasks:['Task', function (Task) {
         //TODO: need to know the current user here
-        return Tasks.all();
+        return Task.all();
       }]
     }
   });
@@ -21,8 +21,8 @@ angular.module('dashboard', ['resources.projects', 'resources.tasks'])
   $scope.projects = projects;
   $scope.tasks = tasks;
 
-  $scope.manageBacklog = function (projectId) {
-    $location.path('/projects/' + projectId + '/productbacklog');
+  $scope.manageBacklogs = function (projectId) {
+    $location.path('/projects/' + projectId + '/productbacklogs');
   };
 
   $scope.manageSprints = function (projectId) {
