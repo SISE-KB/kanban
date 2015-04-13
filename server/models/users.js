@@ -1,7 +1,6 @@
 'use strict';
 
 var mongoose = require('mongoose'),
-    passwdPlugin = require('./passwordPlugin'),
     passportLocalMongoose = require('passport-local-mongoose'),
     Schema = mongoose.Schema,
     ObjectId = Schema.ObjectId;
@@ -26,9 +25,19 @@ var UserSchema = new Schema({
 
 UserSchema.plugin(passportLocalMongoose,{
 	usernameField :'mobileNo',
-	hashField:'password'
+	hashField:'password',
+	saltlen:8,
+	keylen:32
 });
-UserSchema.plugin(passwdPlugin);
+
+UserSchema.pre('save', function (next) {
+	if(this.password&&this.password.length < 20){ 
+        this.setPassword(this.password,function(err,user){
+		    next();
+		});
+    }
+   
+  })
 
 UserSchema.statics.JoinProject = function (userId,pid,cb) {
    this.findById(userId,function(err,u){
