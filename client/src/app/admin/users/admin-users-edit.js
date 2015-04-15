@@ -9,9 +9,9 @@ angular.module('admin-users-edit',[
 
   $scope.user = user;
   $scope.password = user.password;
-
+  $scope.availableSkills=['协调','后端编码','前端编码','2D做图','3D建模','文档写作','测试'];
   $scope.onSave = function (user) {
-    i18nNotifications.pushForNextRoute('crud.user.save.success', 'success', {id : user.$id()});
+    i18nNotifications.pushForNextRoute('crud.user.save.success', 'success', {id : user.name});
     $location.path('/admin/users');
   };
 
@@ -20,7 +20,7 @@ angular.module('admin-users-edit',[
   };
 
   $scope.onRemove = function(user) {
-    i18nNotifications.pushForNextRoute('crud.user.remove.success', 'success', {id : user.$id()});
+    i18nNotifications.pushForNextRoute('crud.user.remove.success', 'success', {id : user.name});
     $location.path('/admin/users');
   };
 

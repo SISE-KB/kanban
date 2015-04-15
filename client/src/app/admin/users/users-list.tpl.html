@@ -1,19 +1,27 @@
 <table class="table table-bordered table-condensed table-striped table-hover">
     <thead>
     <tr>
-        <th></th>
-        <th>Mobile No</th>
-        <th>name</th>
+        <th>手机号</th>
+        <th>昵称</th>
+        <th>类型</th>
+        <th>注册日期</th>
+        <th>是否管理员</th>
+        <th>是否有效</th>
+         <th>操作</th>
     </tr>
     </thead>
     <tbody>
     <tr ng-repeat="user in users" ng-click="edit(user.$id())">
         <td>{{user.mobileNo}}</td>
         <td>{{user.name}}</td>
-        <td><button class="btn btn-danger remove" ng-click="remove(user, $index, $event)">Remove</button></td>
+        <td>{{user.type}}</td>
+        <td>{{user.regDate | date:'yyyy/MM/dd'}}</td>
+        <td>{{user.isAdmin}}</td>
+        <td>{{user.isActive}}</td>
+        <td><button class="btn btn-danger remove" ng-click="remove(user, $index, $event)">删除</button></td>
     </tr>
     </tbody>
 </table>
 <div class="well">
-    <button class="btn btn-default" ng-click="new()">New User</button>
+    <button class="btn btn-default" ng-click="new()">新　建</button>
 </div>

@@ -8,12 +8,26 @@
   <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-theme.css"/>
   <script type="text/javascript" src="/static/jquery.js"></script>
   <script type="text/javascript" src="/static/angular.js"></script>
-  <script type="text/javascript" src="/static/angular-mongo-res.js"></script>
+  <script type="text/javascript" src="/static/ui-select.js"></script>
   <script type="text/javascript" src="/static/ui-bootstrap-tpls.js"></script>
+  <script type="text/javascript" src="/static/angular-mongo-res.js"></script>
+
   <script type="text/javascript" src="/static/templates-common.js"></script>
   <script type="text/javascript" src="/static/templates-app.js"></script>
   <script type="text/javascript" src="/static/angular-common.js"></script>
   <script type="text/javascript" src="/static/angular-app.js"></script>
+   <style>
+    body {
+      padding: 15px;
+    }
+    .select2 > .select2-choice.ui-select-match {
+      /* Because of the inclusion of Bootstrap */
+      height: 29px;
+    }
+    .selectize-control > .selectize-dropdown {
+      top: 36px;
+    }
+  </style>
 </head>
 
 <body ng-controller="AppCtrl">

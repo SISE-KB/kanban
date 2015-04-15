@@ -11,6 +11,8 @@ angular.module('app', [
   'directives.crud',
   'templates.app',
   'templates.common',
+  'ngSanitize',
+  'ui.select',
   'ui.bootstrap.tpls']);
 
 
@@ -384,9 +386,9 @@ angular.module('admin-users-edit',[
 
   $scope.user = user;
   $scope.password = user.password;
-
+  $scope.availableSkills=['协调','后端编码','前端编码','2D做图','3D建模','文档写作','测试'];
   $scope.onSave = function (user) {
-    i18nNotifications.pushForNextRoute('crud.user.save.success', 'success', {id : user.$id()});
+    i18nNotifications.pushForNextRoute('crud.user.save.success', 'success', {id : user.name});
     $location.path('/admin/users');
   };
 
@@ -395,7 +397,7 @@ angular.module('admin-users-edit',[
   };
 
   $scope.onRemove = function(user) {
-    i18nNotifications.pushForNextRoute('crud.user.remove.success', 'success', {id : user.$id()});
+    i18nNotifications.pushForNextRoute('crud.user.remove.success', 'success', {id : user.name});
     $location.path('/admin/users');
   };
 
@@ -465,18 +467,14 @@ angular.module('admin-users-edit-uniqueMobileNo', ['resources.users'])
     require:'ngModel',
     restrict:'A',
     link:function (scope, el, attrs, ctrl) {
-
-      //TODO: We need to check that the value is different to the original
-      
-      //using push() here to run it as the last parser, after we are sure that other validators were run
+     //using push() here to run it as the last parser, after we are sure that other validators were run
       ctrl.$parsers.push(function (viewValue) {
-
         if (viewValue) {
           User.query({mobileNo:viewValue}, function (users) {
             if (users.length === 0) {
-              ctrl.$setValidity('uniqueMobileNo', true);
-            } else {
               ctrl.$setValidity('uniqueMobileNo', false);
+            } else {
+              ctrl.$setValidity('uniqueMobileNo', true);
             }
           });
           return viewValue;

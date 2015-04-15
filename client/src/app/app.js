@@ -11,6 +11,8 @@ angular.module('app', [
   'directives.crud',
   'templates.app',
   'templates.common',
+  'ngSanitize',
+  'ui.select',
   'ui.bootstrap.tpls']);
 
 

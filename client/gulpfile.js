@@ -49,12 +49,13 @@ var karmaCommonConf = {
     'src/**/*.tpl.html': ['ng-html2js']
   },
   files: [
-    'bower_components/jquery/dist/jquery.js',
-    'bower_components/angular/angular.js',
-    'bower_components/angular-route/angular-route.js',
-    'bower_components/angularjs-mongolab/src/angular-mongolab.js',
-    'bower_components/angular-mocks/angular-mocks.js',
-    'bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
+    'libs/jquery.js',
+    'libs/angular.js',
+    'libs/angular-route.js',
+    'libs/angular-mocks.js',
+    'libs/angular-sanitize.js',
+    'libs/ui-bootstrap-tpls.js',
+    'libs/ui-select.js',
     'src/**/*.tpl.html',
     'src/**/*.js',
     'test/unit/**/*.spec.js'
@@ -104,15 +105,15 @@ gulp.task('build-app-js', function () {
 });
 gulp.task('copy-static', function () {
   return merge(
-    gulp.src('bower_components/bootstrap-css/css/*.css').pipe(gulp.dest('dist/css')),
-    gulp.src('bower_components/bootstrap-css/css/*.css.map').pipe(gulp.dest('dist/css')),
-    gulp.src('bower_components/bootstrap-css/fonts/*').pipe(gulp.dest('dist/fonts')),
+    gulp.src('css/*.*').pipe(gulp.dest('dist/css')),
+    gulp.src('fonts/*').pipe(gulp.dest('dist/fonts')),
     gulp.src('src/*.*').pipe(gulp.dest('dist')),
     merge(
       gulp.src('src/assets/**/*.*'),
-      gulp.src(['bower_components/angular/angular.js', 'bower_components/angular-route/angular-route.js']).pipe(concat('angular.js')),
-      gulp.src('bower_components/angular-bootstrap/ui-bootstrap-tpls.js'),
-      gulp.src('bower_components/jquery/dist/jquery.js')
+      gulp.src(['libs/angular.js', 'libs/angular-route.js', 'libs/angular-sanitize.js']).pipe(concat('angular.js')),
+      gulp.src('libs/ui-bootstrap-tpls.js'),
+      gulp.src('libs/ui-select.js'),
+      gulp.src('libs/jquery.js')
    ).pipe(gulp.dest('dist'))
   );
 });

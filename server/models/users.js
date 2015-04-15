@@ -9,18 +9,16 @@ var mongoose = require('mongoose'),
 var UserSchema = new Schema({
   name : String,	
   mobileNo : String,
+  skills : [String],
   password:String,
   isAdmin:{type: Boolean,default: false},
-  skills : [String],
-  catalog : [String],
+  type : String,
   isActive :  {type: Boolean,default: true},
   regDate :  { type: Date, default: Date.now },
   sex : String,
   code : String,
   hostel : String,
   desc : String
-
- // projects : [{type: ObjectId, ref: 'Project'} ]
 });
 
 UserSchema.plugin(passportLocalMongoose,{
@@ -33,12 +31,12 @@ UserSchema.plugin(passportLocalMongoose,{
 UserSchema.pre('save', function (next) {
 	if(this.password&&this.password.length < 20){ 
         this.setPassword(this.password,function(err,user){
+			console.log("setpasswod:",user.password);
 		    next();
 		});
     }
-   
-  })
-
+ })
+/*
 UserSchema.statics.JoinProject = function (userId,pid,cb) {
    this.findById(userId,function(err,u){
 		  if(err) throw err;
@@ -53,7 +51,7 @@ UserSchema.statics.loadData = function (query) {
    .populate('projects','name')
    .exec();
  };
-
+*/
 
 
 module.exports = mongoose.model('User', UserSchema);
