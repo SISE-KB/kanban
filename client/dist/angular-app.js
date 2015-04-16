@@ -39,6 +39,8 @@ angular.module('app').controller('AppCtrl', ['$scope', 'i18nNotifications', 'loc
   $scope.$on('$routeChangeError', function(event, current, previous, rejection){
     i18nNotifications.pushForCurrentRoute('errors.route.changeError', 'error', {}, {rejection: rejection});
   });
+}])
+.controller('MixedContentController', ['$scope', function($scope) {
 }]);
 
 angular.module('app').controller('HeaderCtrl', ['$scope', '$location', '$route', 'security', 'breadcrumbs', 'notifications', 'httpRequestTracker',
@@ -112,44 +114,6 @@ angular.module('dashboard', ['resources.projects', 'resources.tasks'])
 
   $scope.manageSprints = function (projectId) {
     $location.path('/projects/' + projectId + '/sprints');
-  };
-}]);
-
-angular.module('projects', ['resources.projects', 'productbacklogs', 'sprints', 'security.authorization'])
-
-.config(['$routeProvider', 'securityAuthorizationProvider', function ($routeProvider, securityAuthorizationProvider) {
-  $routeProvider.when('/projects', {
-    templateUrl:'projects/projects-list.tpl.html',
-    controller:'ProjectsViewCtrl',
-    resolve:{
-      projects:['Project', function (Project) {
-        //TODO: fetch only for the current user
-        return Project.all();
-      }],
-      authenticatedUser: securityAuthorizationProvider.requireAuthenticatedUser
-    }
-  });
-}])
-
-.controller('ProjectsViewCtrl', ['$scope', '$location', 'projects', 'security', function ($scope, $location, projects, security) {
-  $scope.projects = projects;
-
-  $scope.viewProject = function (project) {
-    $location.path('/projects/'+project.$id());
-  };
-
-  $scope.manageBacklogs = function (project) {
-    $location.path('/projects/'+project.$id()+'/productbacklogs');
-  };
-
-  $scope.manageSprints = function (project) {
-    $location.path('/projects/'+project.$id()+'/sprints');
-  };
-
-  $scope.getMyRoles = function(project) {
-    if ( security.currentUser ) {
-      return project.getRoles(security.currentUser.id);
-    }
   };
 }]);
 
@@ -275,6 +239,44 @@ angular.module('resources.users').factory('User', ['$mongoResourceHttp', functio
   return userResource;
 }]);
 
+angular.module('projects', ['resources.projects', 'productbacklogs', 'sprints', 'security.authorization'])
+
+.config(['$routeProvider', 'securityAuthorizationProvider', function ($routeProvider, securityAuthorizationProvider) {
+  $routeProvider.when('/projects', {
+    templateUrl:'projects/projects-list.tpl.html',
+    controller:'ProjectsViewCtrl',
+    resolve:{
+      projects:['Project', function (Project) {
+        //TODO: fetch only for the current user
+        return Project.all();
+      }],
+      authenticatedUser: securityAuthorizationProvider.requireAuthenticatedUser
+    }
+  });
+}])
+
+.controller('ProjectsViewCtrl', ['$scope', '$location', 'projects', 'security', function ($scope, $location, projects, security) {
+  $scope.projects = projects;
+
+  $scope.viewProject = function (project) {
+    $location.path('/projects/'+project.$id());
+  };
+
+  $scope.manageBacklogs = function (project) {
+    $location.path('/projects/'+project.$id()+'/productbacklogs');
+  };
+
+  $scope.manageSprints = function (project) {
+    $location.path('/projects/'+project.$id()+'/sprints');
+  };
+
+  $scope.getMyRoles = function(project) {
+    if ( security.currentUser ) {
+      return project.getRoles(security.currentUser.id);
+    }
+  };
+}]);
+
 angular.module('admin-projects', [
   'resources.projects',
   'resources.users',
@@ -387,6 +389,13 @@ angular.module('admin-users-edit',[
   $scope.user = user;
   $scope.password = user.password;
   $scope.availableSkills=['协调','后端编码','前端编码','2D做图','3D建模','文档写作','测试'];
+  
+  $scope.openDate = function($event) {
+    $event.preventDefault();
+    $event.stopPropagation();
+
+    $scope.opened = true;
+  };
   $scope.onSave = function (user) {
     i18nNotifications.pushForNextRoute('crud.user.save.success', 'success', {id : user.name});
     $location.path('/admin/users');
@@ -432,14 +441,13 @@ angular.module('admin-users-list', [
 angular.module('admin-users', [
   'admin-users-list',
   'admin-users-edit',
-  
   'services.crud',
   'security.authorization'
 ])
 
 .config(['crudRouteProvider', 'securityAuthorizationProvider', function (crudRouteProvider, securityAuthorizationProvider) {
 
-  crudRouteProvider.routesFor('Users', 'admin')
+  crudRouteProvider.routesFor('Users', 'admin')//,false,'MixedContentController'
     .whenList({
       users: ['User', function(User) { return User.all(); }],
       currentUser: securityAuthorizationProvider.requireAdminUser
@@ -450,6 +458,7 @@ angular.module('admin-users', [
     })
     .whenEdit({
       user:['$route', 'User', function ($route, User) {
+		// console.log($route.current.params.itemId);
         return User.getById($route.current.params.itemId);
       }],
       currentUser: securityAuthorizationProvider.requireAdminUser

@@ -1,4 +1,4 @@
-<div class="well">
+<div class="well"><!--ng-controller="UsersEditCtrl"-->
     <form name="form" novalidate crud-edit="user">
         <legend>用户列表</legend>
         <div class="row">
@@ -38,11 +38,16 @@
                      </ui-select-choices>
                   </ui-select>
                 </div>
-                <div class="form-group">
-				<label>注册日期(demo)</label>	
-                <datepicker ng-model="user.regDate" date-format='YYYY-mm-dd'></datepicker>
-                </div>
-			     <div class="form-group">
+				<div class="form-group">
+                <label>注册日期(demo)</label>
+			    <p class="input-group">
+                  <input type="text" class="form-control" datepicker-popup="YYYY-MM-dd" ng-model="user.regDate" is-open="opened" min-date="2015-01-22" max-date="'2016-06-22'"  close-text="关闭" />
+                  <span class="input-group-btn">
+                     <button type="button" class="btn btn-default" ng-click="openDate($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                  </span>
+                </p>
+				 </div>
+      	        <div class="form-group">
                     <label>类型</label>
                     <input type="text" name="type" ng-model="user.type" class="form-control" >
                 </div>

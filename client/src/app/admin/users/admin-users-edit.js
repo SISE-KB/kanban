@@ -10,6 +10,13 @@ angular.module('admin-users-edit',[
   $scope.user = user;
   $scope.password = user.password;
   $scope.availableSkills=['协调','后端编码','前端编码','2D做图','3D建模','文档写作','测试'];
+  
+  $scope.openDate = function($event) {
+    $event.preventDefault();
+    $event.stopPropagation();
+
+    $scope.opened = true;
+  };
   $scope.onSave = function (user) {
     i18nNotifications.pushForNextRoute('crud.user.save.success', 'success', {id : user.name});
     $location.path('/admin/users');

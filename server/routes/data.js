@@ -23,13 +23,13 @@ dbRouter
 
       if(!!id)  m.findById(id,function(err,data){
 		  if(err) return next(err);
-		  //debug(data)
+		  console.log(data)
 		  res.json(data)
 	  })
 	  else m.find(req.query.q,function(err,data){
 		  if(err) return next(err);
 		  console.log(cname,' query: ',req.query.q)
-		  debug(data)
+		  console.log(data)
 	       res.json(data)
 	   })  
   })

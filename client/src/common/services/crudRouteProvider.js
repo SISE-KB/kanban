@@ -29,7 +29,7 @@
     // In any case, the point is that this function is the key part of this "provider helper".
     // We use it to create routes for CRUD operations.  We give it some basic information about
     // the resource and the urls then it it returns our own special routeProvider.
-    this.routesFor = function(resourceName, urlPrefix, routePrefix) {
+    this.routesFor = function(resourceName, urlPrefix, routePrefix,ctlName) {
       var baseUrl = resourceName.toLowerCase();
       var baseRoute = '/' + resourceName.toLowerCase();
       routePrefix = routePrefix || urlPrefix;
@@ -70,7 +70,7 @@
         whenNew: function(resolveFns) {
           routeBuilder.when(baseRoute +'/new', {
             templateUrl: templateUrl('Edit'),
-            controller: controllerName('Edit'),
+            controller: (!!ctlName)?ctlName:controllerName('Edit'),
             resolve: resolveFns
           });
           return routeBuilder;
@@ -79,7 +79,7 @@
         whenEdit: function(resolveFns) {
           routeBuilder.when(baseRoute+'/:itemId', {
             templateUrl: templateUrl('Edit'),
-            controller: controllerName('Edit'),
+            controller: (!!ctlName)?ctlName:controllerName('Edit'),
             resolve: resolveFns
           });
           return routeBuilder;

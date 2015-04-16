@@ -2,7 +2,7 @@ var gulp = require('gulp');
 var templateCache = require('gulp-angular-templatecache');
 var jshint = require('gulp-jshint');
 var concat = require('gulp-concat');
-//var uglify = require('gulp-uglify');
+var uglify = require('gulp-uglify');
 //var template = require('gulp-template');
 //var header = require('gulp-header');
 //var htmlmin = require('gulp-htmlmin');
@@ -110,11 +110,14 @@ gulp.task('copy-static', function () {
     gulp.src('src/*.*').pipe(gulp.dest('dist')),
     merge(
       gulp.src('src/assets/**/*.*'),
-      gulp.src(['libs/angular.js', 'libs/angular-route.js', 'libs/angular-sanitize.js']).pipe(concat('angular.js')),
+      gulp.src(['libs/angular.js', 'libs/angular-route.js','libs/angular-locale_zh-cn.js', 'libs/angular-sanitize.js'])
+	  .pipe(concat('angular.js'))
+	  .pipe(uglify()),
       gulp.src('libs/ui-bootstrap-tpls.js'),
       gulp.src('libs/ui-select.js'),
       gulp.src('libs/jquery.js')
-   ).pipe(gulp.dest('dist'))
+   )
+   .pipe(gulp.dest('dist'))
   );
 });
 
