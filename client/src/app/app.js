@@ -39,8 +39,6 @@ angular.module('app').controller('AppCtrl', ['$scope', 'i18nNotifications', 'loc
   $scope.$on('$routeChangeError', function(event, current, previous, rejection){
     i18nNotifications.pushForCurrentRoute('errors.route.changeError', 'error', {}, {rejection: rejection});
   });
-}])
-.controller('MixedContentController', ['$scope', function($scope) {
 }]);
 
 angular.module('app').controller('HeaderCtrl', ['$scope', '$location', '$route', 'security', 'breadcrumbs', 'notifications', 'httpRequestTracker',

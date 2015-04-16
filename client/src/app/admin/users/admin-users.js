@@ -7,7 +7,7 @@ angular.module('admin-users', [
 
 .config(['crudRouteProvider', 'securityAuthorizationProvider', function (crudRouteProvider, securityAuthorizationProvider) {
 
-  crudRouteProvider.routesFor('Users', 'admin')//,false,'MixedContentController'
+  crudRouteProvider.routesFor('Users', 'admin',false,'MixedContentController')
     .whenList({
       users: ['User', function(User) { return User.all(); }],
       currentUser: securityAuthorizationProvider.requireAdminUser

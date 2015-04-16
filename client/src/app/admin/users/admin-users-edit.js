@@ -4,7 +4,8 @@ angular.module('admin-users-edit',[
   'admin-users-edit-uniqueMobileNo',
   'admin-users-edit-validateEquals'
 ])
-
+.controller('MixedContentController', ['$scope', function($scope) {
+}])
 .controller('UsersEditCtrl', ['$scope', '$location', 'i18nNotifications', 'user', function ($scope, $location, i18nNotifications, user) {
 
   $scope.user = user;
