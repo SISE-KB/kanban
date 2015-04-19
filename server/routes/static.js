@@ -7,8 +7,9 @@ exports.addRoutes = function(app, config) {
 	var publicDir  = config.server.distFolder
 	   ,uploadDir  = publicDir+"/files"
 	   ,multipartMiddleware = multipart({uploadDir: uploadDir})
-	   
-	app.use(config.server.staticUrl,express.static(publicDir))
+	
+	app.use(express.static(publicDir))
+	//app.use(config.server.staticUrl,express.static(publicDir))
 	app.get('/', function(req, res) {
     // Just send the index.html for other files to support HTML5Mode
     res.sendFile('index.html', { root: config.server.distFolder });

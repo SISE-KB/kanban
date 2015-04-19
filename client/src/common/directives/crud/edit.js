@@ -2,7 +2,9 @@ angular.module('directives.crud.edit', [])
 
 // Apply this directive to an element at or below a form that will manage CRUD operations on a resource.
 // - The resource must expose the following instance methods: $saveOrUpdate(), $id() and $remove()
-.directive('crudEdit', ['$parse', function($parse) {
+.directive('crudEdit', [
+           '$parse', '$stateParams',  '$state',
+function($parse, $stateParams,   $state) {
   return {
     // We ask this directive to create a new child scope so that when we add helper methods to the scope
     // it doesn't make a mess of the parent scope.
@@ -40,7 +42,7 @@ angular.module('directives.crud.edit', [])
       };
       // Set up callbacks with fallback
       // onSave attribute -> onSave scope -> noop
-      var userOnSave = attrs.onSave ? makeFn('onSave') : ( scope.onSave || angular.noop );
+      var userOnSave = attrs.onSave ? makeFn('onSave') : ( scope.onSave || angular.noop);
       var onSave = function(result, status, headers, config) {
         // Reset the original to help with reverting and pristine checks
         original = result;
@@ -55,6 +57,7 @@ angular.module('directives.crud.edit', [])
       // - e.g. ng-click="save()"
       scope.save = function() {
         resource.$saveOrUpdate().then(onSave, onError);
+       
       };
       scope.revertChanges = function() {
         resource = angular.copy(original);

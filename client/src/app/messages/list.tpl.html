@@ -1,0 +1,23 @@
+<div class="well">
+    <button class="btn btn-default" ng-click="create()">新　建</button>
+</div>
+<h2>全部消息</h2>
+<table class="table table-bordered table-condensed table-striped table-hover">
+    <thead>
+    <tr>
+        <th>标题</th>
+        <th>发布日期</th>
+        <th>失效日期</th>
+         <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="item in data" ng-click="view(item)">
+        <td>{{item.title}}</td>
+        <td>{{item.recDate | date:'yyyy/MM/dd'}}</td>
+        <td>{{item.closeDate | date:'yyyy/MM/dd'}}</td>
+        <td><button class="btn btn-danger remove" ng-click="remove(item, $index, $event)">删除</button></td>
+    </tr>
+    </tbody>
+</table>
+

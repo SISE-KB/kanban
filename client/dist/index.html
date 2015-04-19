@@ -1,27 +1,25 @@
-<!DOCTYPE html>
+  <!doctype html>
 <html lang="zh_CN" ng-app="app">
-<head>
-  <meta charset="utf-8">
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css"/>
-  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-theme.css"/>
-  <script type="text/javascript" src="/static/jquery.js"></script>
-  <script type="text/javascript" src="/static/angular.js"></script>
-  <script type="text/javascript" src="/static/ui-select.js"></script>
-  <script type="text/javascript" src="/static/ui-bootstrap-tpls.js"></script>
-  <script type="text/javascript" src="/static/angular-mongo-res.js"></script>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="jquery.min.js"></script>
+        <script src="angular.js"></script>
+        <script src="ui-bootstrap-tpls.min.js"></script>
+        <link href="css/bootstrap.css" rel="stylesheet">
+        <link href="css/styles.css" rel="stylesheet">
+      <script  src="marked.js"></script>
+       <script  src="angular-marked.js"></script>
+       <script  src="ui-select.js"></script>
+       <script  src="angular-mongo-res.js"></script>
+        <script src="app-common.js"></script>
+        <script src="app-main.js"></script>
 
-  <script type="text/javascript" src="/static/templates-common.js"></script>
-  <script type="text/javascript" src="/static/templates-app.js"></script>
-  <script type="text/javascript" src="/static/angular-common.js"></script>
-  <script type="text/javascript" src="/static/angular-app.js"></script>
- 
-</head>
+    </head>
 
-<body ng-controller="AppCtrl">
-  <div ng-include="'header.tpl.html'"></div>
-  <div ng-include="'notifications.tpl.html'" class="container-fluid" ng-show="notifications.getCurrent().length"></div>
-  <div ng-view class="container-fluid"></div>
+   
+<body >
+      <div ng-include="'views/header.tpl.html'"></div>
+      <div ui-view class="container-fluid"></div>
 </body>
 </html>

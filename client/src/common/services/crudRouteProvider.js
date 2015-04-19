@@ -1,6 +1,6 @@
 (function() {
 
-  function crudRouteProvider($routeProvider) {
+  function crudRouteProvider($stateProvider) {
 
     // This $get noop is because at the moment in AngularJS "providers" must provide something
     // via a $get method.
@@ -16,20 +16,8 @@
     //   var routeProvider = crudRouteProvider.routesFor('MyBook', '/myApp');
     // });
     // ```
-    //
-    // but instead have something like:
-    //
-    //
-    // ```
-    // myMod.config(function(crudRouteProvider) {
-    //   var routeProvider = crudRouteProvider('MyBook', '/myApp');
-    // });
-    // ```
-    //
-    // In any case, the point is that this function is the key part of this "provider helper".
-    // We use it to create routes for CRUD operations.  We give it some basic information about
-    // the resource and the urls then it it returns our own special routeProvider.
-    this.routesFor = function(resourceName, urlPrefix, routePrefix,ctlName) {
+
+    this.routesFor = function(resourceName, urlPrefix, routePrefix) {
       var baseUrl = resourceName.toLowerCase();
       var baseRoute = '/' + resourceName.toLowerCase();
       routePrefix = routePrefix || urlPrefix;
@@ -59,50 +47,52 @@
       var routeBuilder = {
         // Create a route that will handle showing a list of items
         whenList: function(resolveFns) {
-          routeBuilder.when(baseRoute, {
+          $stateProvider.state(baseRoute, {
             templateUrl: templateUrl('List'),
             controller: controllerName('List'),
-            resolve: resolveFns
+             data: resolveFns
+           // resolve: resolveFns
           });
           return routeBuilder;
         },
         // Create a route that will handle creating a new item
         whenNew: function(resolveFns) {
-          routeBuilder.when(baseRoute +'/new', {
+          $stateProvider.state(baseRoute +'/new', {
             templateUrl: templateUrl('Edit'),
-            controller: (!!ctlName)?ctlName:controllerName('Edit'),
-            resolve: resolveFns
+            controller: controllerName('Edit'),
+            data: resolveFns
+           // resolve: resolveFns
           });
           return routeBuilder;
         },
         // Create a route that will handle editing an existing item
         whenEdit: function(resolveFns) {
-          routeBuilder.when(baseRoute+'/:itemId', {
+          $stateProvider.state(baseRoute+'/:itemId', {
             templateUrl: templateUrl('Edit'),
-            controller: (!!ctlName)?ctlName:controllerName('Edit'),
-            resolve: resolveFns
+            controller: controllerName('Edit'),
+            data: resolveFns
+           // resolve: resolveFns
           });
           return routeBuilder;
         },
         // Pass-through to `$routeProvider.when()`
         when: function(path, route) {
-          $routeProvider.when(path, route);
+          $stateProvider.state(path, route);
           return routeBuilder;
         },
-        // Pass-through to `$routeProvider.otherwise()`
-        otherwise: function(params) {
-          $routeProvider.otherwise(params);
+       /*    otherwise: function(params) {
+          $stateProvider.otherwise(params);
           return routeBuilder;
-        },
+        },*/
         // Access to the core $routeProvider.
-        $routeProvider: $routeProvider
+        stateProvider: $stateProvider
       };
       return routeBuilder;
     };
   }
   // Currently, v1.0.3, AngularJS does not provide annotation style dependencies in providers so,
   // we add our injection dependencies using the $inject form
-  crudRouteProvider.$inject = ['$routeProvider'];
+  crudRouteProvider.$inject = ['$stateProvider'];
 
   // Create our provider - it would be nice to be able to do something like this instead:
   //
@@ -111,5 +101,5 @@
   //   .configHelper('crudRouteProvider', ['$routeProvider, crudRouteProvider]);
   // ```
   // Then we could dispense with the $get, the $inject and the closure wrapper around all this.
-  angular.module('services.crudRouteProvider', ['ngRoute']).provider('crudRoute', crudRouteProvider);
+  angular.module('services.crudRouteProvider', ['ui.router']).provider('crudRoute', crudRouteProvider);
 })();

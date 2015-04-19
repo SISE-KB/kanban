@@ -4,7 +4,7 @@ angular.module('security.login.toolbar', [])
 // and information the current authenticated user
 .directive('loginToolbar', ['security', function(security) {
   var directive = {
-    templateUrl: 'security/login/toolbar.tpl.html',
+    templateUrl: 'views/security/login/toolbar.tpl.html',
     restrict: 'E',
     replace: true,
     scope: true,
