@@ -1,0 +1,32 @@
+<div >
+    <div class="navbar navbar-default" role="navigation">
+        <div class="navbar-header">
+            <a class="navbar-brand" ng-click="home()">SISE-GAME 实践项目辅助平台</a>
+        </div>
+        <div>
+            <ul class="nav navbar-nav">
+                 <li ui-sref-active="active"><a ui-sref="home">Home</a></li>
+                 <li ui-sref-active="active"><a ui-sref="messages.list">Messages</a></li>
+            </ul>
+            <p ui-view="hint" class="navbar-text pull-right"></p>
+         </div>
+         <login-toolbar></login-toolbar>
+            <ul class="nav navbar-nav navbar-right" >
+                <li><a href="#"><img src="img/spinner.gif"></a></li>
+            </ul>
+    </div>
+
+    <!--
+    <div>
+        <ul class="breadcrumb">
+            <li ng-repeat="breadcrumb in breadcrumbs.getAll()">
+                <span class="divider">/</span>
+                <ng-switch on="$last">
+                    <span ng-switch-when="true">{{breadcrumb.name}}</span>
+                    <span ng-switch-default><a href="{{breadcrumb.path}}">{{breadcrumb.name}}</a></span>
+                </ng-switch>
+            </li>
+        </ul>
+    </div>
+    -->
+</div>

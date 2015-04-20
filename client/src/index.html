@@ -1,0 +1,25 @@
+  <!doctype html>
+<html lang="zh_CN" ng-app="app">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="jquery.min.js"></script>
+        <script src="angular.js"></script>
+        <script src="ui-bootstrap-tpls.min.js"></script>
+        <link href="css/bootstrap.css" rel="stylesheet">
+        <link href="css/styles.css" rel="stylesheet">
+      <script  src="marked.js"></script>
+       <script  src="angular-marked.js"></script>
+       <script  src="ui-select.js"></script>
+       <script  src="angular-mongo-res.js"></script>
+        <script src="app-common.js"></script>
+        <script src="app-main.js"></script>
+
+    </head>
+
+   
+<body >
+      <div ng-include="'views/header.tpl.html'"></div>
+      <div ui-view class="container-fluid"></div>
+</body>
+</html>
