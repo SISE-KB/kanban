@@ -1,4 +1,4 @@
-angular.module('app', [ 'ngAnimate',  'ui.router','ngSanitize',  'ui.select', 'hc.marked', 'ui.bootstrap', 
+angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngSanitize',  'ui.select', 'hc.marked', 'ui.bootstrap', 
  'services.i18nNotifications', 'services.httpRequestTracker', 'directives.crud', 'security',
  'resources','states','controllers'
 ])
