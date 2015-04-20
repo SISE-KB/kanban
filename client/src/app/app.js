@@ -5,71 +5,54 @@ angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngSanitize',  'ui
 .config(['$stateProvider','$urlRouterProvider',
 function ($stateProvider,$urlRouterProvider) {
   $urlRouterProvider
-       .otherwise('/home');
+       .otherwise('/');
         
   $stateProvider
     .state('home',  {
-	  url: '/home',	
-      templateUrl: 'views/home.tpl.html'
-    })
-    .state('about',  {
-	  url: '/about',	
-      template: '<p>about us</p>'
+	  url: '/',	
+      template: '<h1>项目状态看板.....</h1>'
+    }) 
+    .state('demo',  {
+	  url: '/demo',	
+      templateUrl: 'views/demo.tpl.html'
     })   
 }])
 .run(
   [          '$rootScope', '$state', '$stateParams','security', 
     function ($rootScope,   $state,   $stateParams,security) {
-
-    // It's very handy to add references to $state and $stateParams to the $rootScope
-    // so that you can access them from any scope within your applications.For example,
-    // <li ng-class="{ active: $state.includes('contacts.list') }"> will set the <li>
-    // to active whenever 'contacts.list' or one of its decendents is active.
       $rootScope.$state = $state
       $rootScope.$stateParams = $stateParams
-   //   $rootScope.currentUser=security.requestCurrentUser()
+      $rootScope.currentUser=security.requestCurrentUser()
     }
   ]
 )
+.controller('AppCtrl', [
+           '$scope', 'i18nNotifications', 'localizedMessages',
+ function($scope, i18nNotifications, localizedMessages) {
+  $scope.notifications = i18nNotifications
+  $scope.removeNotification = function (notification) {
+    i18nNotifications.remove(notification)
+  }
+  $scope.$on('$stateChangeError', function(event, current, previous, rejection){
+    i18nNotifications.pushForCurrentRoute('errors.state.changeError', 'error', {}, {rejection: rejection})
+  })
+}])
+.controller('HeaderCtrl', [
+            '$scope',  'security', 'notifications', 'httpRequestTracker',
+  function ($scope,  security,  notifications, httpRequestTracker) {
+  $scope.isAuthenticated = security.isAuthenticated
+  $scope.isAdmin = security.isAdmin
+  
+  $scope.hasPendingRequests = function () {
+    return httpRequestTracker.hasPendingRequests()
+  }
+  $scope.home = function () {
+    if (security.isAuthenticated()) {
+      $scope.$state.go('home');
+    } else {
+      $scope.$state.go('dashboard');
+    }
+  }
+ }])
 
-.controller('DatepickerDemoCtrl', ['$scope', function($scope) {
-  $scope.today = function() {
-    $scope.dt = new Date();
-  };
-  $scope.today();
-
-  $scope.showWeeks = true;
-  $scope.toggleWeeks = function () {
-    $scope.showWeeks = ! $scope.showWeeks;
-  };
-
-  $scope.clear = function () {
-    $scope.dt = null; 
-  };
-
-  // Disable weekend selection
-  $scope.disabled = function(date, mode) {
-    return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );
-  };
-
-  $scope.toggleMin = function() {
-    $scope.minDate = ( $scope.minDate ) ? null : new Date();
-  };
-  $scope.toggleMin(); 
-
-  $scope.open = function($event) {
-    $event.preventDefault();
-    $event.stopPropagation();
-
-    $scope.opened = true;
-  };
-
-  $scope.dateOptions = {
-    'year-format': "'yy'",
-    'starting-day': 1
-  };
-
-  $scope.formats = [ 'yyyy/MM/dd', 'shortDate'];
-  $scope.format = $scope.formats[0];
-}]);
 

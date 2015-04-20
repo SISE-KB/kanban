@@ -1,10 +1,10 @@
 exports.addRoutes = function(app, security) {
 
-	app.get('/loggedin', function(req, res,next) {
+app.get('/loggedin', function(req, res,next) {
 		res.json(req.isAuthenticated() ? req.user : {id:0})
-	})
+})
 
-	app.post('/register', security.register)
+app.post('/register', security.register)
 
 
 app.post('/login',  security.login);

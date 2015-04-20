@@ -63,18 +63,18 @@ angular.module('services.crud').factory('crudEditMethods', function () {
   };
 });
 
-angular.module('services.crud').factory('crudListMethods', ['$location', function ($location) {
+angular.module('services.crud').factory('crudListMethods', ['$state', function ($state) {
 
-  return function (pathPrefix) {
+  return function (base) {
 
     var mixin = {};
 
     mixin['new'] = function () {
-      $location.path(pathPrefix+'/new');
+      $state.go(base+'.new');
     };
 
     mixin.edit = function (itemId) {
-      $location.path(pathPrefix+'/'+itemId);
+      $state.go(base+'/'+itemId+'/edit');
     };
 
     return mixin;

@@ -148,12 +148,14 @@ angular.module('security.service', [
   'ui.bootstrap.modal'     // Used to display the login form as a modal dialog.
 ])
 
-.factory('security', ['$http', '$q', '$location', 'securityRetryQueue', '$modal', function($http, $q, $location, queue, $modal) {
+.factory('security', [
+       '$http', '$q', '$state', 'securityRetryQueue', '$modal', 
+function($http, $q, $location, queue, $modal) {
 
   // Redirect to the given url (defaults to '/')
-  function redirect(url) {
-    url = url || '/';
-    $location.path(url);
+  function redirect(state) {
+    state = state || 'home';
+    $state.go(state);
   }
 
   // Login form dialog stuff
@@ -255,43 +257,6 @@ angular.module('security.service', [
   return service;
 }]);
 
-angular.module('services.breadcrumbs', []);
-angular.module('services.breadcrumbs')
-.factory('breadcrumbs',  [
-           '$rootScope', '$location',
-  function($rootScope, $location){
-
-  var breadcrumbs = [];
-  var breadcrumbsService = {};
-
-  //we want to update breadcrumbs only when a route is actually changed
-  //as $location.path() will get updated imediatelly (even if route change fails!)
-  $rootScope.$on('$routeChangeSuccess', function(event, current){
-
-    var pathElements = $location.path().split('/'), result = [], i;
-    var breadcrumbPath = function (index) {
-      return '/' + (pathElements.slice(0, index + 1)).join('/');
-    };
-
-    pathElements.shift();
-    for (i=0; i<pathElements.length; i++) {
-      result.push({name: pathElements[i], path: breadcrumbPath(i)});
-    }
-
-    breadcrumbs = result;
-  });
-
-  breadcrumbsService.getAll = function() {
-    return breadcrumbs;
-  };
-
-  breadcrumbsService.getFirst = function() {
-    return breadcrumbs[0] || {};
-  };
-
-  return breadcrumbsService;
-}]);
-
 angular.module('services.crud', ['services.crudRouteProvider']);
 angular.module('services.crud').factory('crudEditMethods', function () {
 
@@ -357,23 +322,24 @@ angular.module('services.crud').factory('crudEditMethods', function () {
   };
 });
 
-angular.module('services.crud').factory('crudListMethods', ['$location', function ($location) {
+angular.module('services.crud').factory('crudListMethods', ['$state', function ($state) {
 
-  return function (pathPrefix) {
+  return function (base) {
 
     var mixin = {};
 
     mixin['new'] = function () {
-      $location.path(pathPrefix+'/new');
+      $state.go(base+'.new');
     };
 
     mixin.edit = function (itemId) {
-      $location.path(pathPrefix+'/'+itemId);
+      $state.go(base+'/'+itemId+'/edit');
     };
 
     return mixin;
   };
 }]);
+
 (function() {
 
   function crudRouteProvider($stateProvider) {
@@ -582,7 +548,7 @@ angular.module('services.notifications', []).factory('notifications', ['$rootSco
     return notificationObj;
   };
 
-  $rootScope.$on('$routeChangeSuccess', function () {
+  $rootScope.$on('$stateChangeSuccess', function () {
     notifications.ROUTE_CURRENT.length = 0;
 
     notifications.ROUTE_CURRENT = angular.copy(notifications.ROUTE_NEXT);
@@ -622,6 +588,7 @@ angular.module('services.notifications', []).factory('notifications', ['$rootSco
 
   return notificationsService;
 }]);
+
 angular.module('directives.crud', ['directives.crud.buttons', 'directives.crud.edit']);
 
 angular.module('directives.crud.buttons', [])
@@ -749,7 +716,6 @@ function($parse, $stateParams,   $state) {
   };
 }]);
 
-angular.module('security.login', ['security.login.form', 'security.login.toolbar']);
 angular.module('security.login.form', ['services.localizedMessages'])
 
 // The LoginFormController provides the behaviour behind a reusable form to allow users to authenticate.
@@ -796,6 +762,7 @@ angular.module('security.login.form', ['services.localizedMessages'])
   };
 }]);
 
+angular.module('security.login', ['security.login.form', 'security.login.toolbar']);
 angular.module('security.login.toolbar', [])
 
 // The loginToolbar directive is a reusable widget that can show login or logout buttons

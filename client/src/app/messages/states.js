@@ -34,11 +34,16 @@ angular.module('states.messages', ['ui.router'
 					templateUrl: 'views/'+resName+'/edit.tpl.html',
 					controller:  Ress+'CreateCtrl'
 			})
-			.state(resName+'.detail', {
+			.state(resName+'.list.detail', {
 				url: '/:itemId',
 				templateUrl: 'views/'+resName+'/detail.tpl.html',
 				controller:  Ress+'DetailCtrl'
-				
+	/*			views:{
+					'detail@':	{
+						templateUrl: 'views/'+resName+'/detail.tpl.html',
+						controller:  Ress+'DetailCtrl'
+					}	
+				}*/
 			})
 			.state(resName+'.edit', {
 				url: '/:itemId/edit',

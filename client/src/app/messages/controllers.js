@@ -3,17 +3,30 @@ angular.module('controllers.messages', ['ui.router'
 , 'resources.messages'
 , 'security.authorization'])  
 .controller('MessagesMainCtrl',   [
-               '$scope', '$state', '$stateParams', 'i18nNotifications', 'messages', 
-	function ( $scope,   $state,   $stateParams,    i18nNotifications,   messages) {
-              // Add a 'messages' field in this abstract parent's scope, so that all
-              // child state views can access it in their scopes. 
+               '$scope', '$state', '$stateParams', 'i18nNotifications', 'messages','$http','Message',
+	function ( $scope,   $state,   $stateParams,    i18nNotifications,messages,$http,Message) {
+      
 		$scope.data = messages
 		$scope.availableTags=["娱乐","科技"]
 		$scope.visited=[]
+		$scope.$watch('search', function() {
+		  var re = new RegExp($scope.search, 'i');
+		  var q={title:{$regex: re }}
+		  $http.get('/api/messages', {params: q}).success(function(msgs){
+			 
+			  ds=[]
+			  for(var i=0;i<msgs.length;i++)
+			     ds.push(new Message(msgs[i]))
+			  $scope.data=ds
+			  console.log(ds)
+		  })
+		  
+           
+	   })
 		$scope.findById = function (id) {
 			for (var i = 0; i < $scope.data.length; i++) {
 				var rt=$scope.data[i]
-				//console.log(rt)
+				//
 				if ($scope.data[i].$id() == id)
 					return rt
 			}
@@ -57,6 +70,21 @@ angular.module('controllers.messages', ['ui.router'
 .controller('MessagesListCtrl',   [
                 '$scope', '$state', '$stateParams', 'i18nNotifications', 
 	function (  $scope,   $state,   $stateParams,    i18nNotifications) {
+	  $scope.totalItems = 100//$scope.data.length
+	  $scope.currentPage = 1
+
+	  $scope.setPage = function (pageNo) {
+			$scope.currentPage = pageNo
+	   }
+
+	   $scope.pageChanged = function() {
+			$log.log('Page changed to: ' + $scope.currentPage)
+		}
+
+	   $scope.maxSize = 5
+	 //  $scope.bigTotalItems = 10
+	 //  $scope.bigCurrentPage = 1
+  
 		$scope.remove = function(item, $index, $event) {
 			// Don't let the click bubble up to the ng-click on the enclosing div, which will try to trigger
 			// an edit of this item.
@@ -68,7 +96,7 @@ angular.module('controllers.messages', ['ui.router'
 			})
 		}
 		$scope.view = function (item) {
-			$state.go('^.detail', {itemId: item.$id()})
+			$state.go('messages.list.detail', {itemId: item.$id()})
 		}
 	
 		$scope.create = function () {

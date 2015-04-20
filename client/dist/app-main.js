@@ -5,33 +5,59 @@ angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngSanitize',  'ui
 .config(['$stateProvider','$urlRouterProvider',
 function ($stateProvider,$urlRouterProvider) {
   $urlRouterProvider
-       .otherwise('/home');
+       .otherwise('/');
         
   $stateProvider
     .state('home',  {
-	  url: '/home',	
-      templateUrl: 'views/home.tpl.html'
-    })
-    .state('about',  {
-	  url: '/about',	
-      template: '<p>about us</p>'
+	  url: '/',	
+      template: '<h1>项目状态看板.....</h1>'
+    }) 
+    .state('demo',  {
+	  url: '/demo',	
+      templateUrl: 'views/demo.tpl.html'
     })   
 }])
 .run(
   [          '$rootScope', '$state', '$stateParams','security', 
     function ($rootScope,   $state,   $stateParams,security) {
-
-    // It's very handy to add references to $state and $stateParams to the $rootScope
-    // so that you can access them from any scope within your applications.For example,
-    // <li ng-class="{ active: $state.includes('contacts.list') }"> will set the <li>
-    // to active whenever 'contacts.list' or one of its decendents is active.
       $rootScope.$state = $state
       $rootScope.$stateParams = $stateParams
-   //   $rootScope.currentUser=security.requestCurrentUser()
+      $rootScope.currentUser=security.requestCurrentUser()
     }
   ]
 )
+.controller('AppCtrl', [
+           '$scope', 'i18nNotifications', 'localizedMessages',
+ function($scope, i18nNotifications, localizedMessages) {
+  $scope.notifications = i18nNotifications
+  $scope.removeNotification = function (notification) {
+    i18nNotifications.remove(notification)
+  }
+  $scope.$on('$stateChangeError', function(event, current, previous, rejection){
+    i18nNotifications.pushForCurrentRoute('errors.state.changeError', 'error', {}, {rejection: rejection})
+  })
+}])
+.controller('HeaderCtrl', [
+            '$scope',  'security', 'notifications', 'httpRequestTracker',
+  function ($scope,  security,  notifications, httpRequestTracker) {
+  $scope.isAuthenticated = security.isAuthenticated
+  $scope.isAdmin = security.isAdmin
+  
+  $scope.hasPendingRequests = function () {
+    return httpRequestTracker.hasPendingRequests()
+  }
+  $scope.home = function () {
+    if (security.isAuthenticated()) {
+      $scope.$state.go('home');
+    } else {
+      $scope.$state.go('dashboard');
+    }
+  }
+ }])
 
+
+
+angular.module('app')
 .controller('DatepickerDemoCtrl', ['$scope', function($scope) {
   $scope.today = function() {
     $scope.dt = new Date();
@@ -73,9 +99,8 @@ function ($stateProvider,$urlRouterProvider) {
   $scope.format = $scope.formats[0];
 }]);
 
-
 angular.module('app').constant('I18N.MESSAGES', {
-  'errors.route.changeError':'前端路由出错',
+  'errors.state.changeError':'前端状态转换出错',
   'crud.save.success':"成功保存'{{id}}'",
   'crud.save.error':"保存出错...'{{id}}'",
   'crud.remove.success':"成功删除'{{id}}'",
@@ -97,17 +122,30 @@ angular.module('controllers.messages', ['ui.router'
 , 'resources.messages'
 , 'security.authorization'])  
 .controller('MessagesMainCtrl',   [
-               '$scope', '$state', '$stateParams', 'i18nNotifications', 'messages', 
-	function ( $scope,   $state,   $stateParams,    i18nNotifications,   messages) {
-              // Add a 'messages' field in this abstract parent's scope, so that all
-              // child state views can access it in their scopes. 
+               '$scope', '$state', '$stateParams', 'i18nNotifications', 'messages','$http','Message',
+	function ( $scope,   $state,   $stateParams,    i18nNotifications,messages,$http,Message) {
+      
 		$scope.data = messages
 		$scope.availableTags=["娱乐","科技"]
 		$scope.visited=[]
+		$scope.$watch('search', function() {
+		  var re = new RegExp($scope.search, 'i');
+		  var q={title:{$regex: re }}
+		  $http.get('/api/messages', {params: q}).success(function(msgs){
+			 
+			  ds=[]
+			  for(var i=0;i<msgs.length;i++)
+			     ds.push(new Message(msgs[i]))
+			  $scope.data=ds
+			  console.log(ds)
+		  })
+		  
+           
+	   })
 		$scope.findById = function (id) {
 			for (var i = 0; i < $scope.data.length; i++) {
 				var rt=$scope.data[i]
-				//console.log(rt)
+				//
 				if ($scope.data[i].$id() == id)
 					return rt
 			}
@@ -151,6 +189,21 @@ angular.module('controllers.messages', ['ui.router'
 .controller('MessagesListCtrl',   [
                 '$scope', '$state', '$stateParams', 'i18nNotifications', 
 	function (  $scope,   $state,   $stateParams,    i18nNotifications) {
+	  $scope.totalItems = 100//$scope.data.length
+	  $scope.currentPage = 1
+
+	  $scope.setPage = function (pageNo) {
+			$scope.currentPage = pageNo
+	   }
+
+	   $scope.pageChanged = function() {
+			$log.log('Page changed to: ' + $scope.currentPage)
+		}
+
+	   $scope.maxSize = 5
+	 //  $scope.bigTotalItems = 10
+	 //  $scope.bigCurrentPage = 1
+  
 		$scope.remove = function(item, $index, $event) {
 			// Don't let the click bubble up to the ng-click on the enclosing div, which will try to trigger
 			// an edit of this item.
@@ -162,7 +215,7 @@ angular.module('controllers.messages', ['ui.router'
 			})
 		}
 		$scope.view = function (item) {
-			$state.go('^.detail', {itemId: item.$id()})
+			$state.go('messages.list.detail', {itemId: item.$id()})
 		}
 	
 		$scope.create = function () {
@@ -238,11 +291,16 @@ angular.module('states.messages', ['ui.router'
 					templateUrl: 'views/'+resName+'/edit.tpl.html',
 					controller:  Ress+'CreateCtrl'
 			})
-			.state(resName+'.detail', {
+			.state(resName+'.list.detail', {
 				url: '/:itemId',
 				templateUrl: 'views/'+resName+'/detail.tpl.html',
 				controller:  Ress+'DetailCtrl'
-				
+	/*			views:{
+					'detail@':	{
+						templateUrl: 'views/'+resName+'/detail.tpl.html',
+						controller:  Ress+'DetailCtrl'
+					}	
+				}*/
 			})
 			.state(resName+'.edit', {
 				url: '/:itemId/edit',

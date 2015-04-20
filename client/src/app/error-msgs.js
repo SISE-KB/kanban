@@ -1,5 +1,5 @@
 angular.module('app').constant('I18N.MESSAGES', {
-  'errors.route.changeError':'前端路由出错',
+  'errors.state.changeError':'前端状态转换出错',
   'crud.save.success':"成功保存'{{id}}'",
   'crud.save.error':"保存出错...'{{id}}'",
   'crud.remove.success':"成功删除'{{id}}'",
