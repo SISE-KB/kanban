@@ -3,26 +3,25 @@ angular.module('controllers.messages', ['ui.router'
 , 'resources.messages'
 , 'security.authorization'])  
 .controller('MessagesMainCtrl',   [
-               '$scope', '$state', '$stateParams', 'i18nNotifications', 'messages','$http','Message',
-	function ( $scope,   $state,   $stateParams,    i18nNotifications,messages,$http,Message) {
+               '$scope', '$state', '$stateParams', 'i18nNotifications','$http','Message',
+	function ( $scope,   $state,   $stateParams,    i18nNotifications,  $http,  Message) {
       
-		$scope.data = messages
+		$scope.data = []
+		$scope.query = ''
 		$scope.availableTags=["娱乐","科技"]
 		$scope.visited=[]
-		$scope.$watch('search', function() {
-		  var re = new RegExp($scope.search, 'i');
-		  var q={title:{$regex: re }}
-		  $http.get('/api/messages', {params: q}).success(function(msgs){
-			 
+		$scope.search=function() {
+		  
+		  var q={'title':$scope.query}
+		  console.log(q)
+		  $http.get('/api/messages', {params: {q:q}}).success(function(msgs){
 			  ds=[]
 			  for(var i=0;i<msgs.length;i++)
 			     ds.push(new Message(msgs[i]))
 			  $scope.data=ds
 			  console.log(ds)
 		  })
-		  
-           
-	   })
+	    }
 		$scope.findById = function (id) {
 			for (var i = 0; i < $scope.data.length; i++) {
 				var rt=$scope.data[i]

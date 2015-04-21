@@ -18,7 +18,7 @@ angular.module('states.messages', ['ui.router'
 				abstract: true,
 				url: "/"+resName,
 				templateUrl: 'views/'+resName+'/index.tpl.html',
-				resolve: resoFn,
+				//resolve: resoFn,
 				controller: Ress+'MainCtrl'
 			})
 
