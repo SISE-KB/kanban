@@ -23,6 +23,8 @@ function ($stateProvider,$urlRouterProvider) {
       $rootScope.$state = $state
       $rootScope.$stateParams = $stateParams
       $rootScope.currentUser=security.requestCurrentUser()
+      $rootScope.isAuthenticated = security.isAuthenticated
+      $rootScope.isAdmin = security.isAdmin
     }
   ]
 )
@@ -40,8 +42,7 @@ function ($stateProvider,$urlRouterProvider) {
 .controller('HeaderCtrl', [
             '$scope',  'security', 'notifications', 'httpRequestTracker',
   function ($scope,  security,  notifications, httpRequestTracker) {
-  $scope.isAuthenticated = security.isAuthenticated
-  $scope.isAdmin = security.isAdmin
+
   
   $scope.hasPendingRequests = function () {
     return httpRequestTracker.hasPendingRequests()
