@@ -2,10 +2,12 @@
  <div class="col-md-3">
     <div class="well well-small">
       <ul class="nav nav-list">
-        <li ui-sref-active="active"><a ui-sref="messages.list">所有消息</a></li>
+		 <input type="text" name="query" ng-model="query" placeholder="过滤条件 ..." ng-blur="search()"> 
+		<button class="btn btn-default">查询</button>
+        <!--<li ui-sref-active="active"><a ui-sref="messages.list">所有消息</a></li>-->
         <li class="nav-header">最近访问</li>
         <li ng-repeat="msg in visited" ui-sref-active="active">
-        <a ui-sref="messages.detail({itemId:msg.$id()})">{{msg.title}}</a>
+        <a ui-sref="messages.list.detail({itemId:msg.$id()})">{{msg.title}}</a>
         </li>
       </ul>
     </div>
@@ -14,3 +16,4 @@
   <!-- Our unnamed main ui-view for this template -->
   <div ui-view class="col-md-9 slide"></div>
 </div>
+

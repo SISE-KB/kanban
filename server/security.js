@@ -35,7 +35,7 @@ var security = {
   },
   adminRequired: function(req, res, next) {
     console.log('adminRequired');
-    if (req.user && req.user.admin ) {
+    if (req.user && req.user.isAdmin ) {
       next();
     } else {
       res.json(401, filterUser(req.user));
@@ -63,7 +63,7 @@ var security = {
     function authenticationFailed(err, user, info){
       if (err) { return next(err); }
       if (!user) { return res.json(filterUser(user)); }
-      req.logIn(user, function(err) {
+      req.login(user, function(err) {
         if ( err ) { return next(err); }
         return res.json(filterUser(user));
       });

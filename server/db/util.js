@@ -5,7 +5,7 @@ var mongoose     = require('mongoose')
 
 function connectDB(cb){
 	var degug= parseArgs(process.argv)['debug']
-	var dbUrl =config[config.env].MongoDbURL
+	var dbUrl =config.mongo.MongoDB
 	dbUrl=dbUrl||'mongodb://127.0.0.1/test'
 	if(!!degug) {
 	  mongoose.set('debug', true)  

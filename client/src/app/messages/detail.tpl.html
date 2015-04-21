@@ -1,4 +1,4 @@
 <div>
-  <h4>{{item.title}}<button class="btn" ng-click="edit()">Edit</button></h4>
+  <h4>{{item.title}}<button class="btn" ng-click="edit()" ng-show="isAdmin()">Edit</button></h4>
   <div  marked="item.text"></div>
 </div>

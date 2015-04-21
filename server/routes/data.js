@@ -12,7 +12,13 @@ var express = require('express')
 exports.addRoutes = function(app, config) {
 var dbRouter = express.Router()
 
-
+function string2Object(str)
+{
+   var obj = JSON.parse(str)
+   for(var p in obj)
+     obj[p]=new RegExp(obj[p])
+   return obj	 
+}
 dbRouter
   .route('/:collection/:id?')
   .get(function (req, res) {
@@ -20,17 +26,19 @@ dbRouter
 	  var cname=req.params.collection
 	  
 	  var m=require('../models/'+cname)
-
+	  ,q=string2Object(req.query.q)
+		console.log(q) 
+  
       if(!!id)  m.findById(id,function(err,data){
 		  if(err) return next(err);
 		  console.log(data)
 		  res.json(data)
 	  })
-	  else m.find(req.query.q,function(err,data){
+	  else m.find(q,function(err,data){//req.query.q
 		  if(err) return next(err);
-		  console.log(cname,' query: ',req.query.q)
+		  //console.log(cname,' query: ',re)
 		  console.log(data)
-	       res.json(data)
+	      res.json(data)
 	   })  
   })
   .put(function (req, res) {

@@ -12,17 +12,17 @@ describe ('Baidu', function() {
          })
    })
 })
-
+/*
 describe ('Route', function() {
 	 before(function(){
-		  tool.connectDB() 
+		  //tool.connectDB() 
 		   require("../server")
 	  })
 	   after(function(){
-		  tool.closeDB()
+		 // tool.closeDB()
 	  })
    it("should  to fetch projects list", function(done) {
-      superagent.get('http://localhost:3000/api/projects')
+      superagent.get('http://localhost:3000/api/users')
          .end(function(e, res) {
           //  expect(e).to.be(null)
            // expect(res.status).to.be(401)
@@ -31,3 +31,4 @@ describe ('Route', function() {
          })
    })
 })
+*/

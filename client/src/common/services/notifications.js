@@ -15,7 +15,7 @@ angular.module('services.notifications', []).factory('notifications', ['$rootSco
     return notificationObj;
   };
 
-  $rootScope.$on('$routeChangeSuccess', function () {
+  $rootScope.$on('$stateChangeSuccess', function () {
     notifications.ROUTE_CURRENT.length = 0;
 
     notifications.ROUTE_CURRENT = angular.copy(notifications.ROUTE_NEXT);

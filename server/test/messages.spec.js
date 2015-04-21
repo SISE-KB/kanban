@@ -2,7 +2,7 @@
 var expect = require('expect.js')
    ,tool    = require("../db/util")
   
-var Message = require('../src/models/Message');
+var Message = require('../models/messages');
 
 describe('Message Test', function () {
       before(function(){
@@ -16,14 +16,13 @@ describe('Message Test', function () {
 		   Message.find({}, function (err, data) {
 			  // data.should.be.an.Array
 			   expect(data).to.be.an('array')
-			   expect(data).to.have.length(2)
+			   expect(data).to.have.length(100)
 			   done()
 		   });
 	   })
 	   it('find One Message', function (done) {
 		   Message.findOne({}, function (err, doc) {
-			   expect(doc.title).to.contain('一等奖')
-			  // doc.title.should.startWith('热烈庆祝我校Ｘ获得全国游戏设计大赛一等奖');
+			   expect(doc.title).to.contain('1')
 			   done()
 		   });
 	   })
