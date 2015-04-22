@@ -1,8 +1,8 @@
 angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngSanitize',  'ui.select', 'hc.marked', 'ui.bootstrap', 
- 'services.i18nNotifications', 'services.httpRequestTracker', 'directives.crud', 'security',
- 'resources','states','controllers'
-])
-.config(['$stateProvider','$urlRouterProvider',
+ 'services.i18nNotifications', 'services.httpRequestTracker','services.stateBuilderProvider',
+ 'directives.crud', 'security',
+ 'resources','controllers'])
+.config(['$stateProvider','$urlRouterProvider', 
 function ($stateProvider,$urlRouterProvider) {
   $urlRouterProvider
        .otherwise('/');
@@ -15,16 +15,18 @@ function ($stateProvider,$urlRouterProvider) {
     .state('demo',  {
 	  url: '/demo',	
       templateUrl: 'views/demo.tpl.html'
-    })   
+    })
+   			
 }])
 .run(
-  [          '$rootScope', '$state', '$stateParams','security', 
-    function ($rootScope,   $state,   $stateParams,security) {
+  [          '$rootScope', '$state', '$stateParams','security',
+    function ($rootScope,   $state,   $stateParams,security,stateBuilder) {
       $rootScope.$state = $state
       $rootScope.$stateParams = $stateParams
       $rootScope.currentUser=security.requestCurrentUser()
       $rootScope.isAuthenticated = security.isAuthenticated
       $rootScope.isAdmin = security.isAdmin
+	  
     }
   ]
 )
@@ -113,15 +115,20 @@ angular.module('app').constant('I18N.MESSAGES', {
   'login.error.serverError': "服务端错误： {{exception}}."
 });
 
-angular.module('states', ['states.messages'])
 angular.module('controllers',['controllers.messages'])
 angular.module('resources', ['resources.messages','resources.users'])
+
+angular.module('app')
+.config(['stateBuilderProvider', 
+function (stateBuilderProvider) {
+   stateBuilderProvider.statesFor('Message')   			
+}])
+
 
 
 angular.module('controllers.messages', ['ui.router'
 , 'services.i18nNotifications'
-, 'resources.messages'
-, 'security.authorization'])  
+, 'resources.messages'])  
 .controller('MessagesMainCtrl',   [
                '$scope', '$state', '$stateParams', 'i18nNotifications','$http','Message',
 	function ( $scope,   $state,   $stateParams,    i18nNotifications,  $http,  Message) {
@@ -152,8 +159,8 @@ angular.module('controllers.messages', ['ui.router'
 			$scope.data = $scope._data.slice(begin, end)
 			$scope.totalItems = $scope._data.length
 			$scope.currentPage = 1
-			console.log('totalItems',$scope.totalItems)
-			console.log('currentPage',$scope.currentPage)
+			//console.log('totalItems',$scope.totalItems)
+			//console.log('currentPage',$scope.currentPage)
 				
 		  })
 	    }
@@ -219,18 +226,18 @@ angular.module('controllers.messages', ['ui.router'
 		$scope.$watch("currentPage + numPerPage + totalItems", function() {
 			var begin = (($scope.currentPage - 1) * $scope.numPerPage)
 				, end = begin + $scope.numPerPage
-				if(end>$scope._data.length) 
+			
+			if(end>$scope._data.length) 
 				   end=$scope._data.length
 			//$scope.data = $scope._data.slice(begin, end)
 			//$scope.totalItems = $scope._data.length
 						
-				$scope.data=[]
-				for(var i=begin;i<end;i++)
-				   	$scope.data.push($scope._data[i])
-			//$scope.currentPage = 1
-			console.log('begin',begin)
-			console.log('end',end)
-            console.log($scope.data.length)
+			$scope.data=[]
+			for(var i=begin;i<end;i++)
+			   	$scope.data.push($scope._data[i])
+			//console.log('begin',begin)
+			//console.log('end',end)
+            //console.log($scope.data.length)
 			//$scope.$apply()
 		})
   
@@ -277,82 +284,7 @@ angular.module('controllers.messages', ['ui.router'
                 '$scope', '$stateParams', '$state',
 	function (  $scope,   $stateParams,   $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
-	/*	$scope.openDate = function($event) {
-			$event.preventDefault()
-			$event.stopPropagation()
-			$scope.dateSelectOpened = true
-			//console.log('openDate',$scope.dateSelectOpened)
-		}*/
 	}
-])
-
-angular.module('states.messages', ['ui.router'
-, 'resources.messages',
-, 'controllers.messages'])  
-.config([
-              '$stateProvider', '$urlRouterProvider',
-    function ($stateProvider,   $urlRouterProvider) {
-		var Res = "Message"
-		, Ress   = Res+'s'
-		,resName=(Ress).toLowerCase()
-		this.$inject = [Res]
-		var resoFn={}
-		resoFn[resName]=	[Res,
-			function( Res){
-				return Res.all()
-		}]
-		$stateProvider
-			.state(resName, {
-				abstract: true,
-				url: "/"+resName,
-				templateUrl: 'views/'+resName+'/index.tpl.html',
-				//resolve: resoFn,
-				controller: Ress+'MainCtrl'
-			})
-
-            // Using a '.' within a state name declares a child within a parent.
-			// So you have a new state 'list' within the parent 'messages' state.
-			.state(resName+'.list', {
-				url: '',//default
-				templateUrl: 'views/'+resName+'/list.tpl.html',
-				controller:  'MessagesListCtrl'
-			})
-			.state(resName+'.create', {
-					url: '/crete',
-					templateUrl: 'views/'+resName+'/edit.tpl.html',
-					controller:  Ress+'CreateCtrl'
-			})
-			.state(resName+'.list.detail', {
-				url: '/:itemId',
-				templateUrl: 'views/'+resName+'/detail.tpl.html',
-				controller:  Ress+'DetailCtrl'
-	/*			views:{
-					'detail@':	{
-						templateUrl: 'views/'+resName+'/detail.tpl.html',
-						controller:  Ress+'DetailCtrl'
-					}	
-				}*/
-			})
-			.state(resName+'.edit', {
-				url: '/:itemId/edit',
-				templateUrl: 'views/'+resName+'/edit.tpl.html',
-				controller:  Ress+'EditCtrl'
-				
-			})
-
-		/*	
-		var temp={};
-		temp['"@'+resName+'"']= { 
-			templateUrl: 'views/'+resName+'/edit.tpl.html',
-			controller: Ress+'EditCtrl'
-		}
-		var editViews={url: '/:itemId/edit',views:{}}
-		angular.extend(editViews.views,temp)
-	
-		$stateProvider	
-			.state(resName+'.edit', editViews)
-*/
-    }
 ])
 
 angular.module('resources.productbacklogs', ['mongoResourceHttp']);
