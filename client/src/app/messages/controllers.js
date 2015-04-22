@@ -50,7 +50,7 @@ angular.module('controllers.messages', ['ui.router'
 			//console.log(idx)
 			if(idx > -1){
 				$scope._data.push(item)
-				$scope.data.push(item)
+				
 			}
 			$state.go('messages.list', $stateParams) 
 		}
@@ -60,7 +60,6 @@ angular.module('controllers.messages', ['ui.router'
 		$scope.onRemove = function(item) {
 			i18nNotifications.pushForNextRoute('crud.remove.success', 'success', {id : item.title})
 			$scope.removeFromArray($scope._data,item)
-			$scope.removeFromArray($scope.data,item)
 			$scope.removeFromArray($scope.visited,item)
 			$state.go('messages.list', $stateParams) 
 		}
