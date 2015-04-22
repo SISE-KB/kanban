@@ -2,37 +2,22 @@ angular.module('controllers.messages', ['ui.router'
 , 'services.i18nNotifications'
 , 'resources.messages'])  
 .controller('MessagesMainCtrl',   [
-               '$scope', '$state', '$stateParams', 'i18nNotifications','$http','Message',
-	function ( $scope,   $state,   $stateParams,    i18nNotifications,  $http,  Message) {
+               '$scope', '$state', '$stateParams', 'i18nNotifications','Message',
+	function ( $scope,   $state,   $stateParams,    i18nNotifications,  Message) {
       
 		$scope._data = []//load from server
-		$scope.data = []// display items
+
 		$scope.query = ''
 		$scope.availableTags=["娱乐","科技"]
 		$scope.visited=[]
-		$scope.numPerPage=10
-		$scope.totalItems=10
-		$scope.currentPage = 1
+
 		
 		$scope.search=function() {
 			var q={'title':$scope.query}
-			//console.log(q)
-			$http.get('/api/messages', {params: {q:q}}).success(function(msgs){
-				ds=[]
-				for(var i=0;i<msgs.length;i++)
-					ds.push(new Message(msgs[i]))
-				$scope._data=ds
+			Message.query(q).then(function(msgs){
+				console.log(msgs)
+				$scope._data=msgs
 				$scope.visited=[]
-				$scope.totalItems = $scope._data.length
-				console.log($scope.totalItems)
-				$scope.data = $scope._data.slice(0, $scope.numPerPage)
-				var begin = (($scope.currentPage - 1) * $scope.numPerPage)
-				, end = begin + $scope.numPerPage
-			$scope.data = $scope._data.slice(begin, end)
-			$scope.totalItems = $scope._data.length
-			$scope.currentPage = 1
-			//console.log('totalItems',$scope.totalItems)
-			//console.log('currentPage',$scope.currentPage)
 				
 		  })
 	    }
@@ -86,31 +71,27 @@ angular.module('controllers.messages', ['ui.router'
                 '$scope', '$state', '$stateParams', 'i18nNotifications', 
 	function (  $scope,   $state,   $stateParams,    i18nNotifications) {
 		
+		$scope.data = []// display items
+		$scope.numPerPage=10
+		$scope.currentPage = 1
+		$scope.totalItems=0
 		
-
 		$scope.setPage = function (pageNo) {
 			$scope.currentPage = pageNo
 		}
        
 		$scope.maxSize = 5
-		
 
-		$scope.$watch("currentPage + numPerPage + totalItems", function() {
+
+		$scope.$watch("currentPage + numPerPage + _data", function() {
+			$scope.totalItems = $scope._data.length
 			var begin = (($scope.currentPage - 1) * $scope.numPerPage)
 				, end = begin + $scope.numPerPage
-			
+
 			if(end>$scope._data.length) 
 				   end=$scope._data.length
-			//$scope.data = $scope._data.slice(begin, end)
-			//$scope.totalItems = $scope._data.length
-						
-			$scope.data=[]
-			for(var i=begin;i<end;i++)
-			   	$scope.data.push($scope._data[i])
-			//console.log('begin',begin)
-			//console.log('end',end)
-            //console.log($scope.data.length)
-			//$scope.$apply()
+
+			$scope.data = $scope._data.slice(begin, end)
 		})
   
 		$scope.remove = function(item, $index, $event) {

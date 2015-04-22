@@ -15,8 +15,11 @@ var dbRouter = express.Router()
 function string2Object(str)
 {
    var obj = JSON.parse(str)
-   for(var p in obj)
+   
+   for(var p in obj){
      obj[p]=new RegExp(obj[p])
+   }
+  // console.log(obj) 
    return obj	 
 }
 dbRouter
@@ -26,18 +29,22 @@ dbRouter
 	  var cname=req.params.collection
 	  
 	  var m=require('../models/'+cname)
-	  ,q=string2Object(req.query.q)
-		console.log(q) 
+	  ,search=req.query.q
+	  console.log(search) 	  
+	  if(!!search)
+		  search=string2Object(search)
+	  else search={}
+	  
   
       if(!!id)  m.findById(id,function(err,data){
 		  if(err) return next(err);
 		  console.log(data)
 		  res.json(data)
 	  })
-	  else m.find(q,function(err,data){//req.query.q
+	  else m.find(search,function(err,data){//req.query.q
 		  if(err) return next(err);
-		  //console.log(cname,' query: ',re)
-		  console.log(data)
+		  console.log(search)
+		  console.log(data.length)
 	      res.json(data)
 	   })  
   })
