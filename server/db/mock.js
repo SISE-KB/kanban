@@ -21,7 +21,7 @@ var makeFn=function(ds){
 }	
 var makeData=function(done) {
   var ds=[
-             {model:"User",	 data:{  name: 'alex',mobileNo:'139222',skills:['S1','S2'],password: '1234',
+             {model:"User",	 data:{  name: '管理员',mobileNo:'114',skills:['S1','S2'],password: '114',
 	             catalog :['老师','管理员'],isActive: true,isAdmin: true}},
              {model:"User",	 data:{  name: 'demo',mobileNo:'139666',skills:['S1','S3'],password: '1234',
 	            catalog :['学生'],isActive: true,code:'2014001',sex:'M',isAdmin:false}}

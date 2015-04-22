@@ -1,8 +1,8 @@
 angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngSanitize',  'ui.select', 'hc.marked', 'ui.bootstrap', 
- 'services.i18nNotifications', 'services.httpRequestTracker', 'directives.crud', 'security',
- 'resources','states','controllers'
-])
-.config(['$stateProvider','$urlRouterProvider',
+ 'services.i18nNotifications', 'services.httpRequestTracker','services.stateBuilderProvider',
+ 'directives.crud', 'security',
+ 'resources','controllers'])
+.config(['$stateProvider','$urlRouterProvider', 
 function ($stateProvider,$urlRouterProvider) {
   $urlRouterProvider
        .otherwise('/');
@@ -15,16 +15,18 @@ function ($stateProvider,$urlRouterProvider) {
     .state('demo',  {
 	  url: '/demo',	
       templateUrl: 'views/demo.tpl.html'
-    })   
+    })
+   			
 }])
 .run(
-  [          '$rootScope', '$state', '$stateParams','security', 
-    function ($rootScope,   $state,   $stateParams,security) {
+  [          '$rootScope', '$state', '$stateParams','security',
+    function ($rootScope,   $state,   $stateParams,security,stateBuilder) {
       $rootScope.$state = $state
       $rootScope.$stateParams = $stateParams
       $rootScope.currentUser=security.requestCurrentUser()
       $rootScope.isAuthenticated = security.isAuthenticated
       $rootScope.isAdmin = security.isAdmin
+	  
     }
   ]
 )

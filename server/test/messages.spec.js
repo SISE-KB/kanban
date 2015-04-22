@@ -22,7 +22,7 @@ describe('Message Test', function () {
 	   })
 	   it('find One Message', function (done) {
 		   Message.findOne({}, function (err, doc) {
-			   expect(doc.title).to.contain('1')
+			   expect(doc.title).to.contain('title')
 			   done()
 		   });
 	   })

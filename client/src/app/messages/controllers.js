@@ -1,7 +1,6 @@
 angular.module('controllers.messages', ['ui.router'
 , 'services.i18nNotifications'
-, 'resources.messages'
-, 'security.authorization'])  
+, 'resources.messages'])  
 .controller('MessagesMainCtrl',   [
                '$scope', '$state', '$stateParams', 'i18nNotifications','$http','Message',
 	function ( $scope,   $state,   $stateParams,    i18nNotifications,  $http,  Message) {
@@ -32,8 +31,8 @@ angular.module('controllers.messages', ['ui.router'
 			$scope.data = $scope._data.slice(begin, end)
 			$scope.totalItems = $scope._data.length
 			$scope.currentPage = 1
-			console.log('totalItems',$scope.totalItems)
-			console.log('currentPage',$scope.currentPage)
+			//console.log('totalItems',$scope.totalItems)
+			//console.log('currentPage',$scope.currentPage)
 				
 		  })
 	    }
@@ -99,18 +98,18 @@ angular.module('controllers.messages', ['ui.router'
 		$scope.$watch("currentPage + numPerPage + totalItems", function() {
 			var begin = (($scope.currentPage - 1) * $scope.numPerPage)
 				, end = begin + $scope.numPerPage
-				if(end>$scope._data.length) 
+			
+			if(end>$scope._data.length) 
 				   end=$scope._data.length
 			//$scope.data = $scope._data.slice(begin, end)
 			//$scope.totalItems = $scope._data.length
 						
-				$scope.data=[]
-				for(var i=begin;i<end;i++)
-				   	$scope.data.push($scope._data[i])
-			//$scope.currentPage = 1
-			console.log('begin',begin)
-			console.log('end',end)
-            console.log($scope.data.length)
+			$scope.data=[]
+			for(var i=begin;i<end;i++)
+			   	$scope.data.push($scope._data[i])
+			//console.log('begin',begin)
+			//console.log('end',end)
+            //console.log($scope.data.length)
 			//$scope.$apply()
 		})
   
@@ -157,11 +156,5 @@ angular.module('controllers.messages', ['ui.router'
                 '$scope', '$stateParams', '$state',
 	function (  $scope,   $stateParams,   $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
-	/*	$scope.openDate = function($event) {
-			$event.preventDefault()
-			$event.stopPropagation()
-			$scope.dateSelectOpened = true
-			//console.log('openDate',$scope.dateSelectOpened)
-		}*/
 	}
 ])
