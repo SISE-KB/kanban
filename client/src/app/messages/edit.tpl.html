@@ -7,7 +7,6 @@
                     <label>标题</label>
                     <input type="text" name="title" ng-model="item.title" required ng-minlength="4" ng-maxlength="10" class="form-control"  autofocus>
                     <br>
-                    <!--<span ng-show="showError('title', 'required')" class="help-inline"></span>-->
 					 <ng-messages for="form.title.$error" multiple>
 					   <ng-message when="required">必须输入标题！</ng-message>
 					   <ng-message when="minlength">不能少于4个字符</ng-message>
@@ -17,12 +16,16 @@
                 </div>
             	<div class="form-group">
 				　<label>标签</label>	
+				    <div class="col-md-12">
+				       <dropdown-multiselect ng-model="item.tags" options="availableTags"></dropdown-multiselect>
+			        </div>
+				<!--
 				  <ui-select multiple ng-model="item.tags" theme="bootstrap" close-on-select="false" style="width: 300px;" title="请选择">
    　　　　　　　　　 <ui-select-match placeholder="请选择 ...">{{$item}}</ui-select-match>
     　　　　　　　　　<ui-select-choices repeat="tag in availableTags | filter:$select.search">
                     {{tag}}
                      </ui-select-choices>
-                  </ui-select>
+                  </ui-select>-->
                 </div>
                 <div class="form-group">
                   <label>关闭日期</label>

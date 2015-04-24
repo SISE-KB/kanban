@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+  <meta charset="utf-8">
+  <!--<base href="/static/">-->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.css"/>
+  <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css"/>
+  <link rel="stylesheet" type="text/css" href="css/styles.css">
+ <!-- <script  src="jquery.min.js"></script>-->
+  <script  src="angular.js"></script>
+
+<script>
+
+		// **************************************************
+		// *** My AngularJS Directive(s)  ********
+		// **************************************************
+		var varMyDirectivesApplication =
+			angular.module('myDirectives', []);
+
+		varMyDirectivesApplication.directive('dropdownMultiselect', function () {
+			return {
+				restrict: 'E',
+				scope: {
+				    id: '@',
+					name: '@',
+					ngModel: '=',
+					options: '=',
+				},
+				template:
+						"<div class='btn-group' data-ng-class='{open: open}'>" +
+							"<button class='btn btn-small'>Select...</button>" +
+							"<button class='btn btn-small dropdown-toggle' data-ng-click='openDropdown()'><span class='caret'></span></button>" +
+							"<ul class='dropdown-menu' aria-labelledby='dropdownMenu'>" +
+								"<li><a data-ng-click='selectAll()'><span class='glyphicon glyphicon-ok green' aria-hidden='true'></span> Check All</a></li>" +
+								"<li><a data-ng-click='deselectAll();'><span class='glyphicon glyphicon-remove red' aria-hidden='true'></span> Uncheck All</a></li>" +
+								"<li class='divider'></li>" +
+								"<li data-ng-repeat='option in options'><a data-ng-click='toggleSelectItem(option)'><span data-ng-class='getClassName(option)' aria-hidden='true'></span>"+
+                                "{{!id?option:option[''+name]}}</a></li>" +
+							"</ul>" +
+						"</div>",
+
+				controller: function ($scope) {
+
+					$scope.openDropdown = function () {
+
+						$scope.open = !$scope.open;
+
+					};
+
+					$scope.selectAll = function () {
+
+						$scope.ngModel = [];
+
+						angular.forEach($scope.options, function (item, index) {
+						if(!$scope.id)
+						   $scope.ngModel.push(item);
+						else   
+						   $scope.ngModel.push(item[$scope.id]);
+
+						});
+
+					};
+
+					$scope.deselectAll = function () {
+
+						$scope.ngModel = [];
+
+					};
+
+					$scope.toggleSelectItem = function (option) {
+
+						var intIndex = -1;
+
+						angular.forEach($scope.ngModel, function (item, index) {
+
+							if (item == option|| item ==option[$scope.id]) {
+
+								intIndex = index;
+
+							}
+
+						});
+
+						if (intIndex >= 0) {
+
+							$scope.ngModel.splice(intIndex, 1);
+
+						}
+						else {
+						   if(!$scope.id)
+						      $scope.ngModel.push(option);
+						   else
+							$scope.ngModel.push(option[$scope.id]);
+
+						}
+
+					};
+
+					$scope.getClassName = function (option) {
+
+						var varClassName = 'glyphicon glyphicon-remove red';
+
+						angular.forEach($scope.ngModel, function (item, index) {
+
+							if (item == option||item == option[$scope.id]) {
+
+								varClassName = 'glyphicon glyphicon-ok green';
+
+							}
+
+						});
+
+						return (varClassName);
+
+					};
+
+				}
+			}
+
+		});
+		// **************************************************
+		// *** /My AngularJS Directive(s) Application *******
+		// **************************************************
+
+		// **************************************************
+		// *** Your AngularJS Application *******************
+		// **************************************************
+		var varMyApplication =
+			angular.module('myApplication', ['myDirectives']);
+
+		varMyApplication.controller('myController', function ($scope) {
+
+			$scope.users = [
+				{ "_id": 1, "nick": "Ali" },
+				{ "_id": 2, "nick": "Sara" },
+				{ "_id": 3, "nick": "Babak" },
+				{ "_id": 4, "nick": "Sanaz" },
+				{ "_id": 5, "nick": "Dariush" },
+			];
+
+			$scope.tags = [ "C++","Java" ,"C#"	];
+			
+			$scope.selectedUserIds = [3, 5];
+			$scope.selectedTags = ['C#'];
+
+		});
+		// **************************************************
+		// *** /Your AngularJS Application ******************
+		// **************************************************
+
+	</script>
+
+	<style>
+		ul.dropdown-menu li {
+			cursor: pointer;
+		}
+
+		ul.dropdown-menu li span.red {
+			color: red;
+		}
+
+		ul.dropdown-menu li span.green {
+			color: green;
+		}
+	</style>
+</head>
+<body>
+	<div class="container" ng-app="myApplication" ng-controller="myController">
+		<br />
+		<br />
+
+		<div class="row">
+			<div class="col-xs-6">
+				<dropdown-multiselect ng-model="selectedUserIds" options="users" id="_id" name="nick"></dropdown-multiselect>
+			</div>
+			<div class="col-xs-6">
+				<ul>
+					<li data-ng-repeat="id in selectedUserIds">
+						{{ id }}
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-6">
+				<dropdown-multiselect ng-model="selectedTags" options="tags" ></dropdown-multiselect>
+			</div>
+			<br>
+			<div class="col-xs-6">
+				<ul>
+					<li data-ng-repeat="tag in selectedTags">
+						{{ tag }}
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

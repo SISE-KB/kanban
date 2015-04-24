@@ -6,6 +6,7 @@
     <thead>
     <tr>
         <th>标题</th>
+        <th>分类</th>
         <th>发布日期</th>
         <th>失效日期</th>
          <th ng-if="isAdmin()">操作</th>
@@ -14,6 +15,7 @@
     <tbody>
     <tr ng-repeat="item in data" ng-click="view(item)">
         <td>{{item.title}}</td>
+        <td>{{item.tags}}</td>
         <td>{{item.recDate | date:'yyyy/MM/dd'}}</td>
         <td>{{item.closeDate | date:'yyyy/MM/dd'}}</td>
         <td ng-if="isAdmin()"><button class="btn btn-danger remove" ng-click="remove(item, $index, $event)">删除</button></td>

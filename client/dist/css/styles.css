@@ -24,3 +24,14 @@
           transform: scaleX(1);
   opacity: 1;
 }
+ul.dropdown-menu li {
+	cursor: pointer;
+}
+
+ul.dropdown-menu li span.red {
+	color: red;
+}
+
+ul.dropdown-menu li span.green {
+	color: green;
+}

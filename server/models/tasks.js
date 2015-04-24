@@ -7,7 +7,7 @@ var mongoose = require('mongoose'),
 
 var TaskSchema = new Schema({
  /* title: String,
-  project: ObjectId,
+
   planEffort : Number,
   start : Date ,
   deadline : Date,
@@ -17,14 +17,18 @@ var TaskSchema = new Schema({
   examiner : [{type: ObjectId, ref: 'User'} ],
   offset : Number,
   finishDate  : Date*/
-  name: String,
-  productBacklogItemId: ObjectId,
-  desc: String,
-  estimation : Number,
-  remaining  : Number,
-  state: String,
-  assignedUserId: ObjectId,
-  sprintId: ObjectId
+	 name: String
+	,projectId: ObjectId
+	,backlogId: ObjectId
+	,sprintId: ObjectId
+	,estimation : Number
+	,remaining  : Number
+	,deadline: Date
+	,state  :  {type: String,default: 'TODO'}
+	,assignedUserId: ObjectId
+	,spec: String
+	,offset:Number
+	,finishDate:Date
 });
 
 exports=module.exports = mongoose.model('Task', TaskSchema);

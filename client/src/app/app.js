@@ -1,7 +1,9 @@
-angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngSanitize',  'ui.select', 'hc.marked', 'ui.bootstrap', 
- 'services.i18nNotifications', 'services.httpRequestTracker','services.stateBuilderProvider',
- 'directives.crud', 'security',
- 'resources','controllers'])
+angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router'
+//,'ngSanitize',  'ui.select'
+,'hc.marked', 'ui.bootstrap'
+,'services.i18nNotifications', 'services.httpRequestTracker','services.stateBuilderProvider',
+,'directives.crud', 'security'
+,'resources','controllers'])
 .config(['$stateProvider','$urlRouterProvider', 
 function ($stateProvider,$urlRouterProvider) {
   $urlRouterProvider
