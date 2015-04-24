@@ -12,12 +12,12 @@ var MySchema = new Schema({
 })
 
 MySchema.pre('save', function (next) {
-	var now = new Date()
+	var now = new Date(new Date())
 	if(!this.recDate){ 
-      recDate= now
+      this.recDate= now
     }
    	if(!this.closeDate){ 
-      closeDate : now.setDate(now.getDate()+14)
+      this.closeDate= now.setDate(now.getDate()+14)
     }
     next()
  })

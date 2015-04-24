@@ -6,11 +6,14 @@ var mongoose = require('mongoose'),
 
 
 var SprintSchema = new Schema({
-  name: String,
-  capacity : Number,
-  start : Date ,
-  end : Date,
-  projectId: ObjectId
+	 projectId: ObjectId
+	,name: String
+	,capacity : Number
+	,effort : Number
+	,start : Date
+	,end : Date
+	,finishDate : Date
+	,note : String
  
 });
 

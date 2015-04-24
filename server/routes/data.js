@@ -54,6 +54,7 @@ dbRouter
 	  var m=require('../models/'+cname)
       if(!!id)   m.findByIdAndUpdate(id, req.body, function (err, post) {
 		if (err) return next(err);
+		console.log(req.body)
 		res.json(post);
 	  })
 		else {
