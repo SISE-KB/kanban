@@ -1,5 +1,6 @@
 angular.module('controllers.messages', ['ui.router'
 , 'services.i18nNotifications'
+, 'directives.dropdownMultiselect'
 , 'resources.messages'])  
 .controller('MessagesMainCtrl',   [
                '$scope', '$state', '$stateParams', 'i18nNotifications','Message',
@@ -15,7 +16,7 @@ angular.module('controllers.messages', ['ui.router'
 		$scope.search=function() {
 			var q={'title':$scope.query}
 			Message.query(q).then(function(msgs){
-				console.log(msgs)
+				//console.log(msgs)
 				$scope._data=msgs
 				$scope.visited=[]
 				
@@ -58,10 +59,17 @@ angular.module('controllers.messages', ['ui.router'
 			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
 		}
 		$scope.onRemove = function(item) {
-			i18nNotifications.pushForNextRoute('crud.remove.success', 'success', {id : item.title})
+			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item.title})
 			$scope.removeFromArray($scope._data,item)
 			$scope.removeFromArray($scope.visited,item)
 			$state.go('messages.list', $stateParams) 
+		}
+		$scope.checkDate= function(item){
+			var now = new Date()
+			if(!item.recDate)
+				item.recDate=now
+			if(!item.closeDate)
+				item.closeDate= now.setDate(now.getDate()+14)
 		}
 
 	}
@@ -116,9 +124,10 @@ angular.module('controllers.messages', ['ui.router'
                 '$scope', 'Message',
 	function (  $scope,   Message) {
 		$scope.item = new Message()
-		var now=new Date()
+		/*var now=new Date()
 		$scope.item.recDate=now
-		$scope.item.closeDate= now.setDate(now.getDate()+14)
+		$scope.item.closeDate= now.setDate(now.getDate()+14)*/
+		$scope.checkDate($scope.item)
 	}
 ])
 .controller('MessagesDetailCtrl',   [
@@ -136,5 +145,7 @@ angular.module('controllers.messages', ['ui.router'
                 '$scope', '$stateParams', '$state',
 	function (  $scope,   $stateParams,   $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.item.tags=$scope.item.tags||[]
+		$scope.checkDate($scope.item)
 	}
 ])

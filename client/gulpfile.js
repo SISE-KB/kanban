@@ -26,14 +26,15 @@ gulp.task('copy-static', function () {
     gulp.src('src/*.*').pipe(gulp.dest('dist')),
     merge(
       gulp.src('assets/**/*.*'),
-      gulp.src(['libs/angular.js', 'libs/angular-ui-router.js','libs/angular-messages.js',
-       'libs/angular-sanitize.js','libs/angular-aria.js','libs/angular-animate.js'
+      gulp.src(['libs/angular.js', 'libs/angular-ui-router.js','libs/angular-messages.js'
+       ,'libs/angular-aria.js','libs/angular-animate.js' 
+       //,'libs/angular-sanitize.js'
        ,'libs/angular-locale_zh-cn.js'])
 	  .pipe(concat('angular.js'))
 	  .pipe(uglify()),
 	   gulp.src('libs/jquery.min.js'),
       gulp.src('libs/ui-bootstrap-tpls.min.js'),
-      gulp.src('libs/ui-select.js'),
+  //    gulp.src('libs/ui-select.js'),
       gulp.src('libs/marked.js'),
       gulp.src('libs/angular-marked.js')
      
