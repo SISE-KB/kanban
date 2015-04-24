@@ -1,0 +1,20 @@
+查看远程库信息，使用git remote -v；
+git branch
+
+git checkout -b dev origin/dev 本地和远程分支的名称最好一致；
+
+本地新建的分支如果不推送到远程，对其他人就是不可见的；
+从本地推送分支，使用git push origin dev，如果推送失败，先用git pull抓取远程的新提交；
+从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。
+
+命令git tag <name>用于新建一个标签，默认为HEAD，也可以指定一个commit id；
+git tag -a <tagname> -m "blablabla..."可以指定标签信息；
+git tag -d <tagname> //delete the local tag
+git push origin :refs/tags/<tagname>  //delete the remote tag
+推送所有标签
+git push origin --tags
+
+git check out master
+git pull
+git merge dev
+
