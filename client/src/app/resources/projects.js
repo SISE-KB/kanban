@@ -4,7 +4,6 @@ angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', f
   var Project = $mongoResourceHttp('projects');
 
   Project.forUser = function(userId, successcb, errorcb) {
-    //TODO: get projects for this user only (!)
     return Project.query({}, successcb, errorcb);
   };
 

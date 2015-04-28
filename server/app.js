@@ -29,7 +29,8 @@ app.use(session({
  }))
 
 security.initialize(app)
-app.use("/api", require('./routes/data').addRoutes(app));
+app.use("/api", require('./routes/api').addRoutes(app));
+app.use("/db", require('./routes/data').addRoutes(app));
 require('./routes/security').addRoutes(app, security);
 require('./routes/static').addRoutes(app, config);
 

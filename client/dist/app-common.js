@@ -523,7 +523,7 @@ angular.module('services.notifications', []).factory('notifications', ['$rootSco
 				controller:  'MessagesListCtrl'
 			})
 			.state(resName+'.create', {
-					url: '/crete',
+					url: '/create',
 					templateUrl: 'views/'+resName+'/edit.tpl.html',
 					controller:  Ress+'CreateCtrl'
 			})
@@ -565,6 +565,7 @@ angular.module('services.notifications', []).factory('notifications', ['$rootSco
     angular.module('services.stateBuilderProvider', ['ui.router'])
 		.provider('stateBuilder', stateBuilderProvider)
 })()
+
 angular.module('directives.crud', ['directives.crud.buttons', 'directives.crud.edit']);
 
 angular.module('directives.crud.buttons', [])

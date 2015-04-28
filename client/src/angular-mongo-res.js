@@ -3,7 +3,7 @@ angular.module('mongoResourceHttp', [])
 
     function MongoResourceFactory(collectionName) {
       var config = {
-            BASE_URL: 'http://localhost:3000/api/'
+            BASE_URL: 'http://localhost:3000/db/'
         };
         var dbUrl = config.BASE_URL;
         var collectionUrl = dbUrl + collectionName;
@@ -64,7 +64,7 @@ angular.module('mongoResourceHttp', [])
                 return response.data;
             });
         };
-
+/*
         Resource.distinct = function (field, queryJson) {
             return $http.post(dbUrl + '/runCommand', angular.extend({}, queryJson || {}, {
                 distinct: collectionName,
@@ -73,7 +73,7 @@ angular.module('mongoResourceHttp', [])
             }).then(function (response) {
                 return response.data.values;
             });
-        };
+        };*/
 
         Resource.getById = function (id) {
             return $http.get(collectionUrl + '/' + id, {params: defaultParams}).then(resourceRespTransform);

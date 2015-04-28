@@ -31,7 +31,7 @@
 				controller:  'MessagesListCtrl'
 			})
 			.state(resName+'.create', {
-					url: '/crete',
+					url: '/create',
 					templateUrl: 'views/'+resName+'/edit.tpl.html',
 					controller:  Ress+'CreateCtrl'
 			})

@@ -33,18 +33,18 @@ var StageSchema = new Schema({
 */
 
 var ProjectSchema = new Schema({
-  name : String,
-  catalog : [String],
-  tags : [String],
-  productOwner: ObjectId,
-  scrumMaster: ObjectId,
-  teamMembers: [ObjectId],
-  isSample : {type: Boolean,default: false},
-  planDate : Date,
-  iterationDuration :  {type: Number,default: 2},
-  state  :  {type: Number,default: 1},
-  finishDate : Date,
-  desc : String
+	 name : String
+	,catalog : [String]
+	,tags : [String]
+	,productOwner: ObjectId
+	,scrumMaster: ObjectId
+	,teamMembers: [ObjectId]
+	,isSample : {type: Boolean,default: false}
+	,planDate : Date
+	,iterationDuration :  {type: Number,default: 4}
+	,state  :  {type: String,default: 'TODO'}
+	,finishDate : Date
+	,desc : String
 
 });
 

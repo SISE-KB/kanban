@@ -3,7 +3,8 @@ angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router'
 ,'hc.marked', 'ui.bootstrap'
 ,'services.i18nNotifications', 'services.httpRequestTracker','services.stateBuilderProvider',
 ,'directives.crud', 'security'
-,'resources','controllers'])
+,'resources','controllers'
+])
 .config(['$stateProvider','$urlRouterProvider', 
 function ($stateProvider,$urlRouterProvider) {
   $urlRouterProvider
@@ -53,9 +54,9 @@ function ($stateProvider,$urlRouterProvider) {
   }
   $scope.home = function () {
     if (security.isAuthenticated()) {
-      $scope.$state.go('home');
+      $scope.$state.go('projects.list');
     } else {
-      $scope.$state.go('dashboard');
+      $scope.$state.go('home');
     }
   }
  }])
