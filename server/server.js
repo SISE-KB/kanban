@@ -26,6 +26,6 @@ mongoose.connect(config.mongo.MongoDB, function(err) {
 server.listen(port, function() {
   console.log('Express server listening on port ' + port)
     var open = require('open');
-    open('http://localhost:' + config.server.listenPort + '/');
+    open(config.server.url+':' + config.server.listenPort + '/');
 })
 

@@ -129,11 +129,14 @@ angular.module('resources', [
 ])
 
 angular.module('app')
+.value('SERVER_CFG',{URL:'http://172.16.28.188:3000'})
 .config(['stateBuilderProvider', 
 function (stateBuilderProvider) {
    stateBuilderProvider.statesFor('Message') 
    stateBuilderProvider.statesFor('Project')   			
 }])
+
+
 
 
 

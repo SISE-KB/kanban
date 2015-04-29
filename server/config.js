@@ -11,6 +11,7 @@ module.exports = {
     usersCollection: 'users'                            // The name of the collection contains user information
   },
   server: {
+    url: 'http://172.16.28.188', 
     listenPort: 3000,                                   // The port on which the server is to listen (means that the app is at http://localhost:3000 for instance)
     securePort: 8433,                                   // The HTTPS port on which the server is to listen (means that the app is at https://localhost:8433 for instance)
     distFolder: path.join(__dirname, '../client/dist'),  // path.resolve(__dirname,"../../client/dist")

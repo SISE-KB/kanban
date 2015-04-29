@@ -1,11 +1,11 @@
 angular.module('mongoResourceHttp', [])
-    .factory('$mongoResourceHttp', ['$http', '$q', function ($http, $q) {
+.factory('$mongoResourceHttp', [
+  	      '$http', '$q','SERVER_CFG', 
+function ($http, $q,SERVER_CFG) {
 
     function MongoResourceFactory(collectionName) {
-      var config = {
-            BASE_URL: 'http://localhost:3000/db/'
-        };
-        var dbUrl = config.BASE_URL;
+        var dbUrl = SERVER_CFG.URL+'/db/';
+		console.log(dbUrl);
         var collectionUrl = dbUrl + collectionName;
         var defaultParams = {};//apiKey: config.API_KEY
 

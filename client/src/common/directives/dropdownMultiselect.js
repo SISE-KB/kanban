@@ -6,7 +6,7 @@ angular.module('directives.dropdownMultiselect', [])
 				    id: '@',
 					name: '@',
 					ngModel: '=',
-					options: '=',
+					options: '='
 				},
 				template:
 						"<div class='btn-group' data-ng-class='{open: open}'>" +
@@ -19,14 +19,25 @@ angular.module('directives.dropdownMultiselect', [])
 								"<li data-ng-repeat='option in options'><a data-ng-click='toggleSelectItem(option)'><span data-ng-class='getClassName(option)' aria-hidden='true'></span>"+
                                 "{{!id?option:option[''+name]}}</a></li>" +
 							"</ul>" +
-							"<span data-ng-repeat='item in ngModel'>{{!id?item:item[''+name]}}{{' '}}</span>"+
+							"<span data-ng-repeat='key in ngModel'>{{nameById(key)}}{{' '}}</span>"+
 						"</div>",
 
 				controller: function ($scope) {
-					
+					$scope.nameById = function (key) {
+					    if(!$scope.id) return key;
+						for(var i=0;i<$scope.options.length;i++){
+							var item=$scope.options[i];
+						     if(item[''+$scope.id]==key){
+						       //console.log("OK",item[''+$scope.name]);
+						      return item[''+$scope.name]
+						   }
+						}
+						//console.log("FAIL");
+						return '?';						
+					};
 					$scope.openDropdown = function ($event) {
 						$scope.open = !$scope.open;
-						$event.stopPropagation()
+						$event.stopPropagation();
 					};
 
 					$scope.selectAll = function () {

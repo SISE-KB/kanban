@@ -4,11 +4,11 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="form-group">
-                    <label>标题</label>
-                    <input type="text" name="name" ng-model="item.name" required ng-minlength="4" ng-maxlength="10" class="form-control"  autofocus>
+                    <label>项目名称</label>
+                    <input type="text" name="name" ng-model="item.name" required ng-minlength="10" ng-maxlength="10" class="form-control"  autofocus>
                     <br>
 					 <ng-messages for="form.name.$error" multiple>
-					   <ng-message when="required">必须输入！</ng-message>
+					   <ng-message when="required">必须输入标题！</ng-message>
 					   <ng-message when="minlength">不能少于4个字符</ng-message>
 					   <ng-message when="maxlength">不能多于10个字符</ng-message>
 					</ng-messages>
