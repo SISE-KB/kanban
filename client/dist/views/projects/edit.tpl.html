@@ -8,7 +8,7 @@
                     <input type="text" name="name" ng-model="item.name" required ng-minlength="4" ng-maxlength="10" class="form-control"  autofocus>
                     <br>
 					 <ng-messages for="form.name.$error" multiple>
-					   <ng-message when="required">必须输入标题！</ng-message>
+					   <ng-message when="required">必须输入！</ng-message>
 					   <ng-message when="minlength">不能少于4个字符</ng-message>
 					   <ng-message when="maxlength">不能多于10个字符</ng-message>
 					</ng-messages>
@@ -18,6 +18,15 @@
 				　<label>标签</label>	
 				    <div class="col-md-12">
 				       <dropdown-multiselect ng-model="item.tags" options="availableTags"></dropdown-multiselect>
+			        </div>
+                </div>
+                <div class="form-group">
+				　<label>开发成员</label>	
+				   <!--  <input type="text" name="userNameFilter" ng-model="userNameFilter" >
+				   users | filter:userNameFilter
+				   -->
+				    <div class="col-md-12">
+				       <dropdown-multiselect ng-model="item.teamMembers" options="users" id="_id" name="name"></dropdown-multiselect>
 			        </div>
                 </div>
              </div>

@@ -11,7 +11,7 @@ angular.module('directives.dropdownMultiselect', [])
 				template:
 						"<div class='btn-group' data-ng-class='{open: open}'>" +
 							"<button class='btn btn-small'>请选择...</button>" +
-							"<button class='btn btn-small dropdown-toggle' data-ng-click='openDropdown()'><span class='caret'></span></button>" +
+							"<button class='btn btn-small dropdown-toggle' data-ng-click='openDropdown($event)'><span class='caret'></span></button>" +
 							"<ul class='dropdown-menu' aria-labelledby='dropdownMenu'>" +
 								"<li><a data-ng-click='selectAll()'><span class='glyphicon glyphicon-ok green' aria-hidden='true'></span>全部选中</a></li>" +
 								"<li><a data-ng-click='deselectAll();'><span class='glyphicon glyphicon-remove red' aria-hidden='true'></span>全部取消</a></li>" +
@@ -24,8 +24,9 @@ angular.module('directives.dropdownMultiselect', [])
 
 				controller: function ($scope) {
 					
-					$scope.openDropdown = function () {
+					$scope.openDropdown = function ($event) {
 						$scope.open = !$scope.open;
+						$event.stopPropagation()
 					};
 
 					$scope.selectAll = function () {
@@ -42,14 +43,11 @@ angular.module('directives.dropdownMultiselect', [])
 					$scope.deselectAll = function () {
 						$scope.ngModel = [];
 					};
-					/*
-					$scope.selectItems = function (option) {
-						
-						var intIndex = -1;
-					}*/
+				
 
 					$scope.toggleSelectItem = function (option) {
 						var intIndex = -1;
+						$scope.ngModel=$scope.ngModel||[];
 						angular.forEach($scope.ngModel, function (item, index) {
 							if (item == option|| item ==option[$scope.id]) {
 								intIndex = index;

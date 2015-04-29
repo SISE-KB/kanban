@@ -1,23 +1,29 @@
 angular.module('controllers.projects', ['ui.router'
 , 'services.i18nNotifications'
 , 'directives.dropdownMultiselect'
-, 'resources.projects'])  
+, 'resources.projects'
+, 'resources.users'
+])  
 .controller('ProjectsMainCtrl',   [
-               '$scope', '$state', '$stateParams', 'i18nNotifications','Project',
-	function ( $scope,   $state,   $stateParams,    i18nNotifications,  Project) {
+               '$scope', '$state', '$stateParams', 'i18nNotifications','Project','User',
+	function ( $scope,   $state,   $stateParams,    i18nNotifications, Project,User) {
       
 		$scope._data = []//load from server
+		$scope.users=[]
 
 		$scope.query = ''
 		$scope.availableTags=["3D","2D"]
 		$scope.visited=[]
 
-		
+		User.all().then(function(ds){
+				//console.log(ds)
+			$scope.users =ds
+	   })
 		$scope.search=function() {
 			var q={'name':$scope.query}
-			Message.query(q).then(function(msgs){
-				//console.log(msgs)
-				$scope._data=msgs
+			Project.query(q).then(function(ds){
+				//console.log(ds)
+				$scope._data=ds
 				$scope.visited=[]
 				
 		  })
@@ -136,7 +142,8 @@ angular.module('controllers.projects', ['ui.router'
                 '$scope', '$stateParams', '$state',
 	function (  $scope,   $stateParams,   $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.item.tags=$scope.item.tags||[]
+		//$scope.userNameFilter
+		
 
 	}
 ])
