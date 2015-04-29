@@ -5,15 +5,23 @@
 <table class="table table-bordered table-condensed table-striped table-hover">
     <thead>
     <tr>
-        <th>Name</th>
-        <th>分类</th>
-         <th ng-if="isAdmin()">操作</th>
+        <th>项目名称</th>
+        <th>类型</th>
+		<th>关键字</th>
+		<th>样本</th>
+        <th>状态</th>
+        <th>预计完成日期</th>
+        <th ng-if="isAdmin()">操作</th>
     </tr>
     </thead>
     <tbody>
     <tr ng-repeat="item in data" ng-click="view(item)">
         <td ng-click="manageBacklogs(project)">{{item.name}}</td>
-        <td>{{item.tags}}</td>
+        <td>{{item.catalog}}</td>
+		<td>{{item.tags}}</td>
+		<td>{{item.isSample}}</td>
+		<td>{{item.state}}</td>
+		<td>{{item.planDate | date:'yyyy/MM/dd'}}</td>
         <td ng-if="isAdmin()"><button class="btn btn-danger remove" ng-click="remove(item, $index, $event)">删除</button>
           <a ng-click="manageBacklogs(project)">Product backlog</a>
           <a ng-click="manageSprints(project)">Sprints</a>

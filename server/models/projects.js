@@ -34,8 +34,8 @@ var StageSchema = new Schema({
 
 var ProjectSchema = new Schema({
 	 name : String
-	,catalog : [String]
-	,tags : [String]
+	,catalog : String
+	,tags : String
 	,productOwner: ObjectId
 	,scrumMaster: ObjectId
 	,teamMembers: [ObjectId]
