@@ -1,1 +1,0 @@
-../../../../bower_components/angular-elastic/elastic.js

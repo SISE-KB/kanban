@@ -520,7 +520,7 @@ angular.module('services.notifications', []).factory('notifications', ['$rootSco
 			.state(resName+'.list', {
 				url: '',//default
 				templateUrl: 'views/'+resName+'/list.tpl.html',
-				controller:  'MessagesListCtrl'
+				controller:  Ress+'ListCtrl'
 			})
 			.state(resName+'.create', {
 					url: '/create',
