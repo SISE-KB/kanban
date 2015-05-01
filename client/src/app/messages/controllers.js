@@ -1,4 +1,4 @@
-angular.module('controllers.messages', ['ui.router'
+angular.module('controllers.messages', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
 , 'directives.dropdownMultiselect'
 , 'resources.messages'])  
@@ -65,7 +65,7 @@ angular.module('controllers.messages', ['ui.router'
 			$state.go('messages.list', $stateParams) 
 		}
 		$scope.checkDate= function(item){
-			var now = new Date()
+			var now = new Date(Date.now())
 			if(!item.recDate)
 				item.recDate=now
 			if(!item.closeDate)
@@ -112,7 +112,7 @@ angular.module('controllers.messages', ['ui.router'
 			})
 		}
 		$scope.view = function (item) {
-			$state.go('messages.list.detail', {itemId: item.$id()})
+			$state.go('messages.detail', {itemId: item.$id()})
 		}
 	
 		$scope.create = function () {

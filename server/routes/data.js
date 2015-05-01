@@ -64,10 +64,14 @@ dbRouter
   .post(function (req, res) {
 	  var cname=req.params.collection
 	  var m=require('../models/'+cname)
-	  debug(req.body)
+	 // debug(req.body)
       m.create(req.body, function (err, post) {
-		if (err) return next(err);
 		
+		if (err) {
+			debug(err) 
+			return next(err);
+		}
+		debug(post)  
 		res.json(post)
 	  })
   })

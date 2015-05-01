@@ -1,0 +1,39 @@
+<div class="well"  ng-if="isAdmin()"  >
+    <button class="btn btn-default" ng-click="create()">新　建</button>
+</div>
+<h2>全部用户</h2>
+<table class="table table-bordered table-condensed table-striped table-hover">
+    <thead>
+    <tr>
+        <th>昵称</th>
+        <th>手机号</th>
+        <th>类型</th>
+        <th>是否管理员</th>
+        <th>是否有效</th>
+         <th ng-if="isAdmin()">操　作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="item in data" ng-click="view(item)">
+        <td>{{item.name}}</td>
+        <td>{{item.mobileNo}}</td>
+        <td>{{item.type}}</td>
+        <td>{{item.isAdmin?'是':'否'}}</td>
+        <td>{{item.isActive?'是':'否'}}</td>
+        <td ng-if="isAdmin()">
+			<button class="btn btn-danger remove" ng-click="remove(item, $index, $event)">删除</button>
+			<button class="btn btn-default" ng-click="edit(item)">修改</button>			
+		</td>
+    </tr>
+    </tbody>
+</table>
+<pagination total-items="totalItems" ng-model="currentPage" num-per-page="numPerPage"
+max-size="maxSize" class="pagination-sm" boundary-links="true" rotate="false" 
+previous-text="上页" next-text="下页" first-text="首页" last-text="尾页"
+num-pages="numPages">
+</pagination>
+<!--
+<div class="row well">
+  <div ui-view class="col-md-12 slide"></div>
+</div>
+-->

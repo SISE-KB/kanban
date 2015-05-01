@@ -1,5 +1,6 @@
 angular.module('controllers',[
  'controllers.messages'
+,'controllers.users'
 ,'controllers.projects'
 ])
 angular.module('resources', [
@@ -9,9 +10,10 @@ angular.module('resources', [
 ])
 
 angular.module('app')
-.value('SERVER_CFG',{URL:'http://172.16.28.188:3000'})
+.value('SERVER_CFG',{URL:'http://127.0.0.1:3000'})
 .config(['stateBuilderProvider', 
 function (stateBuilderProvider) {
+   stateBuilderProvider.statesFor('User') 
    stateBuilderProvider.statesFor('Message') 
    stateBuilderProvider.statesFor('Project')   			
 }])

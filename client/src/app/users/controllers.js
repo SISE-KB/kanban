@@ -1,39 +1,35 @@
-angular.module('controllers.projects', ['ui.router','ngMessages'
+angular.module('controllers.users', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
-, 'directives.dropdownSelect'
 , 'directives.dropdownMultiselect'
-, 'resources.projects'
-, 'resources.users'
-])  
-.controller('ProjectsMainCtrl',   [
-               '$scope', '$state', '$stateParams', 'i18nNotifications','Project','User',
-	function ( $scope,   $state,   $stateParams,    i18nNotifications, Project,User) {
-      
-		$scope._data = []//load from server
-		$scope.users=[]
-
-		$scope.query = ''
-	//	$scope.availableStates=['计划','开发中','完成','失败']
+, 'resources.users'])  
+.controller('UsersMainCtrl',   [
+               '$scope', '$state', '$stateParams', 'i18nNotifications', 'User',
+	function ( $scope,   $state,   $stateParams,    i18nNotifications,User) {
+        $scope._ress="users"
+		$scope._data =[]//load from server
+		$scope.data = []// display items
+		
+		$scope.availableSkills=['协调','后端编码','前端编码','2D做图','3D建模','文档写作','测试']
 		$scope.visited=[]
-
-		User.all().then(function(ds){
-				//console.log(ds)
-			$scope.users =ds
-	   })
+		
+		$scope.query = ''
 		$scope.search=function() {
 			var q={'name':$scope.query}
-			Project.query(q).then(function(ds){
-				//console.log(ds)
-				$scope._data=ds
+			console.log(q)
+			User.query(q).then(function(msgs){
+				$scope._data=msgs
 				$scope.visited=[]
-				$state.go('projects.list') 
+				$state.go($scope._ress+'.list', $stateParams) 
+				
 		  })
 	    }
+
 		$scope.findById = function (id) {
+			//console.log($scope._data.length)
 			for (var i = 0; i < $scope._data.length; i++) {
 				var rt=$scope._data[i]
 				//
-				if ($scope._data[i].$id() == id)
+				if (rt.$id() == id)
 					return rt
 			}
 			return null
@@ -60,7 +56,7 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 				$scope._data.push(item)
 				
 			}
-			$state.go('projects.list', $stateParams) 
+			$state.go($scope._ress+'.list', $stateParams) 
 		}
 		$scope.onError = function() {
 			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
@@ -69,26 +65,30 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item.name})
 			$scope.removeFromArray($scope._data,item)
 			$scope.removeFromArray($scope.visited,item)
-			$state.go('projects.list', $stateParams) 
+			$state.go($scope._ress+'.list', $stateParams) 
 		}
-	
+		$scope.checkDate= function(item){
+			var now = new Date(Date.now())
+			if(!item.regDate)
+				item.regDate=now
+		}
 
 	}
 ])
-.controller('ProjectsListCtrl',   [
-                '$scope', '$state', '$stateParams', 'i18nNotifications', 
-	function (  $scope,   $state,   $stateParams,    i18nNotifications) {
+.controller('UsersListCtrl',   [
+                '$scope', '$state', '$stateParams', 'i18nNotifications', 'User',
+	function (  $scope,   $state,   $stateParams,    i18nNotifications,  User) {
 		
-		$scope.data = []// display items
+
 		$scope.numPerPage=10
 		$scope.currentPage = 1
 		$scope.totalItems=0
+		$scope.maxSize = 5
 		
+				
 		$scope.setPage = function (pageNo) {
 			$scope.currentPage = pageNo
 		}
-       
-		$scope.maxSize = 5
 
 
 		$scope.$watch("currentPage + numPerPage + _data", function() {
@@ -113,38 +113,44 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 			})
 		}
 		$scope.view = function (item) {
-			$state.go('projects.detail', {itemId: item.$id()})
+			$state.go($scope._ress+'.detail', {itemId: item.$id()})
 		}
-	
-		$scope.create = function () {
-			$state.go('projects.create')
+		$scope.edit = function (item) {
+			$state.go($scope._ress+'.edit', {itemId: item.$id()})
 		}
-	}
-])
-.controller('ProjectsCreateCtrl',   [
-                '$scope', 'Project',
-	function (  $scope,   Project) {
-		$scope.item = new Project()
 
+		$scope.create = function () {
+			$state.go($scope._ress+'.create')
+		}
 	}
 ])
-.controller('ProjectsDetailCtrl',   [
+.controller('UsersCreateCtrl',   [
+                '$scope', 'User',
+	function (  $scope,   User) {
+		$scope.item = new User()
+		$scope.checkDate($scope.item)
+	}
+])
+.controller('UsersDetailCtrl',   [
                 '$scope','$stateParams', '$state',
-	function (  $scope,$stateParams,   $state) {
+	function ( $scope,  $stateParams,    $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
+		
 		$scope.addToVisited($scope.item)
 		
 		$scope.edit = function () {
-			$state.go('projects.edit', {itemId: $scope.item.$id()})
+			$state.go($scope._ress+'.edit', {itemId: $scope.item.$id()})
+		}
+		$scope.list = function () {
+			$state.go($scope._ress+'.list')
 		}
 	}
 ])
-.controller('ProjectsEditCtrl',   [
+.controller('UsersEditCtrl',   [
                 '$scope', '$stateParams', '$state',
 	function (  $scope,   $stateParams,   $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
-		//$scope.userNameFilter
-		
-
+		$scope.item.skills=$scope.item.skills||[]
+		$scope.checkDate($scope.item)
 	}
 ])

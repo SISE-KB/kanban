@@ -6,8 +6,8 @@
 		<button class="btn btn-default" ng-click="search()">查询</button>
         <!--<li ui-sref-active="active"><a ui-sref="messages.list">所有消息</a></li>-->
         <li class="nav-header">最近访问</li>
-        <li ng-repeat="msg in visited" ui-sref-active="active">
-        <a ui-sref="messages.list.detail({itemId:msg.$id()})">{{msg.title}}</a>
+        <li ng-repeat="item in visited" ui-sref-active="active">
+        <a ui-sref="projects.detail({itemId:item.$id()})">{{item.name}}</a>
         </li>
       </ul>
     </div>

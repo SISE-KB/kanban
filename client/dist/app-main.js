@@ -120,6 +120,7 @@ angular.module('app').constant('I18N.MESSAGES', {
 
 angular.module('controllers',[
  'controllers.messages'
+,'controllers.users'
 ,'controllers.projects'
 ])
 angular.module('resources', [
@@ -129,9 +130,10 @@ angular.module('resources', [
 ])
 
 angular.module('app')
-.value('SERVER_CFG',{URL:'http://172.16.28.188:3000'})
+.value('SERVER_CFG',{URL:'http://127.0.0.1:3000'})
 .config(['stateBuilderProvider', 
 function (stateBuilderProvider) {
+   stateBuilderProvider.statesFor('User') 
    stateBuilderProvider.statesFor('Message') 
    stateBuilderProvider.statesFor('Project')   			
 }])
@@ -140,7 +142,7 @@ function (stateBuilderProvider) {
 
 
 
-angular.module('controllers.messages', ['ui.router'
+angular.module('controllers.messages', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
 , 'directives.dropdownMultiselect'
 , 'resources.messages'])  
@@ -207,7 +209,7 @@ angular.module('controllers.messages', ['ui.router'
 			$state.go('messages.list', $stateParams) 
 		}
 		$scope.checkDate= function(item){
-			var now = new Date()
+			var now = new Date(Date.now())
 			if(!item.recDate)
 				item.recDate=now
 			if(!item.closeDate)
@@ -254,7 +256,7 @@ angular.module('controllers.messages', ['ui.router'
 			})
 		}
 		$scope.view = function (item) {
-			$state.go('messages.list.detail', {itemId: item.$id()})
+			$state.go('messages.detail', {itemId: item.$id()})
 		}
 	
 		$scope.create = function () {
@@ -322,8 +324,9 @@ function ($http,$scope,Project) {
   ]
 }])
 
-angular.module('controllers.projects', ['ui.router'
+angular.module('controllers.projects', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
+, 'directives.dropdownSelect'
 , 'directives.dropdownMultiselect'
 , 'resources.projects'
 , 'resources.users'
@@ -336,7 +339,7 @@ angular.module('controllers.projects', ['ui.router'
 		$scope.users=[]
 
 		$scope.query = ''
-		$scope.availableTags=["3D","2D"]
+	//	$scope.availableStates=['计划','开发中','完成','失败']
 		$scope.visited=[]
 
 		User.all().then(function(ds){
@@ -349,7 +352,7 @@ angular.module('controllers.projects', ['ui.router'
 				//console.log(ds)
 				$scope._data=ds
 				$scope.visited=[]
-				
+				$state.go('projects.list') 
 		  })
 	    }
 		$scope.findById = function (id) {
@@ -436,7 +439,7 @@ angular.module('controllers.projects', ['ui.router'
 			})
 		}
 		$scope.view = function (item) {
-			$state.go('projects.list.detail', {itemId: item.$id()})
+			$state.go('projects.detail', {itemId: item.$id()})
 		}
 	
 		$scope.create = function () {
@@ -587,3 +590,214 @@ angular.module('resources.users').factory('User', ['$mongoResourceHttp', functio
 
   return userResource;
 }]);
+
+angular.module('controllers.users', ['ui.router','ngMessages'
+, 'services.i18nNotifications'
+, 'directives.dropdownMultiselect'
+, 'resources.users'])  
+.controller('UsersMainCtrl',   [
+               '$scope', '$state', '$stateParams', 'i18nNotifications', 'User',
+	function ( $scope,   $state,   $stateParams,    i18nNotifications,User) {
+        $scope._ress="users"
+		$scope._data =[]//load from server
+		$scope.data = []// display items
+		
+		$scope.availableSkills=['协调','后端编码','前端编码','2D做图','3D建模','文档写作','测试']
+		$scope.visited=[]
+		
+		$scope.query = ''
+		$scope.search=function() {
+			var q={'name':$scope.query}
+			console.log(q)
+			User.query(q).then(function(msgs){
+				$scope._data=msgs
+				$scope.visited=[]
+				$state.go($scope._ress+'.list', $stateParams) 
+				
+		  })
+	    }
+
+		$scope.findById = function (id) {
+			//console.log($scope._data.length)
+			for (var i = 0; i < $scope._data.length; i++) {
+				var rt=$scope._data[i]
+				//
+				if (rt.$id() == id)
+					return rt
+			}
+			return null
+		}
+		$scope.removeFromArray = function (data,item) {
+			var index = data.indexOf(item);
+			if (index > -1)
+				data.splice(index, 1);
+		}
+		$scope.addToVisited = function (item) {
+			var index = $scope.visited.indexOf(item);
+			if (index > -1) 
+			$scope.visited.splice(index, 1);
+			$scope.visited.push(item)
+			while ($scope.visited.length>10)
+				$scope.visited.shift()
+		}
+		$scope.onSave = function (item) {
+			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item.name})
+			//console.log($state.current.name)
+			var idx=$state.current.name.indexOf('create')
+			//console.log(idx)
+			if(idx > -1){
+				$scope._data.push(item)
+				
+			}
+			$state.go($scope._ress+'.list', $stateParams) 
+		}
+		$scope.onError = function() {
+			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
+		}
+		$scope.onRemove = function(item) {
+			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item.name})
+			$scope.removeFromArray($scope._data,item)
+			$scope.removeFromArray($scope.visited,item)
+			$state.go($scope._ress+'.list', $stateParams) 
+		}
+		$scope.checkDate= function(item){
+			var now = new Date(Date.now())
+			if(!item.regDate)
+				item.regDate=now
+		}
+
+	}
+])
+.controller('UsersListCtrl',   [
+                '$scope', '$state', '$stateParams', 'i18nNotifications', 'User',
+	function (  $scope,   $state,   $stateParams,    i18nNotifications,  User) {
+		
+
+		$scope.numPerPage=10
+		$scope.currentPage = 1
+		$scope.totalItems=0
+		$scope.maxSize = 5
+		
+				
+		$scope.setPage = function (pageNo) {
+			$scope.currentPage = pageNo
+		}
+
+
+		$scope.$watch("currentPage + numPerPage + _data", function() {
+			$scope.totalItems = $scope._data.length
+			var begin = (($scope.currentPage - 1) * $scope.numPerPage)
+				, end = begin + $scope.numPerPage
+
+			if(end>$scope._data.length) 
+				   end=$scope._data.length
+
+			$scope.data = $scope._data.slice(begin, end)
+		})
+  
+		$scope.remove = function(item, $index, $event) {
+			// Don't let the click bubble up to the ng-click on the enclosing div, which will try to trigger
+			// an edit of this item.
+			$event.stopPropagation()
+			item.$remove().then(function() {
+				$scope.onRemove(item)
+			}, function() {
+				i18nNotifications.pushForCurrentRoute('crud.user.remove.error', 'danger', {id : item.name})
+			})
+		}
+		$scope.view = function (item) {
+			$state.go($scope._ress+'.detail', {itemId: item.$id()})
+		}
+		$scope.edit = function (item) {
+			$state.go($scope._ress+'.edit', {itemId: item.$id()})
+		}
+
+		$scope.create = function () {
+			$state.go($scope._ress+'.create')
+		}
+	}
+])
+.controller('UsersCreateCtrl',   [
+                '$scope', 'User',
+	function (  $scope,   User) {
+		$scope.item = new User()
+		$scope.checkDate($scope.item)
+	}
+])
+.controller('UsersDetailCtrl',   [
+                '$scope','$stateParams', '$state',
+	function ( $scope,  $stateParams,    $state) {
+		$scope.item = $scope.findById( $stateParams.itemId)
+		
+		$scope.addToVisited($scope.item)
+		
+		$scope.edit = function () {
+			$state.go($scope._ress+'.edit', {itemId: $scope.item.$id()})
+		}
+		$scope.list = function () {
+			$state.go($scope._ress+'.list')
+		}
+	}
+])
+.controller('UsersEditCtrl',   [
+                '$scope', '$stateParams', '$state',
+	function (  $scope,   $stateParams,   $state) {
+		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.item.skills=$scope.item.skills||[]
+		$scope.checkDate($scope.item)
+	}
+])
+
+angular.module('controllers.users')  
+.directive('validateEquals', function() {
+  return {
+    restrict: 'A',
+    require: 'ngModel',
+    link: function(scope, elm, attrs, ctrl) {
+      function validateEqual(myValue, otherValue) {
+        if (myValue === otherValue) {
+          ctrl.$setValidity('equal', true)
+          return myValue
+        } else {
+          ctrl.$setValidity('equal', false)
+          return undefined
+        }
+      }
+
+      scope.$watch(attrs.validateEquals, function(otherModelValue) {
+        ctrl.$setValidity('equal', ctrl.$viewValue === otherModelValue)
+      })
+
+      ctrl.$parsers.push(function(viewValue) {
+        return validateEqual(viewValue, scope.$eval(attrs.validateEquals))
+      })
+
+      ctrl.$formatters.push(function(modelValue) {
+        return validateEqual(modelValue, scope.$eval(attrs.validateEquals))
+      })
+    }
+  }
+})
+.directive('uniqueMobileNo', [
+            "$http","SERVER_CFG",
+ function ($http,SERVER_CFG) {
+  return {
+    require:'ngModel',
+    restrict:'A',
+    link:function (scope, el, attrs, ctrl) {
+     //using push() here to run it as the last parser, after we are sure that other validators were run
+      ctrl.$parsers.push(function (viewValue) {
+        if (viewValue) {
+		  	var baseURL= SERVER_CFG.URL+'/api/'
+		  	$http.post(baseURL+'users/uniqueMobileNo',{mobileNo:viewValue})
+		  	.then(function(resp){
+				  var uniqueMobileNo=resp.data.uniqueMobileNo
+				 //console.log('users/uniqueMobileNo--',uniqueMobileNo)
+				 ctrl.$setValidity('uniqueMobileNo', uniqueMobileNo )
+          })
+          return viewValue
+        }
+      })
+    }
+  }
+}])

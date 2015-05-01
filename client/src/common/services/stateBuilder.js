@@ -35,7 +35,7 @@
 					templateUrl: 'views/'+resName+'/edit.tpl.html',
 					controller:  Ress+'CreateCtrl'
 			})
-			.state(resName+'.list.detail', {
+			.state(resName+'.detail', {
 				url: '/:itemId',
 				templateUrl: 'views/'+resName+'/detail.tpl.html',
 				controller:  Ress+'DetailCtrl'
@@ -52,7 +52,6 @@
 				controller:  Ress+'EditCtrl'
 			})
 		}//stateFor
-
 
 			/*	
 			var temp={};

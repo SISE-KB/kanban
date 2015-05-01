@@ -7,7 +7,7 @@
         <!--<li ui-sref-active="active"><a ui-sref="messages.list">所有消息</a></li>-->
         <li class="nav-header">最近访问</li>
         <li ng-repeat="msg in visited" ui-sref-active="active">
-        <a ui-sref="messages.list.detail({itemId:msg.$id()})">{{msg.title}}</a>
+        <a ui-sref="messages.detail({itemId:msg.$id()})">{{msg.title}}</a>
         </li>
       </ul>
     </div>
