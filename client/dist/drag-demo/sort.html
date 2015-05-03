@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AngularJS and Sortable demo</title>
+
+
+  <!-- AngularJS -->
+  <script src="../angular.js"></script>
+
+  <!-- Sortable.js -->
+  <script src="Sortable.js"></script>
+
+  <!-- ng-sortable.js -->
+  <script src="ng-sortable.js"></script>
+ <script type="text/javascript">
+   angular.module('myApp', ['ng-sortable'])
+    .controller('demo', ['$scope', function ($scope) {
+        $scope.items = ['item 1', 'item 2'];
+        $scope.foo = ['foo 1', '..'];
+        $scope.bar = ['bar 1', '..'];
+        $scope.barConfig = {
+            group: 'foobar',
+            animation: 150,
+            onSort: function (/** ngSortEvent */evt){
+                // @see https://github.com/RubaXa/Sortable/blob/master/ng-sortable.js#L18-L24
+            }
+        };
+    }]);
+  </script>
+  
+</head>
+<body>
+ <div ng-app="myApp" ng-controller="demo">
+    <ul ng-sortable>
+        <li ng-repeat="item in items">{{item}}</li>
+    </ul>
+
+    <ul ng-sortable="{ group: 'foobar' }">
+        <li ng-repeat="item in foo">{{item}}</li>
+    </ul>
+
+    <ul ng-sortable="barConfig">
+        <li ng-repeat="item in bar">{{item}}</li>
+    </ul>
+</div>
+</body>
+</html>
