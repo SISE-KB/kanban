@@ -15,7 +15,7 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 		$scope.query = ''
 		$scope.search=function() {
 			var q={'name':$scope.query}
-			console.log(q)
+			//console.log(q)
 			User.query(q).then(function(msgs){
 				$scope._data=msgs
 				$scope.visited=[]
@@ -128,6 +128,8 @@ angular.module('controllers.users', ['ui.router','ngMessages'
                 '$scope', 'User',
 	function (  $scope,   User) {
 		$scope.item = new User()
+		$scope.item.isActive=true
+		$scope.item.isAdmin=false
 		$scope.checkDate($scope.item)
 	}
 ])
@@ -150,7 +152,6 @@ angular.module('controllers.users', ['ui.router','ngMessages'
                 '$scope', '$stateParams', '$state',
 	function (  $scope,   $stateParams,   $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.item.skills=$scope.item.skills||[]
 		$scope.checkDate($scope.item)
 	}
 ])

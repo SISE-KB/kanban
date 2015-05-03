@@ -1,4 +1,5 @@
 <div>
-  <h4>{{item.name}}<button class="btn" ng-click="edit()" ng-show="isAdmin()">Edit</button></h4>
+  <h4>{{item.name}}<button class="btn" ng-click="edit()" ng-show="isAdmin()">修　改</button></h4>
+    <li ui-sref-active="active"><a ui-sref="projects.list">项目列表</a></li>
   <div  marked="item.desc"></div>
 </div>

@@ -1,6 +1,6 @@
 angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router'
-//,'ngSanitize',  'ui.select'
-,'hc.marked', 'ui.bootstrap'
+,'ngSanitize',  'ui.select'
+ ,'hc.marked', 'ui.bootstrap'
 ,'services.i18nNotifications', 'services.httpRequestTracker','services.stateBuilderProvider',
 ,'directives.crud', 'security'
 ,'resources','controllers'
@@ -122,11 +122,13 @@ angular.module('controllers',[
  'controllers.messages'
 ,'controllers.users'
 ,'controllers.projects'
+,'controllers.backlogs'
 ])
 angular.module('resources', [
  'resources.messages'
 ,'resources.users'
 ,'resources.projects'
+,'resources.backlogs'
 ])
 
 angular.module('app')
@@ -136,6 +138,9 @@ function (stateBuilderProvider) {
    stateBuilderProvider.statesFor('User') 
    stateBuilderProvider.statesFor('Message') 
    stateBuilderProvider.statesFor('Project')   			
+}])
+.config(['uiSelectConfig', function(uiSelectConfig) {
+  uiSelectConfig.theme = 'bootstrap';
 }])
 
 
@@ -326,8 +331,6 @@ function ($http,$scope,Project) {
 
 angular.module('controllers.projects', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
-, 'directives.dropdownSelect'
-, 'directives.dropdownMultiselect'
 , 'resources.projects'
 , 'resources.users'
 ])  
@@ -445,12 +448,17 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 		$scope.create = function () {
 			$state.go('projects.create')
 		}
+		$scope.backlogs=function (item) {
+			$state.go('backlogs-list', {projectId: item.$id()})
+		}
 	}
 ])
 .controller('ProjectsCreateCtrl',   [
                 '$scope', 'Project',
 	function (  $scope,   Project) {
 		$scope.item = new Project()
+		$scope.item.iterationDuration=4
+		$scope.item.isSample=false
 
 	}
 ])
@@ -475,16 +483,17 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 	}
 ])
 
-angular.module('resources.productbacklogs', ['mongoResourceHttp']);
-angular.module('resources.productbacklogs').factory('ProductBacklog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-  var ProductBacklog = $mongoResourceHttp('productbacklogs');
+angular.module('resources.backlogs', ['mongoResourceHttp'])
 
-  ProductBacklog.forProject = function (projectId) {
-    return ProductBacklog.query({projectId:projectId});
-  };
+.factory('Backlog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+  var res = $mongoResourceHttp('backlogs');
 
-  return ProductBacklog;
-}]);
+  res.forProject = function (projectId) {
+      return res.query({projectId:projectId},{strict:true});
+  }
+
+  return res
+}])
 
 angular.module('resources.messages', ['mongoResourceHttp'])
 
@@ -514,7 +523,7 @@ angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', f
     return !this.isScrumMaster(userId) && !this.isDevTeamMember(userId);
   };
   Project.prototype.isScrumMaster = function (userId) {
-    return this.scrumMaster === userId;
+    return this.processMaster === userId;
   };
   Project.prototype.canActAsScrumMaster = function (userId) {
     return !this.isProductOwner(userId);
@@ -608,7 +617,7 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 		$scope.query = ''
 		$scope.search=function() {
 			var q={'name':$scope.query}
-			console.log(q)
+			//console.log(q)
 			User.query(q).then(function(msgs){
 				$scope._data=msgs
 				$scope.visited=[]
@@ -721,6 +730,8 @@ angular.module('controllers.users', ['ui.router','ngMessages'
                 '$scope', 'User',
 	function (  $scope,   User) {
 		$scope.item = new User()
+		$scope.item.isActive=true
+		$scope.item.isAdmin=false
 		$scope.checkDate($scope.item)
 	}
 ])
@@ -743,7 +754,6 @@ angular.module('controllers.users', ['ui.router','ngMessages'
                 '$scope', '$stateParams', '$state',
 	function (  $scope,   $stateParams,   $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.item.skills=$scope.item.skills||[]
 		$scope.checkDate($scope.item)
 	}
 ])
@@ -801,3 +811,61 @@ angular.module('controllers.users')
     }
   }
 }])
+
+angular.module('controllers.backlogs', ['ui.router','ngMessages'
+, 'services.i18nNotifications'
+, 'resources.projects'
+, 'resources.backlogs'
+, 'resources.users'
+]) 
+ .config(['$stateProvider', 
+ function($stateProvider){
+	var projectId = ['$stateParams', function($stateParams) {
+      return $stateParams.projectId
+    }]
+    
+  	$stateProvider
+		.state('backlogs-list', {
+				url: "backlogs/:projectId",
+				templateUrl: 'views/projects/backlogs/list.tpl.html',
+				resolve: {
+					// projectId: projectId,
+					 backlogs : [     '$stateParams', 'Backlog', 
+					    function($stateParams, Backlog){
+                           return Backlog.forProject($stateParams.projectId)
+                        }]
+		        },
+				controller: 'BacklogsListCtrl'
+		})
+		.state('backlogs-create', {
+				url: 'backlogs/create/:projectId',
+				templateUrl: 'views/projects/backlogs/edit.tpl.html',
+				controller:  'BacklogsCreateCtrl'
+		})
+ }])
+
+ .controller('BacklogsListCtrl', [
+             '$scope',  'backlogs', '$state','$stateParams',
+    function($scope,   backlogs, $state,$stateParams){
+      $scope.data = backlogs;
+      $scope.create = function () {
+		 $state.go('backlogs-create', 
+		  {projectId:$stateParams.projectId}
+		  )
+	  }
+   
+  }])
+  .controller('BacklogsCreateCtrl', [
+             '$scope',  'Backlog',  'i18nNotifications','$state','$stateParams',
+    function($scope,   Backlog,    i18nNotifications,$state,$stateParams){
+      $scope.item = new Backlog()
+      $scope.item.projectId=$stateParams.projectId
+      $scope.onSave = function (item) {
+			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item.name})
+			$state.go('backlogs-list', $stateParams) 
+	  }
+	  $scope.onError = function() {
+			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
+	  }
+   
+  }])

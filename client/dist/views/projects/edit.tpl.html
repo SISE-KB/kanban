@@ -1,68 +1,101 @@
 <div class="well" >
-  <form name="form" novalidate crud-edit="item" >
-    <legend>修改信息</legend>
-    <div class="row">
-      <div class="col-md-6">
-        <div class="form-group">
-          <label>项目名称</label>
-          <input type="text" name="name" ng-model="item.name" required ng-minlength="4" ng-maxlength="10" class="form-control"  autofocus>
-          <ng-messages for="form.name.$error" multiple>
-            <ng-message when="required">必须输入项目名称！</ng-message>
-            <ng-message when="minlength">不能少于4个字符</ng-message>
-            <ng-message when="maxlength">不能多于10个字符</ng-message>
-          </ng-messages>
-        </div>
-        <div class="form-group">
-           <label>类型</label>
-           <input ng-model="item.catalog" class="form-control" >
-        </div>
-        <div class="form-group">
-           <label>关键字</label>
-           <input ng-model="item.tags"  class="form-control" >
-        </div>
-        <div class="form-group">
-            <label>Product Owner</label>
-            <dropdown-select ng-model="item.productOwner" options="users" id="_id" name="name"></dropdown-select>
-        </div>
-        <div class="form-group">
-            <label>团队成员</label>
-            <dropdown-multiselect ng-model="item.teamMembers" options="users" id="_id" name="name"></dropdown-multiselect>
-        </div>
-        <div class="from-group">
-          <label>是否样本？</label>
-          <input type="checkbox" ng-model="item.isSample">
-        </div>
-        <div class="form-group">
-          <label>迭代时间间隔(默认4周)</label>
-          <input type="number" class="form-control" ng-model="item.iterationDuration">
-        </div>
-        <div class="form-group">
-          <label>预计完成日期</label>
-          <div class="well well-sm" ng-model="item.planDate"> 
-             <datepicker min="minDate" show-weeks="showWeeks" close-text="关闭"></datepicker>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="form-group">
- 		   <label>状态</label>
-           <div class="btn-group">
-			  	<label class="btn btn-primary" ng-model="item.state" btn-radio="'计划'">计划</label>
-				<label class="btn btn-primary" ng-model="item.state" btn-radio="'开发中'">开发中</label>
-				<label class="btn btn-primary" ng-model="item.state" btn-radio="'完成'">完成</label>
-				<label class="btn btn-primary" ng-model="item.state" btn-radio="'失败'">失败</label>
-           </div>
-         </div>  
-
-        <div class="form-group">
-          <label>项目简介</label>
-          <textarea rows="30" cols="10" ng-model="item.desc" class="form-control"></textarea>
-        </div>
+	<form name="form" novalidate crud-edit="item" >
+		<legend>项目资料</legend>
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label>项目名称</label>
+						<input type="text" name="name" ng-model="item.name" required ng-minlength="4" ng-maxlength="10" class="form-control"  autofocus>
+						<ng-messages for="form.name.$error" multiple style="color:red;">
+							<ng-message when="required">必须输入标题！</ng-message>
+							<ng-message when="minlength">不能少于4个字符</ng-message>
+							<ng-message when="maxlength">不能多于10个字符</ng-message>
+						</ng-messages>
+						<br>
+					</div>
+					<div class="form-group">
+						<label>技术类型(空格相隔)</label>
+						<input ng-model="item.catalog" class="form-control" >
+				   		<br>
+					</div>
+					<div class="form-group">
+					   <label>关键字(空格相隔)</label>
+					   <input ng-model="item.tags"  class="form-control" >
+					   <br>
+					</div>
+					<div class="form-group">
+						<label>产品代表</label>
+						<ui-select ng-model="item.productOwner" close-on-select="true">
+   　　　　　　　　　  	<ui-select-match placeholder="请选择 ...">{{$select.selected.name}}</ui-select-match>
+    　　　　　　　　　		<ui-select-choices repeat="u._id as u in users | filter:$select.search">
+                        {{u.name}}&lt;{{u.mobileNo}}&gt;
+                            </ui-select-choices>
+                        </ui-select>
+                        <br>
+				    </div>
+				   	<div class="form-group">
+						<label>流程专员</label>
+						<ui-select ng-model="item.procMaster" close-on-select="true">
+   　　　　　　　　　  	<ui-select-match placeholder="请选择 ...">{{$select.selected.name}}</ui-select-match>
+    　　　　　　　　　		<ui-select-choices repeat="u._id as u in users | filter:$select.search">
+                        {{u.name}}&lt;{{u.mobileNo}}&gt;
+                            </ui-select-choices>
+                        </ui-select>
+                        <br>
+				    </div>
+					<div class="form-group">
+						<label>团队成员</label>
+						<ui-select multiple ng-model="item.teamMembers" close-on-select="false" title="请选择">
+   　　　　　　　　　  	<ui-select-match placeholder="请选择 ...">{{$item.name}}</ui-select-match>
+    　　　　　　　　　		<ui-select-choices repeat="u._id as u in users | filter:$select.search">
+		                        <div>{{u.name}}</div>
+								  <small>
+									手机: <span ng-bind-html="''+u.mobileNo | highlight: $select.search"></span>
+							      </small>
+                              </ui-select-choices>
+                        </ui-select>
+                        <br>
+				    </div>
+					<div class="from-group">
+					  <label>是否样本？</label>
+					  <input type="checkbox" ng-model="item.isSample">
+					  <br>
+					</div>
+					<div class="form-group">
+					  <label>迭代时间间隔(默认4周)</label>
+					  <input type="number" class="form-control" ng-model="item.iterationDuration">
+					  <br>
+					</div>
+	
+			</div>
+			  <div class="col-md-6">
+					<div class="form-group">
+			 		   <label>状态</label>
+					   <div class="btn-group">
+						  	<label class="btn btn-primary" ng-model="item.state" btn-radio="'计划'">计划</label>
+							<label class="btn btn-primary" ng-model="item.state" btn-radio="'开发中'">开发中</label>
+							<label class="btn btn-primary" ng-model="item.state" btn-radio="'完成'">完成</label>
+							<label class="btn btn-primary" ng-model="item.state" btn-radio="'失败'">失败</label>
+					   </div>
+					   <br>
+					</div>  
+					<div class="form-group">
+					  <label>预计完成日期</label>
+					  <div class="well well-sm" ng-model="item.planDate"> 
+						 <datepicker min="minDate" show-weeks="showWeeks" close-text="关闭"></datepicker>
+					  </div>
+					</div>
+	
+					<div class="form-group">
+						<label>具体内容</label>
+						<textarea rows="16" cols="10" ng-model="item.desc" class="form-control"></textarea>
+				   </div>
+		     </div>
+	   </div>
+      <div class="row">
+            <hr>
+            <crud-buttons class="col-md-12"></crud-buttons>
        </div>
-    </div>
-    <div class="row">
-      <hr>
-      <crud-buttons class="col-md-12"></crud-buttons>
-    </div>
-  </form>
+    </form>
 </div>
+

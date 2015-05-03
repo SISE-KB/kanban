@@ -26,12 +26,12 @@ function ($http, $q,SERVER_CFG) {
         var Resource = function (data) {
             angular.extend(this, data);
         };
-
+     
         Resource.query = function (queryJson, options) {
 
             var prepareOptions = function (options) {
 
-                var optionsMapping = {sort: 's', limit: 'l', fields: 'f', skip: 'sk'};
+                var optionsMapping = {sort: 's', limit: 'l', fields: 'f', skip: 'sk',strict:'strict'};
                 var optionsTranslated = {};
 
                 if (options && !angular.equals(options, {})) {

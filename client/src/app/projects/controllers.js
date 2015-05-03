@@ -1,7 +1,5 @@
 angular.module('controllers.projects', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
-, 'directives.dropdownSelect'
-, 'directives.dropdownMultiselect'
 , 'resources.projects'
 , 'resources.users'
 ])  
@@ -119,12 +117,17 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 		$scope.create = function () {
 			$state.go('projects.create')
 		}
+		$scope.backlogs=function (item) {
+			$state.go('backlogs-list', {projectId: item.$id()})
+		}
 	}
 ])
 .controller('ProjectsCreateCtrl',   [
                 '$scope', 'Project',
 	function (  $scope,   Project) {
 		$scope.item = new Project()
+		$scope.item.iterationDuration=4
+		$scope.item.isSample=false
 
 	}
 ])

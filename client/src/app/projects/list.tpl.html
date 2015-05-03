@@ -1,7 +1,7 @@
 <div class="well" ng-if="isAdmin()">
     <button class="btn btn-default" ng-click="create()">新　建</button>
 </div>
-<h2>全部</h2>
+<h3>项目列表</h3>
 <table class="table table-bordered table-condensed table-striped table-hover">
     <thead>
     <tr>
@@ -15,17 +15,18 @@
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="item in data" ng-click="view(item)">
-        <td ng-click="manageBacklogs(project)">{{item.name}}</td>
+    <tr ng-repeat="item in data" >
+        <td> <a ng-click="view(item)">{{item.name}}</a></td>
         <td>{{item.catalog}}</td>
 		<td>{{item.tags}}</td>
 		<td>{{item.isSample}}</td>
 		<td>{{item.state}}</td>
 		<td>{{item.planDate | date:'yyyy/MM/dd'}}</td>
-        <td ng-if="isAdmin()"><button class="btn btn-danger remove" ng-click="remove(item, $index, $event)">删除</button>
-          <a ng-click="manageBacklogs(project)">Product backlog</a>
-          <a ng-click="manageSprints(project)">Sprints</a>
-          </td>
+        <td ng-if="isAdmin()">
+		  <button class="btn btn-default " ng-click="backlogs(item)">交付件清单</button>
+		  <button class="btn btn-default " ng-click="sprints(item)">开发计划</button>
+          <button class="btn btn-danger remove" ng-click="remove(item, $index, $event)">删除</button>
+        </td>
     </tr>
     </tbody>
 </table>
@@ -34,7 +35,5 @@ max-size="maxSize" class="pagination-sm" boundary-links="true" rotate="false"
 previous-text="上页" next-text="下页" first-text="首页" last-text="尾页"
 num-pages="numPages">
 </pagination>
-<div class="row well">
-  <div ui-view class="col-md-12 slide"></div>
-</div>
+
 

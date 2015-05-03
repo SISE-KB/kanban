@@ -1,10 +1,11 @@
-angular.module('resources.productbacklogs', ['mongoResourceHttp']);
-angular.module('resources.productbacklogs').factory('ProductBacklog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-  var ProductBacklog = $mongoResourceHttp('productbacklogs');
+angular.module('resources.backlogs', ['mongoResourceHttp'])
 
-  ProductBacklog.forProject = function (projectId) {
-    return ProductBacklog.query({projectId:projectId});
-  };
+.factory('Backlog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+  var res = $mongoResourceHttp('backlogs');
 
-  return ProductBacklog;
-}]);
+  res.forProject = function (projectId) {
+      return res.query({projectId:projectId},{strict:true});
+  }
+
+  return res
+}])

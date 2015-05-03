@@ -2,11 +2,13 @@ angular.module('controllers',[
  'controllers.messages'
 ,'controllers.users'
 ,'controllers.projects'
+,'controllers.backlogs'
 ])
 angular.module('resources', [
  'resources.messages'
 ,'resources.users'
 ,'resources.projects'
+,'resources.backlogs'
 ])
 
 angular.module('app')
@@ -16,6 +18,9 @@ function (stateBuilderProvider) {
    stateBuilderProvider.statesFor('User') 
    stateBuilderProvider.statesFor('Message') 
    stateBuilderProvider.statesFor('Project')   			
+}])
+.config(['uiSelectConfig', function(uiSelectConfig) {
+  uiSelectConfig.theme = 'bootstrap';
 }])
 
 

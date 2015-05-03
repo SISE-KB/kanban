@@ -12,16 +12,17 @@ var express = require('express')
 exports.addRoutes = function(app, config) {
 var dbRouter = express.Router()
 
-function string2Object(str)
+function likeHandle(obj)
 {
-   var obj = JSON.parse(str)
-   
+ 
    for(var p in obj){
      obj[p]=new RegExp(obj[p])
    }
   // console.log(obj) 
    return obj	 
 }
+
+
 dbRouter
   .route('/:collection/:id?')
   .get(function (req, res) {
@@ -29,24 +30,25 @@ dbRouter
 	  var cname=req.params.collection
 	  
 	  var m=require('../models/'+cname)
-	  ,search=req.query.q
-	  console.log(search) 	  
-	  if(!!search)
-		  search=string2Object(search)
-	  else search={}
-	  
-  
+       ,strict=req.query.strict
+       ,search=JSON.parse(req.query.q||'{}')
+      debug(cname)
+	  if(!strict)
+		  search=likeHandle(search)
+	 // search=IdHandle(search)
       if(!!id)  m.findById(id,function(err,data){
 		  if(err) return next(err);
-		  console.log(data)
+		  debug(data)
 		  res.json(data)
 	  })
-	  else m.find(search,function(err,data){//req.query.q
-		  if(err) return next(err);
-		  console.log(search)
-		  console.log(data.length)
-	      res.json(data)
-	   })  
+	  else{
+		  debug('search-->',search)
+		  m.find(search,function(err,data){
+		    if(err) return next(err);
+		    debug(data)
+	        res.json(data)
+	      })
+	  }      
   })
   .put(function (req, res) {
 	  var id=req.params.id
@@ -54,7 +56,6 @@ dbRouter
 	  var m=require('../models/'+cname)
       if(!!id)   m.findByIdAndUpdate(id, req.body, function (err, post) {
 		if (err) return next(err);
-		console.log(req.body)
 		res.json(post);
 	  })
 		else {
@@ -71,7 +72,7 @@ dbRouter
 			debug(err) 
 			return next(err);
 		}
-		debug(post)  
+	//	debug(post)  
 		res.json(post)
 	  })
   })

@@ -14,7 +14,7 @@ angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', f
     return !this.isScrumMaster(userId) && !this.isDevTeamMember(userId);
   };
   Project.prototype.isScrumMaster = function (userId) {
-    return this.scrumMaster === userId;
+    return this.processMaster === userId;
   };
   Project.prototype.canActAsScrumMaster = function (userId) {
     return !this.isProductOwner(userId);

@@ -37,7 +37,7 @@ var ProjectSchema = new Schema({
 	,catalog : String
 	,tags : String
 	,productOwner: ObjectId
-	,scrumMaster: ObjectId
+	,procMaster: ObjectId
 	,teamMembers: [ObjectId]
 	,isSample : {type: Boolean,default: false}
 	,planDate : Date

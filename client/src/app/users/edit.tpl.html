@@ -6,13 +6,13 @@
                 <div class="form-group">
                     <label>手机号</label>
                     <input type="text" name="mobileNo" class="form-control" ng-model="item.mobileNo" required ng-minlength="3" ng-maxlength="12" unique-mobile-no autofocus>
-                    <br>
-					 <ng-messages for="form.mobileNo.$error" multiple>
+          			 <ng-messages for="form.mobileNo.$error" multiple  style="color:red;">
 					   <ng-message when="required">必须输入！</ng-message>
 					   <ng-message when="minlength">不能少于3个字符</ng-message>
 					   <ng-message when="maxlength">不能多于12个字符</ng-message>
 					   <ng-message when="uniqueMobileNo">该号已被占用，请重新输入！</ng-message>
 					</ng-messages>
+					 <br>
                 </div>
                 <div class="form-group">
                     <label>昵称</label>
@@ -23,25 +23,48 @@
                     <label>密码</label>
                      <br>
                      <input type="password"  name="password" ng-model="item.password" class="form-control"　required>
-                   　 <ng-messages for="form.password.$error">
+                   　 <ng-messages for="form.password.$error" style="color:red;">
 					    <ng-message when="required">必须输入！</ng-message>
 					  </ng-messages>  
                 </div>
-                <div class="form-group">
+                <div class="form-group" ng-if="$state.current.name.indexOf('create')>=0">
                     <label>密码确认</label>
                      <input type="password"  name="passwordRepeat" ng-model="password" class="form-control"　required validate-equals="item.password">
-                   <br>　
-                    <ng-messages for="form.passwordRepeat.$error" multiple>
+                      <ng-messages for="form.passwordRepeat.$error" multiple style="color:red;">
 					     <ng-message when="required">必须输入！</ng-message>
 					     <ng-message when="equal">密码不匹配</ng-message>
-					  </ng-messages>                　　　　　
+					  </ng-messages>  
+					  <br>　              　　　　　
                 </div>
-            	<div class="form-group">
-				　<label>技能</label>	
-				   <dropdown-multiselect ng-model="item.skills" options="availableSkills"></dropdown-multiselect>
-				</div>
+              <!--<dropdown-multiselect ng-model="item.skills" options="availableSkills"></dropdown-multiselect>-->
+				<div class="form-group">
+						<label>技能</label>
+						<ui-select multiple ng-model="item.skills" close-on-select="false">
+   　　　　　　　　　  	<ui-select-match placeholder="请选择 ...">{{$item}}</ui-select-match>
+    　　　　　　　　　		<ui-select-choices repeat="s in availableSkills | filter:$select.search">
+                        {{s}}
+                            </ui-select-choices>
+                        </ui-select>
+                        <br>
+				    </div>
+	
            </div>
            <div class="col-md-6">
+			    <div class="form-group">
+                    <label>类型</label>
+                    <input type="text" name="type" ng-model="item.type" class="form-control" >
+                     <br>
+                </div>
+                <div class="form-group">
+                    <label>是管理员？</label>
+                    <input type="checkbox" ng-model="item.isAdmin">
+                     <br>
+                 </div>
+                 <div class="form-group">
+                    <label>是否有效？</label>
+                    <input type="checkbox" ng-model="item.isActive">
+                    <br>
+                 </div>
 				 <div class="form-group">
                     <label>其他说明</label>
                     <textarea rows="16" cols="10" ng-model="item.desc" class="form-control"></textarea>
