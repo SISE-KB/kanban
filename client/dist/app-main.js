@@ -329,6 +329,123 @@ function ($http,$scope,Project) {
   ]
 }])
 
+angular.module('resources.backlogs', ['mongoResourceHttp'])
+
+.factory('Backlog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+  var res = $mongoResourceHttp('backlogs');
+
+  res.forProject = function (projectId) {
+      return res.query({projectId:projectId},{strict:true});
+  }
+
+  return res
+}])
+
+angular.module('resources.messages', ['mongoResourceHttp'])
+
+.factory('Message', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var resource = $mongoResourceHttp('messages');
+  /*resource.prototype.getFullName = function () {
+    return this.lastName + " " + this.firstName + " (" + this.email + ")";
+  };*/
+
+  return resource;
+}]);
+
+angular.module('resources.projects', ['mongoResourceHttp']);
+angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var Project = $mongoResourceHttp('projects');
+
+  Project.forUser = function(userId, successcb, errorcb) {
+    return Project.query({}, successcb, errorcb);
+  };
+
+  Project.prototype.isProductOwner = function (userId) {
+    return this.productOwner === userId;
+  };
+  Project.prototype.canActAsProductOwner = function (userId) {
+    return !this.isScrumMaster(userId) && !this.isDevTeamMember(userId);
+  };
+  Project.prototype.isScrumMaster = function (userId) {
+    return this.processMaster === userId;
+  };
+  Project.prototype.canActAsScrumMaster = function (userId) {
+    return !this.isProductOwner(userId);
+  };
+  Project.prototype.isDevTeamMember = function (userId) {
+    return this.teamMembers.indexOf(userId) >= 0;
+  };
+  Project.prototype.canActAsDevTeamMember = function (userId) {
+    return !this.isProductOwner(userId);
+  };
+
+  Project.prototype.getRoles = function (userId) {
+    var roles = [];
+    if (this.isProductOwner(userId)) {
+      roles.push('PO');
+    } else {
+      if (this.isScrumMaster(userId)){
+        roles.push('SM');
+      }
+      if (this.isDevTeamMember(userId)){
+        roles.push('DEV');
+      }
+    }
+    return roles;
+  };
+
+  return Project;
+}]);
+
+angular.module('resources.sprints', ['mongoResourceHttp']);
+angular.module('resources.sprints').factory('Sprint', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var Sprint = $mongoResourceHttp('sprints');
+  Sprint.forProject = function (projectId) {
+    return Sprint.query({projectId:projectId});
+  };
+  return Sprint;
+}]);
+
+angular.module('resources.tasks', ['mongoResourceHttp']);
+angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var Task = $mongoResourceHttp('tasks');
+
+  Task.statesEnum = ['TODO', 'IN_DEV', 'BLOCKED', 'IN_TEST', 'DONE'];
+
+  Task.forProductBacklogItem = function (productBacklogItem) {
+    return Task.query({productBacklogItem:productBacklogItem});
+  };
+
+  Task.forSprint = function (sprintId) {
+    return Task.query({sprintId:sprintId});
+  };
+
+  Task.forUser = function (userId) {
+    return Task.query({userId:userId});
+  };
+
+  Task.forProject = function (projectId) {
+    return Task.query({projectId:projectId});
+  };
+
+  return Task;
+}]);
+
+angular.module('resources.users', ['mongoResourceHttp']);
+angular.module('resources.users').factory('User', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var userResource = $mongoResourceHttp('users');
+  /*userResource.prototype.getFullName = function () {
+    return this.lastName + " " + this.firstName + " (" + this.email + ")";
+  };*/
+
+  return userResource;
+}]);
+
 angular.module('controllers.projects', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
 , 'resources.projects'
@@ -482,123 +599,6 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 
 	}
 ])
-
-angular.module('resources.backlogs', ['mongoResourceHttp'])
-
-.factory('Backlog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-  var res = $mongoResourceHttp('backlogs');
-
-  res.forProject = function (projectId) {
-      return res.query({projectId:projectId},{strict:true});
-  }
-
-  return res
-}])
-
-angular.module('resources.messages', ['mongoResourceHttp'])
-
-.factory('Message', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var resource = $mongoResourceHttp('messages');
-  /*resource.prototype.getFullName = function () {
-    return this.lastName + " " + this.firstName + " (" + this.email + ")";
-  };*/
-
-  return resource;
-}]);
-
-angular.module('resources.projects', ['mongoResourceHttp']);
-angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var Project = $mongoResourceHttp('projects');
-
-  Project.forUser = function(userId, successcb, errorcb) {
-    return Project.query({}, successcb, errorcb);
-  };
-
-  Project.prototype.isProductOwner = function (userId) {
-    return this.productOwner === userId;
-  };
-  Project.prototype.canActAsProductOwner = function (userId) {
-    return !this.isScrumMaster(userId) && !this.isDevTeamMember(userId);
-  };
-  Project.prototype.isScrumMaster = function (userId) {
-    return this.processMaster === userId;
-  };
-  Project.prototype.canActAsScrumMaster = function (userId) {
-    return !this.isProductOwner(userId);
-  };
-  Project.prototype.isDevTeamMember = function (userId) {
-    return this.teamMembers.indexOf(userId) >= 0;
-  };
-  Project.prototype.canActAsDevTeamMember = function (userId) {
-    return !this.isProductOwner(userId);
-  };
-
-  Project.prototype.getRoles = function (userId) {
-    var roles = [];
-    if (this.isProductOwner(userId)) {
-      roles.push('PO');
-    } else {
-      if (this.isScrumMaster(userId)){
-        roles.push('SM');
-      }
-      if (this.isDevTeamMember(userId)){
-        roles.push('DEV');
-      }
-    }
-    return roles;
-  };
-
-  return Project;
-}]);
-
-angular.module('resources.sprints', ['mongoResourceHttp']);
-angular.module('resources.sprints').factory('Sprint', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var Sprint = $mongoResourceHttp('sprints');
-  Sprint.forProject = function (projectId) {
-    return Sprint.query({projectId:projectId});
-  };
-  return Sprint;
-}]);
-
-angular.module('resources.tasks', ['mongoResourceHttp']);
-angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var Task = $mongoResourceHttp('tasks');
-
-  Task.statesEnum = ['TODO', 'IN_DEV', 'BLOCKED', 'IN_TEST', 'DONE'];
-
-  Task.forProductBacklogItem = function (productBacklogItem) {
-    return Task.query({productBacklogItem:productBacklogItem});
-  };
-
-  Task.forSprint = function (sprintId) {
-    return Task.query({sprintId:sprintId});
-  };
-
-  Task.forUser = function (userId) {
-    return Task.query({userId:userId});
-  };
-
-  Task.forProject = function (projectId) {
-    return Task.query({projectId:projectId});
-  };
-
-  return Task;
-}]);
-
-angular.module('resources.users', ['mongoResourceHttp']);
-angular.module('resources.users').factory('User', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var userResource = $mongoResourceHttp('users');
-  /*userResource.prototype.getFullName = function () {
-    return this.lastName + " " + this.firstName + " (" + this.email + ")";
-  };*/
-
-  return userResource;
-}]);
 
 angular.module('controllers.users', ['ui.router','ngMessages'
 , 'services.i18nNotifications'

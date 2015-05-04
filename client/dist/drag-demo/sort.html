@@ -2,29 +2,43 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>AngularJS and Sortable demo</title>
-
-
-  <!-- AngularJS -->
-  <script src="../angular.js"></script>
-
-  <!-- Sortable.js -->
-  <script src="Sortable.js"></script>
-
-  <!-- ng-sortable.js -->
-  <script src="ng-sortable.js"></script>
+<link href="app2.css" rel="stylesheet" type="text/css"/>
+<script src="../angular.js"></script>
+<script src="Sortable.js"></script>
+<script src="ng-sortable.js"></script>
  <script type="text/javascript">
+/*
+ var byId = function (id) { return document.getElementById(id); }
+
+	Sortable.create(byId('multi'), {
+		animation: 150,
+		draggable: '.tile',
+		handle: '.tile__name'
+	});
+
+	[].forEach.call(byId('multi').getElementsByClassName('tile__list'), function (el){
+		Sortable.create(el, {
+			group: 'photo',
+			animation: 150
+		});
+	});*/
    angular.module('myApp', ['ng-sortable'])
     .controller('demo', ['$scope', function ($scope) {
-        $scope.items = ['item 1', 'item 2'];
-        $scope.foo = ['foo 1', '..'];
-        $scope.bar = ['bar 1', '..'];
-        $scope.barConfig = {
-            group: 'foobar',
-            animation: 150,
-            onSort: function (/** ngSortEvent */evt){
-                // @see https://github.com/RubaXa/Sortable/blob/master/ng-sortable.js#L18-L24
-            }
+        $scope.items1 = ['face-01.jpg', 'face-02.jpg', 'face-03.jpg','face-04.jpg'];
+		$scope.items2 = ['face-05.jpg', 'face-06.jpg', 'face-07.jpg'];
+		$scope.items3 = ['face-08.jpg', 'face-09.jpg'];
+		$scope.config1={
+		   animation: 150,
+		   draggable: '.tile',
+		   handle: '.tile__name'
+	    };
+        $scope.config2 = {
+            group: 'photo',
+            animation: 150
+		
+          
         };
     }]);
   </script>
@@ -33,16 +47,37 @@
 <body>
  <div ng-app="myApp" ng-controller="demo">
     <ul ng-sortable>
-        <li ng-repeat="item in items">{{item}}</li>
+        <li ng-repeat="item in items1">{{item}}</li>
     </ul>
 
-    <ul ng-sortable="{ group: 'foobar' }">
-        <li ng-repeat="item in foo">{{item}}</li>
-    </ul>
+	<div class="container">
+		<div id="multi" style="margin-left: 30px">
+			<div><div data-force="5" class="layer title title_xl">KANBAN Drag demo</div></div>
 
-    <ul ng-sortable="barConfig">
-        <li ng-repeat="item in bar">{{item}}</li>
-    </ul>
+			<div class="layer tile" data-force="30" ng-sortable="config1" >
+				<div class="tile__name">Group A--{{items1.length}}</div>
+				<div class="tile__list" ng-sortable="config2">
+					<img ng-repeat="item in items1"   src="images/{{item}}">
+				</div>
+			</div>
+
+			<div class="layer tile" data-force="25"  ng-sortable="config1" >
+				<div class="tile__name">Group B--{{items2.length}}</div>
+				<div class="tile__list" ng-sortable="config2">
+					<img ng-repeat="item in items2" src="images/{{item}}">
+				</div>
+			</div>
+
+			<div class="layer tile" data-force="20"  ng-sortable="config1" >
+				<div class="tile__name">Group C--{{items3.length}}</div>
+				<div class="tile__list" ng-sortable="config2">
+					<img ng-repeat="item in items3"   src="images/{{item}}">
+				</div>
+			</div>
+
+		</div>
+	</div>
+
 </div>
 </body>
 </html>

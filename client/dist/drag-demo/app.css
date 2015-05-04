@@ -97,7 +97,7 @@ a>.text {
 .map-body {
   height: 435px;
   width: 580px;
-  background: url(../img/map.jpg) no-repeat left top;
+  background: url(images/map.jpg) no-repeat left top;
   margin: 0 auto;
   -webkit-border-radius: 16px;
   -moz-border-radius: 16px;

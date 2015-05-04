@@ -25,7 +25,7 @@
 
 
 	angular.module('ng-sortable', [])
-		.constant('$version', '0.3.5')
+		.constant('version', '0.3.7')
 		.directive('ngSortable', ['$parse', function ($parse) {
 			var removed,
 				nextSibling;
@@ -64,11 +64,12 @@
 			// Export
 			return {
 				restrict: 'AC',
+				scope: { ngSortable: "=?" },
 				link: function (scope, $el, attrs) {
 					var el = $el[0],
-						ngSortable = attrs.ngSortable,
-						options = scope.$eval(ngSortable) || {},
+						options = scope.ngSortable || {},
 						source = getSource(el),
+						watchers = [],
 						sortable
 					;
 
@@ -78,7 +79,7 @@
 
 						/* jshint expr:true */
 						options[name] && options[name]({
-							model: item,
+							model: item || source && source.item(evt.item),
 							models: source && source.items(),
 							oldIndex: evt.oldIndex,
 							newIndex: evt.newIndex
@@ -143,32 +144,40 @@
 						},
 						onUpdate: function (/**Event*/evt) {
 							_sync(evt);
-							_emitEvent(evt, source && source.item(evt.item));
+							_emitEvent(evt);
 						},
 						onRemove: function (/**Event*/evt) {
 							_emitEvent(evt, removed);
 						},
 						onSort: function (/**Event*/evt) {
-							_emitEvent(evt, source && source.item(evt.item));
+							_emitEvent(evt);
 						}
 					}));
 
 					$el.on('$destroy', function () {
+						angular.forEach(watchers, function (/** Function */unwatch) {
+							unwatch();
+						});
 						sortable.destroy();
+						watchers = null;
 						sortable = null;
 						nextSibling = null;
 					});
 
-					if (ngSortable && !/{|}/.test(ngSortable)) { // todo: ugly
-						angular.forEach(['sort', 'disabled', 'draggable', 'handle', 'animation'], function (name) {
-							scope.$watch(ngSortable + '.' + name, function (value) {
-								if (value !== void 0) {
-									options[name] = value;
+					angular.forEach([
+						'sort', 'disabled', 'draggable', 'handle', 'animation',
+						'onStart', 'onEnd', 'onAdd', 'onUpdate', 'onRemove', 'onSort'
+					], function (name) {
+						watchers.push(scope.$watch('ngSortable.' + name, function (value) {
+							if (value !== void 0) {
+								options[name] = value;
+
+								if (!/^on[A-Z]/.test(name)) {
 									sortable.option(name, value);
 								}
-							});
-						});
-					}
+							}
+						}));
+					});
 				}
 			};
 		}]);
