@@ -14,17 +14,6 @@ html, body {
 	font-family: 'Roboto', sans-serif;
 	font-weight: 300;
 }
-
-
-h1 {
-	color: #FF3F00;
-	font-size: 20px;
-	font-family: 'Roboto', sans-serif;
-	font-weight: 300;
-	text-align: center;
-}
-
-
 ul {
 	margin: 0;
 	padding: 0;
@@ -51,17 +40,15 @@ ul {
 	opacity: .2;
 }
 
-
+#todos input {
+	padding: 5px;
+	font-size: 14px;
+	font-family: 'Roboto', sans-serif;
+	font-weight: 300;
+}
 img {
 	border: 0;
 	vertical-align: middle;
-}
-
-
-.logo {
-	top: 55px;
-	left: 30px;
-	position: absolute;
 }
 
 
@@ -73,7 +60,7 @@ img {
 	background-color: #FF7373;
 	z-index: 1000;
 }
-	.title_xl {
+	.title-xl {
 		padding: 3px 15px;
 		font-size: 40px;
 	}
@@ -93,27 +80,25 @@ img {
 	display: inline-block;
 	vertical-align: top;
 }
-	.tile__name {
+	.tileName {
 		cursor: move;
 		padding-bottom: 10px;
 		border-bottom: 1px solid #FF7373;
 	}
 
-	.tile__list {
+	.tileList {
 		margin-top: 10px;
 	}
-		.tile__list:last-child {
+		.tileList:last-child {
 			margin-right: 0;
 			min-height: 80px;
 		}
 
-		.tile__list img {
+		.tileList img {
 			cursor: move;
 			margin: 10px;
 			border-radius: 100%;
 		}
-
-
 
 .block {
 	opacity: 1;
@@ -169,71 +154,3 @@ img {
 				text-transform: uppercase;
 			}
 
-
-
-#editable {}
-	#editable li {
-		position: relative;
-	}
-
-	#editable i {
-		-webkit-transition: opacity .2s;
-		transition: opacity .2s;
-		opacity: 0;
-		display: block;
-		cursor: pointer;
-		color: #c00;
-		top: 10px;
-		right: 40px;
-		position: absolute;
-		font-style: normal;
-	}
-
-	#editable li:hover i {
-		opacity: 1;
-	}
-
-
-#filter {}
-	#filter button {
-		color: #fff;
-		width: 100%;
-		border: none;
-		outline: 0;
-		opacity: .5;
-		margin: 10px 0 0;
-		transition: opacity .1s ease;
-		cursor: pointer;
-		background: #5F9EDF;
-		padding: 10px 0;
-		font-size: 20px;
-	}
-		#filter button:hover {
-			opacity: 1;
-		}
-
-	#filter .block__list {
-		padding-bottom: 0;
-	}
-
-.drag-handle {
-	margin-right: 10px;
-	font: bold 20px Sans-Serif;
-	color: #5F9EDF;
-	display: inline-block;
-	cursor: move;
-	cursor: -webkit-grabbing;  /* overrides 'move' */
-}
-
-#todos input {
-	padding: 5px;
-	font-size: 14px;
-	font-family: 'Roboto', sans-serif;
-	font-weight: 300;
-}
-
-
-
-#nested ul li {
-	background-color: rgba(0,0,0,.05);
-}
