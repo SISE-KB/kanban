@@ -1,11 +1,11 @@
   angular.module('myApp', ['ng-sortable'])
     .controller('demo', ['$scope', function ($scope) {
         $scope.items1 = [
-		      {name:'1',img:'face-01.jpg',state:'TODO'}
-             ,{name:'2',img:'face-02.jpg',state:'TODO'}
-             ,{name:'3',img:'face-03.jpg',state:'TODO'}
-			 ,{name:'4',img:'face-04.jpg',state:'TODO'}
-			 ,{name:'5',img:'face-05.jpg',state:'TODO'}
+		      {name:'1',img:'face-01.jpg',state:'TODO',effort:10}
+             ,{name:'2',img:'face-02.jpg',state:'TODO',effort:9}
+             ,{name:'3',img:'face-03.jpg',state:'TODO',effort:12}
+			 ,{name:'4',img:'face-04.jpg',state:'TODO',effort:4}
+			 ,{name:'5',img:'face-05.jpg',state:'TODO',effort:8}
 			 ];
 		$scope.items2 = [];
 		$scope.items3 = [];
