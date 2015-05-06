@@ -26,15 +26,19 @@ exports.addRoutes = function(app, config) {
 		var files=fs.readdirSync(uploadDir);
 		res.json(files);
 	})
-  /*
-   app.post('/upload', multipartMiddleware, function(req, res) {
-      var file = req.files.myFile
-      res.json({oldName:file.name,newName:file.path})
 
-   })*/
-   app.post('/upload.html', function(request, response) {
+   app.post('/upload', function(request, response) {
         var count = request.files.file.length;
-        response.status(200).send(JSON.stringify({ success: true, fileCount: count }));
+		var files=[];
+		
+		if(!count) files.push(request.files.file.name)
+		else for(var i=0;i<count;i++){
+		  files.push(request.files.file[i].name);
+		}
+		
+		//console.log(file.mimetype,file.originalname,file.name);
+		//console.log(file.size,file.path);
+        response.status(200).send(JSON.stringify({ success: true, fileCount: count,names:files }));
     })
 
 	// catch 404 and forward to error handler

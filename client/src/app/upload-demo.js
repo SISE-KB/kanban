@@ -24,12 +24,15 @@ angular.module('app')
          * @type {Boolean}
          */
         $scope.error = false;
-
+$scope.interface.useParser=function (responseText) {
+   // console.log(responseText);
+    return responseText;
+};
         // Listen for when the interface has been configured.
         $scope.$on('$dropletReady', function whenDropletReady() {
 
             $scope.interface.allowedExtensions(['png', 'jpg', 'bmp', 'gif', 'svg', 'torrent']);
-            $scope.interface.setRequestUrl('upload.html');
+            $scope.interface.setRequestUrl('upload');
             $scope.interface.defineHTTPSuccess([/2.{2}/]);
             $scope.interface.useArray(false);
 
@@ -40,7 +43,12 @@ angular.module('app')
 
             $scope.uploadCount = files.length;
             $scope.success     = true;
-            console.log(response, files);
+			//console.log(response);
+			for(var i=0;i<response.names.length;i++){
+			    console.log(response.names[i])
+			 // var file=files[i].file;
+             // console.log(file.type,file.name,file.size);
+            }
 
             $timeout(function timeout() {
                 $scope.success = false;
@@ -59,61 +67,5 @@ angular.module('app')
             }, 5000);
 
         });
-
-    }).directive('progressbar2', function ProgressbarDirective() {
-
-        return {
-
-            /**
-             * @property restrict
-             * @type {String}
-             */
-            restrict: 'AC',
-
-            /**
-             * @property scope
-             * @type {Object}
-             */
-            scope: {
-                model: '=ngModel'
-            },
-
-            /**
-             * @property ngModel
-             * @type {String}
-             */
-            require: 'ngModel',
-
-            /**
-             * @method link
-             * @param scope {Object}
-             * @param element {Object}
-             * @return {void}
-             */
-            link: function link(scope, element) {
-
-                var progressBar = new ProgressBar.Path(element[0], {
-                    strokeWidth: 2
-                });
-
-                scope.$watch('model', function() {
-
-                    progressBar.animate(scope.model / 100, {
-                        duration: 1000
-                    });
-
-                });
-
-                scope.$on('$dropletSuccess', function onSuccess() {
-                    progressBar.animate(0);
-                });
-
-                scope.$on('$dropletError', function onSuccess() {
-                    progressBar.animate(0);
-                });
-
-            }
-
-        }
 
     });
