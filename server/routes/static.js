@@ -1,14 +1,18 @@
 var express = require('express')
    ,fs = require('fs')
-   ,multipart = require('connect-multiparty')
- 
+ //  ,multipart = require('connect-multiparty')
+  multer         = require('multer')
+
+
+   
 
 exports.addRoutes = function(app, config) {
 	var publicDir  = config.server.distFolder
-	   ,uploadDir  = publicDir+"/files"
-	   ,multipartMiddleware = multipart({uploadDir: uploadDir})
+	   ,uploadDir  = publicDir+"/uploads"
+	 //  ,multipartMiddleware = multipart({uploadDir: uploadDir})
 	
 	app.use(express.static(publicDir))
+	app.use(multer({ dest: uploadDir }))
 	//app.use(config.server.staticUrl,express.static(publicDir))
 	app.get('/', function(req, res) {
     // Just send the index.html for other files to support HTML5Mode
@@ -22,12 +26,16 @@ exports.addRoutes = function(app, config) {
 		var files=fs.readdirSync(uploadDir);
 		res.json(files);
 	})
-  
+  /*
    app.post('/upload', multipartMiddleware, function(req, res) {
       var file = req.files.myFile
       res.json({oldName:file.name,newName:file.path})
 
-   })
+   })*/
+   app.post('/upload.html', function(request, response) {
+        var count = request.files.file.length;
+        response.status(200).send(JSON.stringify({ success: true, fileCount: count }));
+    })
 
 	// catch 404 and forward to error handler
 	app.use(function(req, res, next) {

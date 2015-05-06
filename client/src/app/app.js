@@ -1,4 +1,4 @@
-angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router'
+angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngDroplet'
 ,'ngSanitize',  'ui.select'
  ,'hc.marked', 'ui.bootstrap'
 ,'services.i18nNotifications', 'services.httpRequestTracker','services.stateBuilderProvider',
@@ -12,12 +12,12 @@ function ($stateProvider,$urlRouterProvider) {
         
   $stateProvider
     .state('home',  {
-	  url: '/',	
+	  url: '/home',	
       template: '<h1>项目状态看板.....</h1>'
     }) 
     .state('demo',  {
-	  url: '/demo',	
-      templateUrl: 'views/demo.tpl.html'
+	  url: '/',	
+      templateUrl: 'views/upload.tpl.html'
     })
    			
 }])
@@ -54,9 +54,9 @@ function ($stateProvider,$urlRouterProvider) {
   }
   $scope.home = function () {
     if (security.isAuthenticated()) {
-      $scope.$state.go('projects.list');
+         $scope.$state.go('home');
     } else {
-      $scope.$state.go('home');
+         $scope.$state.go('demo');
     }
   }
  }])

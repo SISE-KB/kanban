@@ -2,7 +2,6 @@
   "name": "kanban",
   "version": "0.0.0",
   "description": "projects manage platform of SISE game department ",
-  "main": "server.js",
   "scripts": {
     "test": "gulp"
   },

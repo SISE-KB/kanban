@@ -36,8 +36,10 @@ gulp.task('copy-static', function () {
       gulp.src('libs/ui-bootstrap-tpls.min.js'),
       gulp.src('libs/ui-select.js'),
       gulp.src('libs/marked.js'),
-      gulp.src('libs/angular-marked.js')
-     
+      gulp.src('libs/angular-marked.js'),
+      gulp.src('libs/angular-marked.js'),
+      gulp.src('libs/progressbar.js'),
+      gulp.src('libs/ng-droplet.js')
    )
    .pipe(gulp.dest('dist')),
    merge(
