@@ -155,224 +155,6 @@ angular.module('directives.dropdownSelect', [])
 
 });
 
-angular.module('services.exceptionHandler', ['services.i18nNotifications']);
-
-angular.module('services.exceptionHandler').factory('exceptionHandlerFactory', ['$injector', function($injector) {
-  return function($delegate) {
-
-    return function (exception, cause) {
-      // Lazy load notifications to get around circular dependency
-      //Circular dependency: $rootScope <- notifications <- i18nNotifications <- $exceptionHandler
-      var i18nNotifications = $injector.get('i18nNotifications');
-
-      // Pass through to original handler
-      $delegate(exception, cause);
-
-      // Push a notification error
-      i18nNotifications.pushForCurrentRoute('error.fatal', 'danger', {}, {
-        exception:exception,
-        cause:cause
-      });
-    };
-  };
-}]);
-
-angular.module('services.exceptionHandler').config(['$provide', function($provide) {
-  $provide.decorator('$exceptionHandler', ['$delegate', 'exceptionHandlerFactory', function ($delegate, exceptionHandlerFactory) {
-    return exceptionHandlerFactory($delegate);
-  }]);
-}]);
-
-angular.module('services.httpRequestTracker', []);
-angular.module('services.httpRequestTracker').factory('httpRequestTracker', ['$http', function($http){
-
-  var httpRequestTracker = {};
-  httpRequestTracker.hasPendingRequests = function() {
-    return $http.pendingRequests.length > 0;
-  };
-
-  return httpRequestTracker;
-}]);
-angular.module('services.i18nNotifications', ['services.notifications', 'services.localizedMessages']);
-angular.module('services.i18nNotifications').factory('i18nNotifications', ['localizedMessages', 'notifications', function (localizedMessages, notifications) {
-
-  var prepareNotification = function(msgKey, type, interpolateParams, otherProperties) {
-     return angular.extend({
-       message: localizedMessages.get(msgKey, interpolateParams),
-       type: type
-     }, otherProperties);
-  };
-
-  var I18nNotifications = {
-    pushSticky:function (msgKey, type, interpolateParams, otherProperties) {
-      return notifications.pushSticky(prepareNotification(msgKey, type, interpolateParams, otherProperties));
-    },
-    pushForCurrentRoute:function (msgKey, type, interpolateParams, otherProperties) {
-      return notifications.pushForCurrentRoute(prepareNotification(msgKey, type, interpolateParams, otherProperties));
-    },
-    pushForNextRoute:function (msgKey, type, interpolateParams, otherProperties) {
-      return notifications.pushForNextRoute(prepareNotification(msgKey, type, interpolateParams, otherProperties));
-    },
-    getCurrent:function () {
-      return notifications.getCurrent();
-    },
-    remove:function (notification) {
-      return notifications.remove(notification);
-    }
-  };
-
-  return I18nNotifications;
-}]);
-angular.module('services.localizedMessages', []).factory('localizedMessages', ['$interpolate', 'I18N.MESSAGES', function ($interpolate, i18nmessages) {
-
-  var handleNotFound = function (msg, msgKey) {
-    return msg || '?' + msgKey + '?';
-  };
-
-  return {
-    get : function (msgKey, interpolateParams) {
-      var msg =  i18nmessages[msgKey];
-      if (msg) {
-        return $interpolate(msg)(interpolateParams);
-      } else {
-        return handleNotFound(msg, msgKey);
-      }
-    }
-  };
-}]);
-angular.module('services.notifications', []).factory('notifications', ['$rootScope', function ($rootScope) {
-
-  var notifications = {
-    'STICKY' : [],
-    'ROUTE_CURRENT' : [],
-    'ROUTE_NEXT' : []
-  };
-  var notificationsService = {};
-
-  var addNotification = function (notificationsArray, notificationObj) {
-    if (!angular.isObject(notificationObj)) {
-      throw new Error("Only object can be added to the notification service");
-    }
-    notificationsArray.push(notificationObj);
-    return notificationObj;
-  };
-
-  $rootScope.$on('$stateChangeSuccess', function () {
-    notifications.ROUTE_CURRENT.length = 0;
-
-    notifications.ROUTE_CURRENT = angular.copy(notifications.ROUTE_NEXT);
-    notifications.ROUTE_NEXT.length = 0;
-  });
-
-  notificationsService.getCurrent = function(){
-    return [].concat(notifications.STICKY, notifications.ROUTE_CURRENT);
-  };
-
-  notificationsService.pushSticky = function(notification) {
-    return addNotification(notifications.STICKY, notification);
-  };
-
-  notificationsService.pushForCurrentRoute = function(notification) {
-    return addNotification(notifications.ROUTE_CURRENT, notification);
-  };
-
-  notificationsService.pushForNextRoute = function(notification) {
-    return addNotification(notifications.ROUTE_NEXT, notification);
-  };
-
-  notificationsService.remove = function(notification){
-    angular.forEach(notifications, function (notificationsByType) {
-      var idx = notificationsByType.indexOf(notification);
-      if (idx>-1){
-        notificationsByType.splice(idx,1);
-      }
-    });
-  };
-
-  notificationsService.removeAll = function(){
-    angular.forEach(notifications, function (notificationsByType) {
-      notificationsByType.length = 0;
-    });
-  };
-
-  return notificationsService;
-}]);
-
-(function() {
-
-  function stateBuilderProvider($stateProvider) {
-
-    // This $get noop is because at the moment in AngularJS "providers" must provide something
-    // via a $get method.
-    // When AngularJS has "provider helpers" then this will go away!
-    this.$get = angular.noop
-	this.statesFor=function(Res){
-		var Ress   = Res+'s'
-			,resName=Ress.toLowerCase()
-		//this.$inject = [Res]
-		/*var resoFn={}
-		resoFn[resName]=	[Res,
-			function( Res){
-				return Res.all()
-		}]*/
-		
-		$stateProvider
-			.state(resName, {
-				abstract: true,
-				url: "/"+resName,
-				templateUrl: 'views/'+resName+'/index.tpl.html',
-				//resolve: resoFn,
-				controller: Ress+'MainCtrl'
-			})
-
-			.state(resName+'.list', {
-				url: '',//default
-				templateUrl: 'views/'+resName+'/list.tpl.html',
-				controller:  Ress+'ListCtrl'
-			})
-			.state(resName+'.create', {
-					url: '/create',
-					templateUrl: 'views/'+resName+'/edit.tpl.html',
-					controller:  Ress+'CreateCtrl'
-			})
-			.state(resName+'.detail', {
-				url: '/:itemId',
-				templateUrl: 'views/'+resName+'/detail.tpl.html',
-				controller:  Ress+'DetailCtrl'
-		/*		views:{
-					'detail@':	{
-						templateUrl: 'views/'+resName+'/detail.tpl.html',
-						controller:  Ress+'DetailCtrl'
-					}	
-				}*/
-			})
-			.state(resName+'.edit', {
-				url: '/:itemId/edit',
-				templateUrl: 'views/'+resName+'/edit.tpl.html',
-				controller:  Ress+'EditCtrl'
-			})
-		}//stateFor
-
-			/*	
-			var temp={};
-			temp['"@'+resName+'"']= { 
-				templateUrl: 'views/'+resName+'/edit.tpl.html',
-				controller: Ress+'EditCtrl'
-			}
-			var editViews={url: '/:itemId/edit',views:{}}
-			angular.extend(editViews.views,temp)
-		
-			$stateProvider	
-				.state(resName+'.edit', editViews)
-	        */
-
-   }//stateBuilderProvider
-
-    stateBuilderProvider.$inject = ['$stateProvider']
-    angular.module('services.stateBuilderProvider', ['ui.router'])
-		.provider('stateBuilder', stateBuilderProvider)
-})()
-
 angular.module('security.authorization', ['security.service'])
 
 // This service provides guard methods to support AngularJS routes.
@@ -632,6 +414,295 @@ function($http, $q, $location, queue, $modal) {
   return service;
 }]);
 
+angular.module('services.exceptionHandler', ['services.i18nNotifications']);
+
+angular.module('services.exceptionHandler').factory('exceptionHandlerFactory', ['$injector', function($injector) {
+  return function($delegate) {
+
+    return function (exception, cause) {
+      // Lazy load notifications to get around circular dependency
+      //Circular dependency: $rootScope <- notifications <- i18nNotifications <- $exceptionHandler
+      var i18nNotifications = $injector.get('i18nNotifications');
+
+      // Pass through to original handler
+      $delegate(exception, cause);
+
+      // Push a notification error
+      i18nNotifications.pushForCurrentRoute('error.fatal', 'danger', {}, {
+        exception:exception,
+        cause:cause
+      });
+    };
+  };
+}]);
+
+angular.module('services.exceptionHandler').config(['$provide', function($provide) {
+  $provide.decorator('$exceptionHandler', ['$delegate', 'exceptionHandlerFactory', function ($delegate, exceptionHandlerFactory) {
+    return exceptionHandlerFactory($delegate);
+  }]);
+}]);
+
+angular.module('services.httpRequestTracker', []);
+angular.module('services.httpRequestTracker').factory('httpRequestTracker', ['$http', function($http){
+
+  var httpRequestTracker = {};
+  httpRequestTracker.hasPendingRequests = function() {
+    return $http.pendingRequests.length > 0;
+  };
+
+  return httpRequestTracker;
+}]);
+angular.module('services.i18nNotifications', ['services.notifications', 'services.localizedMessages']);
+angular.module('services.i18nNotifications').factory('i18nNotifications', ['localizedMessages', 'notifications', function (localizedMessages, notifications) {
+
+  var prepareNotification = function(msgKey, type, interpolateParams, otherProperties) {
+     return angular.extend({
+       message: localizedMessages.get(msgKey, interpolateParams),
+       type: type
+     }, otherProperties);
+  };
+
+  var I18nNotifications = {
+    pushSticky:function (msgKey, type, interpolateParams, otherProperties) {
+      return notifications.pushSticky(prepareNotification(msgKey, type, interpolateParams, otherProperties));
+    },
+    pushForCurrentRoute:function (msgKey, type, interpolateParams, otherProperties) {
+      return notifications.pushForCurrentRoute(prepareNotification(msgKey, type, interpolateParams, otherProperties));
+    },
+    pushForNextRoute:function (msgKey, type, interpolateParams, otherProperties) {
+      return notifications.pushForNextRoute(prepareNotification(msgKey, type, interpolateParams, otherProperties));
+    },
+    getCurrent:function () {
+      return notifications.getCurrent();
+    },
+    remove:function (notification) {
+      return notifications.remove(notification);
+    }
+  };
+
+  return I18nNotifications;
+}]);
+angular.module('services.localizedMessages', []).factory('localizedMessages', ['$interpolate', 'I18N.MESSAGES', function ($interpolate, i18nmessages) {
+
+  var handleNotFound = function (msg, msgKey) {
+    return msg || '?' + msgKey + '?';
+  };
+
+  return {
+    get : function (msgKey, interpolateParams) {
+      var msg =  i18nmessages[msgKey];
+      if (msg) {
+        return $interpolate(msg)(interpolateParams);
+      } else {
+        return handleNotFound(msg, msgKey);
+      }
+    }
+  };
+}]);
+angular.module('services.notifications', []).factory('notifications', ['$rootScope', function ($rootScope) {
+
+  var notifications = {
+    'STICKY' : [],
+    'ROUTE_CURRENT' : [],
+    'ROUTE_NEXT' : []
+  };
+  var notificationsService = {};
+
+  var addNotification = function (notificationsArray, notificationObj) {
+    if (!angular.isObject(notificationObj)) {
+      throw new Error("Only object can be added to the notification service");
+    }
+    notificationsArray.push(notificationObj);
+    return notificationObj;
+  };
+
+  $rootScope.$on('$stateChangeSuccess', function () {
+    notifications.ROUTE_CURRENT.length = 0;
+
+    notifications.ROUTE_CURRENT = angular.copy(notifications.ROUTE_NEXT);
+    notifications.ROUTE_NEXT.length = 0;
+  });
+
+  notificationsService.getCurrent = function(){
+    return [].concat(notifications.STICKY, notifications.ROUTE_CURRENT);
+  };
+
+  notificationsService.pushSticky = function(notification) {
+    return addNotification(notifications.STICKY, notification);
+  };
+
+  notificationsService.pushForCurrentRoute = function(notification) {
+    return addNotification(notifications.ROUTE_CURRENT, notification);
+  };
+
+  notificationsService.pushForNextRoute = function(notification) {
+    return addNotification(notifications.ROUTE_NEXT, notification);
+  };
+
+  notificationsService.remove = function(notification){
+    angular.forEach(notifications, function (notificationsByType) {
+      var idx = notificationsByType.indexOf(notification);
+      if (idx>-1){
+        notificationsByType.splice(idx,1);
+      }
+    });
+  };
+
+  notificationsService.removeAll = function(){
+    angular.forEach(notifications, function (notificationsByType) {
+      notificationsByType.length = 0;
+    });
+  };
+
+  return notificationsService;
+}]);
+
+(function() {
+
+  function stateBuilderProvider($stateProvider) {
+
+    // This $get noop is because at the moment in AngularJS "providers" must provide something
+    // via a $get method.
+    // When AngularJS has "provider helpers" then this will go away!
+    this.$get = angular.noop
+	this.statesFor=function(Res){
+		var Ress   = Res+'s'
+			,resName=Ress.toLowerCase()
+		//this.$inject = [Res]
+		/*var resoFn={}
+		resoFn[resName]=	[Res,
+			function( Res){
+				return Res.all()
+		}]*/
+		
+		$stateProvider
+			.state(resName, {
+				abstract: true,
+				url: "/"+resName,
+				templateUrl: 'views/'+resName+'/index.tpl.html',
+				//resolve: resoFn,
+				controller: Ress+'MainCtrl'
+			})
+
+			.state(resName+'.list', {
+				url: '',//default
+				templateUrl: 'views/'+resName+'/list.tpl.html',
+				controller:  Ress+'ListCtrl'
+			})
+			.state(resName+'.create', {
+					url: '/create',
+					templateUrl: 'views/'+resName+'/edit.tpl.html',
+					controller:  Ress+'CreateCtrl'
+			})
+			.state(resName+'.detail', {
+				url: '/:itemId',
+				templateUrl: 'views/'+resName+'/detail.tpl.html',
+				controller:  Ress+'DetailCtrl'
+		/*		views:{
+					'detail@':	{
+						templateUrl: 'views/'+resName+'/detail.tpl.html',
+						controller:  Ress+'DetailCtrl'
+					}	
+				}*/
+			})
+			.state(resName+'.edit', {
+				url: '/:itemId/edit',
+				templateUrl: 'views/'+resName+'/edit.tpl.html',
+				controller:  Ress+'EditCtrl'
+			})
+		}//stateFor
+
+			/*	
+			var temp={};
+			temp['"@'+resName+'"']= { 
+				templateUrl: 'views/'+resName+'/edit.tpl.html',
+				controller: Ress+'EditCtrl'
+			}
+			var editViews={url: '/:itemId/edit',views:{}}
+			angular.extend(editViews.views,temp)
+		
+			$stateProvider	
+				.state(resName+'.edit', editViews)
+	        */
+
+   }//stateBuilderProvider
+
+    stateBuilderProvider.$inject = ['$stateProvider']
+    angular.module('services.stateBuilderProvider', ['ui.router'])
+		.provider('stateBuilder', stateBuilderProvider)
+})()
+
+angular.module('security.login', ['security.login.form', 'security.login.toolbar']);
+angular.module('security.login.form', ['services.localizedMessages'])
+
+// The LoginFormController provides the behaviour behind a reusable form to allow users to authenticate.
+// This controller and its template (login/form.tpl.html) are used in a modal dialog box by the security service.
+.controller('LoginFormController', ['$scope', 'security', 'localizedMessages', function($scope, security, localizedMessages) {
+  // The model for this form 
+  $scope.user = {};
+
+  // Any error message from failing to login
+  $scope.authError = null;
+
+  // The reason that we are being asked to login - for instance because we tried to access something to which we are not authorized
+  // We could do something diffent for each reason here but to keep it simple...
+  $scope.authReason = null;
+  if ( security.getLoginReason() ) {
+    $scope.authReason = ( security.isAuthenticated() ) ?
+      localizedMessages.get('login.reason.notAuthorized') :
+      localizedMessages.get('login.reason.notAuthenticated');
+  }
+
+  // Attempt to authenticate the user specified in the form's model
+  $scope.login = function() {
+    // Clear any previous security errors
+    $scope.authError = null;
+
+    // Try to login
+    security.login($scope.user.mobileNo, $scope.user.password).then(function(loggedIn) {
+      if ( !loggedIn ) {
+        // If we get here then the login failed due to bad credentials
+        $scope.authError = localizedMessages.get('login.error.invalidCredentials');
+      }
+    }, function(x) {
+      // If we get here then there was a problem with the login request to the server
+      $scope.authError = localizedMessages.get('login.error.serverError', { exception: x });
+    });
+  };
+
+  $scope.clearForm = function() {
+    $scope.user = {};
+  };
+
+  $scope.cancelLogin = function() {
+    security.cancelLogin();
+  };
+}]);
+
+angular.module('security.login.toolbar', [])
+
+// The loginToolbar directive is a reusable widget that can show login or logout buttons
+// and information the current authenticated user
+.directive('loginToolbar', ['security', function(security) {
+  var directive = {
+    templateUrl: 'views/security/login/toolbar.tpl.html',
+    restrict: 'E',
+    replace: true,
+    scope: true,
+    link: function($scope, $element, $attrs, $controller) {
+      $scope.isAuthenticated = security.isAuthenticated;
+      $scope.login = security.showLogin;
+      $scope.logout = security.logout;
+      $scope.$watch(function() {
+        return security.currentUser;
+      }, function(currentUser) {
+        $scope.currentUser = currentUser;
+      });
+    }
+  };
+  return directive;
+}]);
+
 angular.module('directives.crud', ['directives.crud.buttons', 'directives.crud.edit']);
 
 angular.module('directives.crud.buttons', [])
@@ -757,75 +828,4 @@ function($parse, $stateParams,   $state) {
       };
     }
   };
-}]);
-
-angular.module('security.login', ['security.login.form', 'security.login.toolbar']);
-angular.module('security.login.form', ['services.localizedMessages'])
-
-// The LoginFormController provides the behaviour behind a reusable form to allow users to authenticate.
-// This controller and its template (login/form.tpl.html) are used in a modal dialog box by the security service.
-.controller('LoginFormController', ['$scope', 'security', 'localizedMessages', function($scope, security, localizedMessages) {
-  // The model for this form 
-  $scope.user = {};
-
-  // Any error message from failing to login
-  $scope.authError = null;
-
-  // The reason that we are being asked to login - for instance because we tried to access something to which we are not authorized
-  // We could do something diffent for each reason here but to keep it simple...
-  $scope.authReason = null;
-  if ( security.getLoginReason() ) {
-    $scope.authReason = ( security.isAuthenticated() ) ?
-      localizedMessages.get('login.reason.notAuthorized') :
-      localizedMessages.get('login.reason.notAuthenticated');
-  }
-
-  // Attempt to authenticate the user specified in the form's model
-  $scope.login = function() {
-    // Clear any previous security errors
-    $scope.authError = null;
-
-    // Try to login
-    security.login($scope.user.mobileNo, $scope.user.password).then(function(loggedIn) {
-      if ( !loggedIn ) {
-        // If we get here then the login failed due to bad credentials
-        $scope.authError = localizedMessages.get('login.error.invalidCredentials');
-      }
-    }, function(x) {
-      // If we get here then there was a problem with the login request to the server
-      $scope.authError = localizedMessages.get('login.error.serverError', { exception: x });
-    });
-  };
-
-  $scope.clearForm = function() {
-    $scope.user = {};
-  };
-
-  $scope.cancelLogin = function() {
-    security.cancelLogin();
-  };
-}]);
-
-angular.module('security.login.toolbar', [])
-
-// The loginToolbar directive is a reusable widget that can show login or logout buttons
-// and information the current authenticated user
-.directive('loginToolbar', ['security', function(security) {
-  var directive = {
-    templateUrl: 'views/security/login/toolbar.tpl.html',
-    restrict: 'E',
-    replace: true,
-    scope: true,
-    link: function($scope, $element, $attrs, $controller) {
-      $scope.isAuthenticated = security.isAuthenticated;
-      $scope.login = security.showLogin;
-      $scope.logout = security.logout;
-      $scope.$watch(function() {
-        return security.currentUser;
-      }, function(currentUser) {
-        $scope.currentUser = currentUser;
-      });
-    }
-  };
-  return directive;
 }]);
