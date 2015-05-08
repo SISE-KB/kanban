@@ -35,7 +35,6 @@ dbRouter
       debug(cname)
 	  if(!strict)
 		  search=likeHandle(search)
-	 // search=IdHandle(search)
       if(!!id)  m.findById(id,function(err,data){
 		  if(err) return next(err);
 		  debug(data)
@@ -56,6 +55,7 @@ dbRouter
 	  var m=require('../models/'+cname)
       if(!!id)   m.findByIdAndUpdate(id, req.body, function (err, post) {
 		if (err) return next(err);
+		debug(req.body)
 		res.json(post);
 	  })
 		else {

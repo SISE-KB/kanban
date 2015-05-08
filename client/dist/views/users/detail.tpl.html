@@ -1,6 +1,7 @@
 <div>
   <h4>{{item.name}}
-  <button class="btn" ng-click="edit()" ng-show="isAdmin()">修　改</button></h4>
+  <button class="btn" ng-click="edit()" ng-show="isAdmin()">修　改</button>
   <button class="btn" ng-click="list()">列　表</button></h4>
+   <img ng-src="{{item.image}}"  class="img-circle" style="width:160px;height:160px">
   <div >{{item.desc}}</div>
 </div>

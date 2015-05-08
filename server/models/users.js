@@ -9,6 +9,7 @@ var mongoose = require('mongoose'),
 var UserSchema = new Schema({
   name : String,	
   mobileNo : String,
+  image : String,
   skills : [String],
   password:String,
   isAdmin:{type: Boolean,default: false},

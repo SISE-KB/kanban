@@ -7,7 +7,7 @@ angular.module('security.service', [
 
 .factory('security', [
        '$http', '$q', '$state', 'securityRetryQueue', '$modal', 
-function($http, $q, $location, queue, $modal) {
+function($http, $q, $state, queue, $modal) {
 
   // Redirect to the given url (defaults to '/')
   function redirect(state) {

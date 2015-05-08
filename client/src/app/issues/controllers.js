@@ -1,35 +1,36 @@
-angular.module('controllers.users', ['ui.router','ngMessages'
+angular.module('controllers.issues', 
+['ui.router'
 , 'services.i18nNotifications'
-, 'directives.dropdownMultiselect'
-, 'resources.users'])  
-.controller('UsersMainCtrl',   [
-               '$scope', '$state', '$stateParams', 'i18nNotifications', 'User',
-	function ( $scope,   $state,   $stateParams,    i18nNotifications,User) {
-        $scope._ress="users"
-		$scope._data =[]//load from server
-		$scope.data = []// display items
-		
-		$scope.availableSkills=['协调','后端编码','前端编码','2D做图','3D建模','文档写作','测试']
-		$scope.visited=[]
-		
+, 'resources.users'
+, 'resources.issues'
+])  
+
+.controller('IssuesMainCtrl',   [
+               '$scope', '$state', '$stateParams', 'i18nNotifications','Issue','User',
+	function ( $scope,   $state,   $stateParams,    i18nNotifications,  Issue,User) {
+      
+		$scope._data = []//load from server
 		$scope.query = ''
+		$scope.visited=[]
+		$scope.users=[]
+
+		User.all().then(function(ds){
+			$scope.users =ds
+	   })
 		$scope.search=function() {
 			var q={'name':$scope.query}
-			//console.log(q)
-			User.query(q).then(function(msgs){
+			Issue.query(q).then(function(msgs){
+				//console.log(msgs)
 				$scope._data=msgs
 				$scope.visited=[]
-				$state.go($scope._ress+'.list', $stateParams) 
 				
 		  })
 	    }
-
 		$scope.findById = function (id) {
-			//console.log($scope._data.length)
 			for (var i = 0; i < $scope._data.length; i++) {
 				var rt=$scope._data[i]
 				//
-				if (rt.$id() == id)
+				if ($scope._data[i].$id() == id)
 					return rt
 			}
 			return null
@@ -56,7 +57,7 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 				$scope._data.push(item)
 				
 			}
-			$state.go($scope._ress+'.list', $stateParams) 
+			$state.go('issues.list', $stateParams) 
 		}
 		$scope.onError = function() {
 			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
@@ -65,30 +66,32 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item.name})
 			$scope.removeFromArray($scope._data,item)
 			$scope.removeFromArray($scope.visited,item)
-			$state.go($scope._ress+'.list', $stateParams) 
+			$state.go('issues.list', $stateParams) 
 		}
 		$scope.checkDate= function(item){
 			var now = new Date(Date.now())
 			if(!item.regDate)
 				item.regDate=now
+			if(!item.closeDate)
+				item.closeDate= now.setDate(now.getDate()+14)
 		}
 
 	}
 ])
-.controller('UsersListCtrl',   [
-                '$scope', '$state', '$stateParams', 'i18nNotifications', 'User',
-	function (  $scope,   $state,   $stateParams,    i18nNotifications,  User) {
+.controller('IssuesListCtrl',   [
+                '$scope', '$state', '$stateParams', 'i18nNotifications', 
+	function (  $scope,   $state,   $stateParams,    i18nNotifications) {
 		
-
+		$scope.data = []// display items
 		$scope.numPerPage=10
 		$scope.currentPage = 1
 		$scope.totalItems=0
-		$scope.maxSize = 5
 		
-				
 		$scope.setPage = function (pageNo) {
 			$scope.currentPage = pageNo
 		}
+       
+		$scope.maxSize = 5
 
 
 		$scope.$watch("currentPage + numPerPage + _data", function() {
@@ -113,70 +116,36 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 			})
 		}
 		$scope.view = function (item) {
-			$state.go($scope._ress+'.detail', {itemId: item.$id()})
-		}
-		$scope.edit = function (item) {
-			$state.go($scope._ress+'.edit', {itemId: item.$id()})
+			$state.go('issues.list.detail', {itemId: item.$id()})
 		}
 	
-
 		$scope.create = function () {
-			$state.go($scope._ress+'.create')
+			$state.go('issues.create')
 		}
 	}
 ])
-.controller('UsersCreateCtrl',   [
-                '$scope', 'User',
-	function (  $scope,   User) {
-		$scope.item = new User()
-		$scope.item.isActive=true
-		$scope.item.isAdmin=false
+.controller('IssuesCreateCtrl',   [
+                '$scope', 'Issue',
+	function (  $scope,   Issue) {
+		$scope.item = new Issue()
 		$scope.checkDate($scope.item)
 	}
 ])
-.controller('UsersDetailCtrl',   [
+.controller('IssuesDetailCtrl',   [
                 '$scope','$stateParams', '$state',
-	function ( $scope,  $stateParams,    $state) {
+	function (  $scope,$stateParams,   $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
-		
 		$scope.addToVisited($scope.item)
 		
 		$scope.edit = function () {
-			$state.go($scope._ress+'.edit', {itemId: $scope.item.$id()})
-		}
-		$scope.list = function () {
-			$state.go($scope._ress+'.list')
+			$state.go('issues.edit', {itemId: $scope.item.$id()})
 		}
 	}
 ])
-.controller('UsersEditCtrl',   [
-                '$scope', '$stateParams', '$state','$timeout',
-	function (  $scope,   $stateParams,   $state,$timeout) {
+.controller('IssuesEditCtrl',   [
+                '$scope', '$stateParams', '$state',
+	function (  $scope,   $stateParams,   $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
 		$scope.checkDate($scope.item)
-		$scope.interface = {}
-		$scope.success = false //for upload image
-        $scope.error = false
-        $scope.interface.useParser=function (responseText) {
-                    return responseText
-         }
-        $scope.$on('$dropletReady', function whenDropletReady() {
-            $scope.interface.allowedExtensions(['png', 'jpg', 'bmp', 'gif', 'svg', 'torrent'])
-            $scope.interface.setRequestUrl('upload')
-            $scope.interface.defineHTTPSuccess([/2.{2}/])
-            $scope.interface.useArray(false)
-        })
-        $scope.$on('$dropletSuccess', function onDropletSuccess(event, response, files) {
-            $scope.uploadCount = files.length
-            $scope.success     = true
-			console.log(response);
-			if($scope.uploadCount>0)
-			  $scope.item.image="uploads/"+response.names[0]
-		
-            $timeout(function timeout() {
-                $scope.success = false;
-            }, 3000)
-
-        });
 	}
 ])

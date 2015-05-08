@@ -81,12 +81,14 @@ angular.module('controllers',[
 ,'controllers.users'
 ,'controllers.projects'
 ,'controllers.backlogs'
+,'controllers.issues'
 ])
 angular.module('resources', [
  'resources.messages'
 ,'resources.users'
 ,'resources.projects'
 ,'resources.backlogs'
+,'resources.issues'
 ])
 
 angular.module('app')
@@ -94,8 +96,9 @@ angular.module('app')
 .config(['stateBuilderProvider', 
 function (stateBuilderProvider) {
    stateBuilderProvider.statesFor('User') 
-   stateBuilderProvider.statesFor('Message') 
-   stateBuilderProvider.statesFor('Project')   			
+   stateBuilderProvider.statesFor('Project')   	
+   stateBuilderProvider.statesFor('Issue') 	
+   stateBuilderProvider.statesFor('Message') 	
 }])
 .config(['uiSelectConfig', function(uiSelectConfig) {
   uiSelectConfig.theme = 'bootstrap';
@@ -176,6 +179,158 @@ $scope.interface.useParser=function (responseText) {
         });
 
     });
+
+angular.module('controllers.issues', 
+['ui.router'
+, 'services.i18nNotifications'
+, 'resources.users'
+, 'resources.issues'
+])  
+
+.controller('IssuesMainCtrl',   [
+               '$scope', '$state', '$stateParams', 'i18nNotifications','Issue','User',
+	function ( $scope,   $state,   $stateParams,    i18nNotifications,  Issue,User) {
+      
+		$scope._data = []//load from server
+		$scope.query = ''
+		$scope.visited=[]
+		$scope.users=[]
+
+		User.all().then(function(ds){
+			$scope.users =ds
+	   })
+		$scope.search=function() {
+			var q={'name':$scope.query}
+			Issue.query(q).then(function(msgs){
+				//console.log(msgs)
+				$scope._data=msgs
+				$scope.visited=[]
+				
+		  })
+	    }
+		$scope.findById = function (id) {
+			for (var i = 0; i < $scope._data.length; i++) {
+				var rt=$scope._data[i]
+				//
+				if ($scope._data[i].$id() == id)
+					return rt
+			}
+			return null
+		}
+		$scope.removeFromArray = function (data,item) {
+			var index = data.indexOf(item);
+			if (index > -1)
+				data.splice(index, 1);
+		}
+		$scope.addToVisited = function (item) {
+			var index = $scope.visited.indexOf(item);
+			if (index > -1) 
+			$scope.visited.splice(index, 1);
+			$scope.visited.push(item)
+			while ($scope.visited.length>10)
+				$scope.visited.shift()
+		}
+		$scope.onSave = function (item) {
+			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item.name})
+			//console.log($state.current.name)
+			var idx=$state.current.name.indexOf('create')
+			//console.log(idx)
+			if(idx > -1){
+				$scope._data.push(item)
+				
+			}
+			$state.go('issues.list', $stateParams) 
+		}
+		$scope.onError = function() {
+			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
+		}
+		$scope.onRemove = function(item) {
+			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item.name})
+			$scope.removeFromArray($scope._data,item)
+			$scope.removeFromArray($scope.visited,item)
+			$state.go('issues.list', $stateParams) 
+		}
+		$scope.checkDate= function(item){
+			var now = new Date(Date.now())
+			if(!item.regDate)
+				item.regDate=now
+			if(!item.closeDate)
+				item.closeDate= now.setDate(now.getDate()+14)
+		}
+
+	}
+])
+.controller('IssuesListCtrl',   [
+                '$scope', '$state', '$stateParams', 'i18nNotifications', 
+	function (  $scope,   $state,   $stateParams,    i18nNotifications) {
+		
+		$scope.data = []// display items
+		$scope.numPerPage=10
+		$scope.currentPage = 1
+		$scope.totalItems=0
+		
+		$scope.setPage = function (pageNo) {
+			$scope.currentPage = pageNo
+		}
+       
+		$scope.maxSize = 5
+
+
+		$scope.$watch("currentPage + numPerPage + _data", function() {
+			$scope.totalItems = $scope._data.length
+			var begin = (($scope.currentPage - 1) * $scope.numPerPage)
+				, end = begin + $scope.numPerPage
+
+			if(end>$scope._data.length) 
+				   end=$scope._data.length
+
+			$scope.data = $scope._data.slice(begin, end)
+		})
+  
+		$scope.remove = function(item, $index, $event) {
+			// Don't let the click bubble up to the ng-click on the enclosing div, which will try to trigger
+			// an edit of this item.
+			$event.stopPropagation()
+			item.$remove().then(function() {
+				$scope.onRemove(item)
+			}, function() {
+				i18nNotifications.pushForCurrentRoute('crud.user.remove.error', 'danger', {id : item.name})
+			})
+		}
+		$scope.view = function (item) {
+			$state.go('issues.list.detail', {itemId: item.$id()})
+		}
+	
+		$scope.create = function () {
+			$state.go('issues.create')
+		}
+	}
+])
+.controller('IssuesCreateCtrl',   [
+                '$scope', 'Issue',
+	function (  $scope,   Issue) {
+		$scope.item = new Issue()
+		$scope.checkDate($scope.item)
+	}
+])
+.controller('IssuesDetailCtrl',   [
+                '$scope','$stateParams', '$state',
+	function (  $scope,$stateParams,   $state) {
+		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.addToVisited($scope.item)
+		
+		$scope.edit = function () {
+			$state.go('issues.edit', {itemId: $scope.item.$id()})
+		}
+	}
+])
+.controller('IssuesEditCtrl',   [
+                '$scope', '$stateParams', '$state',
+	function (  $scope,   $stateParams,   $state) {
+		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.checkDate($scope.item)
+	}
+])
 
 angular.module('controllers.messages', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
@@ -359,123 +514,6 @@ function ($http,$scope,Project) {
   ]
 }])
 
-angular.module('resources.backlogs', ['mongoResourceHttp'])
-
-.factory('Backlog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-  var res = $mongoResourceHttp('backlogs');
-
-  res.forProject = function (projectId) {
-      return res.query({projectId:projectId},{strict:true});
-  }
-
-  return res
-}])
-
-angular.module('resources.messages', ['mongoResourceHttp'])
-
-.factory('Message', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var resource = $mongoResourceHttp('messages');
-  /*resource.prototype.getFullName = function () {
-    return this.lastName + " " + this.firstName + " (" + this.email + ")";
-  };*/
-
-  return resource;
-}]);
-
-angular.module('resources.projects', ['mongoResourceHttp']);
-angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var Project = $mongoResourceHttp('projects');
-
-  Project.forUser = function(userId, successcb, errorcb) {
-    return Project.query({}, successcb, errorcb);
-  };
-
-  Project.prototype.isProductOwner = function (userId) {
-    return this.productOwner === userId;
-  };
-  Project.prototype.canActAsProductOwner = function (userId) {
-    return !this.isScrumMaster(userId) && !this.isDevTeamMember(userId);
-  };
-  Project.prototype.isScrumMaster = function (userId) {
-    return this.processMaster === userId;
-  };
-  Project.prototype.canActAsScrumMaster = function (userId) {
-    return !this.isProductOwner(userId);
-  };
-  Project.prototype.isDevTeamMember = function (userId) {
-    return this.teamMembers.indexOf(userId) >= 0;
-  };
-  Project.prototype.canActAsDevTeamMember = function (userId) {
-    return !this.isProductOwner(userId);
-  };
-
-  Project.prototype.getRoles = function (userId) {
-    var roles = [];
-    if (this.isProductOwner(userId)) {
-      roles.push('PO');
-    } else {
-      if (this.isScrumMaster(userId)){
-        roles.push('SM');
-      }
-      if (this.isDevTeamMember(userId)){
-        roles.push('DEV');
-      }
-    }
-    return roles;
-  };
-
-  return Project;
-}]);
-
-angular.module('resources.sprints', ['mongoResourceHttp']);
-angular.module('resources.sprints').factory('Sprint', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var Sprint = $mongoResourceHttp('sprints');
-  Sprint.forProject = function (projectId) {
-    return Sprint.query({projectId:projectId});
-  };
-  return Sprint;
-}]);
-
-angular.module('resources.tasks', ['mongoResourceHttp']);
-angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var Task = $mongoResourceHttp('tasks');
-
-  Task.statesEnum = ['TODO', 'IN_DEV', 'BLOCKED', 'IN_TEST', 'DONE'];
-
-  Task.forProductBacklogItem = function (productBacklogItem) {
-    return Task.query({productBacklogItem:productBacklogItem});
-  };
-
-  Task.forSprint = function (sprintId) {
-    return Task.query({sprintId:sprintId});
-  };
-
-  Task.forUser = function (userId) {
-    return Task.query({userId:userId});
-  };
-
-  Task.forProject = function (projectId) {
-    return Task.query({projectId:projectId});
-  };
-
-  return Task;
-}]);
-
-angular.module('resources.users', ['mongoResourceHttp']);
-angular.module('resources.users').factory('User', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var userResource = $mongoResourceHttp('users');
-  /*userResource.prototype.getFullName = function () {
-    return this.lastName + " " + this.firstName + " (" + this.email + ")";
-  };*/
-
-  return userResource;
-}]);
-
 angular.module('controllers.projects', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
 , 'resources.projects'
@@ -630,6 +668,133 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 	}
 ])
 
+angular.module('resources.backlogs', ['mongoResourceHttp'])
+
+.factory('Backlog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+  var res = $mongoResourceHttp('backlogs');
+
+  res.forProject = function (projectId) {
+      return res.query({projectId:projectId},{strict:true});
+  }
+
+  return res
+}])
+
+angular.module('resources.issues', ['mongoResourceHttp'])
+
+angular.module('resources.issues').factory('Issue', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var res = $mongoResourceHttp('issues');
+
+
+  return res;
+}]);
+
+angular.module('resources.messages', ['mongoResourceHttp'])
+
+.factory('Message', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var resource = $mongoResourceHttp('messages');
+  /*resource.prototype.getFullName = function () {
+    return this.lastName + " " + this.firstName + " (" + this.email + ")";
+  };*/
+
+  return resource;
+}]);
+
+angular.module('resources.projects', ['mongoResourceHttp']);
+angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var Project = $mongoResourceHttp('projects');
+
+  Project.forUser = function(userId, successcb, errorcb) {
+    return Project.query({}, successcb, errorcb);
+  };
+
+  Project.prototype.isProductOwner = function (userId) {
+    return this.productOwner === userId;
+  };
+  Project.prototype.canActAsProductOwner = function (userId) {
+    return !this.isScrumMaster(userId) && !this.isDevTeamMember(userId);
+  };
+  Project.prototype.isScrumMaster = function (userId) {
+    return this.processMaster === userId;
+  };
+  Project.prototype.canActAsScrumMaster = function (userId) {
+    return !this.isProductOwner(userId);
+  };
+  Project.prototype.isDevTeamMember = function (userId) {
+    return this.teamMembers.indexOf(userId) >= 0;
+  };
+  Project.prototype.canActAsDevTeamMember = function (userId) {
+    return !this.isProductOwner(userId);
+  };
+
+  Project.prototype.getRoles = function (userId) {
+    var roles = [];
+    if (this.isProductOwner(userId)) {
+      roles.push('PO');
+    } else {
+      if (this.isScrumMaster(userId)){
+        roles.push('SM');
+      }
+      if (this.isDevTeamMember(userId)){
+        roles.push('DEV');
+      }
+    }
+    return roles;
+  };
+
+  return Project;
+}]);
+
+angular.module('resources.sprints', ['mongoResourceHttp']);
+angular.module('resources.sprints').factory('Sprint', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var Sprint = $mongoResourceHttp('sprints');
+  Sprint.forProject = function (projectId) {
+    return Sprint.query({projectId:projectId});
+  };
+  return Sprint;
+}]);
+
+angular.module('resources.tasks', ['mongoResourceHttp']);
+angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var Task = $mongoResourceHttp('tasks');
+
+  Task.statesEnum = ['TODO', 'IN_DEV', 'BLOCKED', 'IN_TEST', 'DONE'];
+
+  Task.forProductBacklogItem = function (productBacklogItem) {
+    return Task.query({productBacklogItem:productBacklogItem});
+  };
+
+  Task.forSprint = function (sprintId) {
+    return Task.query({sprintId:sprintId});
+  };
+
+  Task.forUser = function (userId) {
+    return Task.query({userId:userId});
+  };
+
+  Task.forProject = function (projectId) {
+    return Task.query({projectId:projectId});
+  };
+
+  return Task;
+}]);
+
+angular.module('resources.users', ['mongoResourceHttp']);
+angular.module('resources.users').factory('User', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var userResource = $mongoResourceHttp('users');
+  /*userResource.prototype.getFullName = function () {
+    return this.lastName + " " + this.firstName + " (" + this.email + ")";
+  };*/
+
+  return userResource;
+}]);
+
 angular.module('controllers.users', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
 , 'directives.dropdownMultiselect'
@@ -750,6 +915,7 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 		$scope.edit = function (item) {
 			$state.go($scope._ress+'.edit', {itemId: item.$id()})
 		}
+	
 
 		$scope.create = function () {
 			$state.go($scope._ress+'.create')
@@ -781,10 +947,34 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 	}
 ])
 .controller('UsersEditCtrl',   [
-                '$scope', '$stateParams', '$state',
-	function (  $scope,   $stateParams,   $state) {
+                '$scope', '$stateParams', '$state','$timeout',
+	function (  $scope,   $stateParams,   $state,$timeout) {
 		$scope.item = $scope.findById( $stateParams.itemId)
 		$scope.checkDate($scope.item)
+		$scope.interface = {}
+		$scope.success = false //for upload image
+        $scope.error = false
+        $scope.interface.useParser=function (responseText) {
+                    return responseText
+         }
+        $scope.$on('$dropletReady', function whenDropletReady() {
+            $scope.interface.allowedExtensions(['png', 'jpg', 'bmp', 'gif', 'svg', 'torrent'])
+            $scope.interface.setRequestUrl('upload')
+            $scope.interface.defineHTTPSuccess([/2.{2}/])
+            $scope.interface.useArray(false)
+        })
+        $scope.$on('$dropletSuccess', function onDropletSuccess(event, response, files) {
+            $scope.uploadCount = files.length
+            $scope.success     = true
+			console.log(response);
+			if($scope.uploadCount>0)
+			  $scope.item.image="uploads/"+response.names[0]
+		
+            $timeout(function timeout() {
+                $scope.success = false;
+            }, 3000)
+
+        });
 	}
 ])
 

@@ -3,12 +3,14 @@ angular.module('controllers',[
 ,'controllers.users'
 ,'controllers.projects'
 ,'controllers.backlogs'
+,'controllers.issues'
 ])
 angular.module('resources', [
  'resources.messages'
 ,'resources.users'
 ,'resources.projects'
 ,'resources.backlogs'
+,'resources.issues'
 ])
 
 angular.module('app')
@@ -16,8 +18,9 @@ angular.module('app')
 .config(['stateBuilderProvider', 
 function (stateBuilderProvider) {
    stateBuilderProvider.statesFor('User') 
-   stateBuilderProvider.statesFor('Message') 
-   stateBuilderProvider.statesFor('Project')   			
+   stateBuilderProvider.statesFor('Project')   	
+   stateBuilderProvider.statesFor('Issue') 	
+   stateBuilderProvider.statesFor('Message') 	
 }])
 .config(['uiSelectConfig', function(uiSelectConfig) {
   uiSelectConfig.theme = 'bootstrap';

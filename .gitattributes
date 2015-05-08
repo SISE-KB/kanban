@@ -8,6 +8,7 @@
 *.ejs text
 *.jade text
 
+# editby alex
 # Declare binary files
 *.png -text
 *.doc -text

@@ -14,15 +14,15 @@
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="item in data" ng-click="view(item)">
-        <td>{{item.name}}</td>
+    <tr ng-repeat="item in data" >
+         <td> <a ng-click="view(item)">{{item.name}}</a></td>
         <td>{{item.mobileNo}}</td>
         <td>{{item.type}}</td>
         <td>{{item.isAdmin?'是':'否'}}</td>
         <td>{{item.isActive?'是':'否'}}</td>
         <td ng-if="isAdmin()">
 			<button class="btn btn-danger remove" ng-click="remove(item, $index, $event)">删除</button>
-			<button class="btn btn-default" ng-click="edit(item)">修改</button>			
+			<button class="btn btn-default" ng-click="edit(item)">修改</button>		
 		</td>
     </tr>
     </tbody>
