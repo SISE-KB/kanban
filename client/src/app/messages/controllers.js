@@ -3,67 +3,13 @@ angular.module('controllers.messages', ['ui.router','ngMessages'
 , 'directives.dropdownMultiselect'
 , 'resources.messages'])  
 .controller('MessagesMainCtrl',   [
-               '$scope', '$state', '$stateParams', 'i18nNotifications','Message',
-	function ( $scope,   $state,   $stateParams,    i18nNotifications,  Message) {
-      
-		$scope._data = []//load from server
+                'crudContrllersHelp','$scope', '$state', '$stateParams','Message',
+	function ( crudContrllersHelp,  $scope,    $state,    $stateParams,  Message) {
 
-		$scope.query = ''
-		$scope.availableTags=["娱乐","科技"]
-		$scope.visited=[]
-
+		crudContrllersHelp.initMain('Message','title',$scope,   $state,   $stateParams)
 		
-		$scope.search=function() {
-			var q={'title':$scope.query}
-			Message.query(q).then(function(msgs){
-				//console.log(msgs)
-				$scope._data=msgs
-				$scope.visited=[]
-				
-		  })
-	    }
-		$scope.findById = function (id) {
-			for (var i = 0; i < $scope._data.length; i++) {
-				var rt=$scope._data[i]
-				//
-				if ($scope._data[i].$id() == id)
-					return rt
-			}
-			return null
-		}
-		$scope.removeFromArray = function (data,item) {
-			var index = data.indexOf(item);
-			if (index > -1)
-				data.splice(index, 1);
-		}
-		$scope.addToVisited = function (item) {
-			var index = $scope.visited.indexOf(item);
-			if (index > -1) 
-			$scope.visited.splice(index, 1);
-			$scope.visited.push(item)
-			while ($scope.visited.length>10)
-				$scope.visited.shift()
-		}
-		$scope.onSave = function (item) {
-			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item.title})
-			//console.log($state.current.name)
-			var idx=$state.current.name.indexOf('create')
-			//console.log(idx)
-			if(idx > -1){
-				$scope._data.push(item)
-				
-			}
-			$state.go('messages.list', $stateParams) 
-		}
-		$scope.onError = function() {
-			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
-		}
-		$scope.onRemove = function(item) {
-			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item.title})
-			$scope.removeFromArray($scope._data,item)
-			$scope.removeFromArray($scope.visited,item)
-			$state.go('messages.list', $stateParams) 
-		}
+		$scope.availableTags=["娱乐","科技"]
+			
 		$scope.checkDate= function(item){
 			var now = new Date(Date.now())
 			if(!item.recDate)
@@ -75,72 +21,26 @@ angular.module('controllers.messages', ['ui.router','ngMessages'
 	}
 ])
 .controller('MessagesListCtrl',   [
-                '$scope', '$state', '$stateParams', 'i18nNotifications', 
-	function (  $scope,   $state,   $stateParams,    i18nNotifications) {
-		
-		$scope.data = []// display items
-		$scope.numPerPage=10
-		$scope.currentPage = 1
-		$scope.totalItems=0
-		
-		$scope.setPage = function (pageNo) {
-			$scope.currentPage = pageNo
-		}
-       
-		$scope.maxSize = 5
-
-
-		$scope.$watch("currentPage + numPerPage + _data", function() {
-			$scope.totalItems = $scope._data.length
-			var begin = (($scope.currentPage - 1) * $scope.numPerPage)
-				, end = begin + $scope.numPerPage
-
-			if(end>$scope._data.length) 
-				   end=$scope._data.length
-
-			$scope.data = $scope._data.slice(begin, end)
-		})
-  
-		$scope.remove = function(item, $index, $event) {
-			// Don't let the click bubble up to the ng-click on the enclosing div, which will try to trigger
-			// an edit of this item.
-			$event.stopPropagation()
-			item.$remove().then(function() {
-				$scope.onRemove(item)
-			}, function() {
-				i18nNotifications.pushForCurrentRoute('crud.user.remove.error', 'danger', {id : item.title})
-			})
-		}
-		$scope.view = function (item) {
-			$state.go('messages.detail', {itemId: item.$id()})
-		}
-	
-		$scope.create = function () {
-			$state.go('messages.create')
-		}
+                'crudContrllersHelp','$scope', '$state', '$stateParams', 
+	function (  crudContrllersHelp,$scope,   $state,   $stateParams) {
+		crudContrllersHelp.initList('Message','title',$scope,   $state,   $stateParams)
 	}
 ])
+.controller('MessagesDetailCtrl',   [
+                'crudContrllersHelp','$scope','$stateParams', '$state',
+	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
+		crudContrllersHelp.initDetail('Message','title',$scope,   $state,   $stateParams)
+	}
+])
+
 .controller('MessagesCreateCtrl',   [
                 '$scope', 'Message',
 	function (  $scope,   Message) {
 		$scope.item = new Message()
-		/*var now=new Date()
-		$scope.item.recDate=now
-		$scope.item.closeDate= now.setDate(now.getDate()+14)*/
 		$scope.checkDate($scope.item)
 	}
 ])
-.controller('MessagesDetailCtrl',   [
-                '$scope','$stateParams', '$state',
-	function (  $scope,$stateParams,   $state) {
-		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.addToVisited($scope.item)
-		
-		$scope.edit = function () {
-			$state.go('messages.edit', {itemId: $scope.item.$id()})
-		}
-	}
-])
+
 .controller('MessagesEditCtrl',   [
                 '$scope', '$stateParams', '$state',
 	function (  $scope,   $stateParams,   $state) {

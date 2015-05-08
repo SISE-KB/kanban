@@ -5,7 +5,7 @@ function ($http, $q,SERVER_CFG) {
 
     function MongoResourceFactory(collectionName) {
         var dbUrl = SERVER_CFG.URL+'/db/';
-		//console.log(dbUrl);
+		var ress=collectionName;
         var collectionUrl = dbUrl + collectionName;
         var defaultParams = {};//apiKey: config.API_KEY
 
@@ -74,7 +74,12 @@ function ($http, $q,SERVER_CFG) {
                 return response.data.values;
             });
         };*/
-
+       Resource.getName=function () {
+			//var rt=ress;
+			//if(!!single) rt=rt.substr(0,ress.length-1);
+			//if(!!capitalFirst) rt=rt.toUpperCase().substr(0,1)+rt.substr(1,rt.length-1);
+			return ress
+		};
         Resource.getById = function (id) {
             return $http.get(collectionUrl + '/' + id, {params: defaultParams}).then(resourceRespTransform);
         };
@@ -86,9 +91,6 @@ function ($http, $q,SERVER_CFG) {
             });
             return Resource.query({_id: {$in: qin}});
         };
-
-        //instance methods
-
         Resource.prototype.$id = function () {
             if (this._id && this._id.$oid) {
                 return this._id.$oid;
@@ -96,6 +98,7 @@ function ($http, $q,SERVER_CFG) {
                 return this._id;
             }
         };
+ 
 
         Resource.prototype.$save = function () {
             return $http.post(collectionUrl, this, {params: defaultParams}).then(resourceRespTransform);

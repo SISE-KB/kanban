@@ -63,6 +63,143 @@ function ($stateProvider,$urlRouterProvider) {
 
 
 
+angular.module('app')
+.factory('crudContrllersHelp', [
+          '$injector',
+function ($injector) {
+ var initMain = function (ResName,searchField,$scope,   $state,   $stateParams) {
+
+		var Res = $injector.get(ResName);
+		var i18nNotifications = $injector.get('i18nNotifications');
+
+		var ressName=Res.getName()
+
+		$scope._data = []//load from server
+		$scope.users=[]
+
+		$scope.query = ''
+		$scope.visited=[]
+
+		$scope.search=function() {
+			var q={}
+			q[searchField]=$scope.query
+			Res.query(q).then(function(ds){
+				$scope._data=ds
+				$scope.visited=[]
+				$state.go(ressName+'.list') 
+		  })
+	    }
+		$scope.findById = function (id) {
+			for (var i = 0; i < $scope._data.length; i++) {
+				var rt=$scope._data[i]
+				if ($scope._data[i].$id() == id)
+					return rt
+			}
+			return null
+		}
+		
+		$scope.removeFromArray = function (data,item) {
+			var index = data.indexOf(item);
+			if (index > -1)
+				data.splice(index, 1);
+		}
+		$scope.addToVisited = function (item) {
+			var index = $scope.visited.indexOf(item);
+			if (index > -1) 
+			$scope.visited.splice(index, 1);
+			$scope.visited.push(item)
+			while ($scope.visited.length>10)
+				$scope.visited.shift()
+		}
+		$scope.onSave = function (item) {
+			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item[searchField]})
+			//console.log($state.current.name)
+			var idx=$state.current.name.indexOf('create')
+			//console.log(idx)
+			if(idx > -1){
+				$scope._data.push(item)
+			}
+			$state.go(ressName+'.list', $stateParams) 
+		}
+		$scope.onError = function() {
+			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
+		}
+		$scope.onRemove = function(item) {
+			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item[searchField]})
+			$scope.removeFromArray($scope._data,item)
+			$scope.removeFromArray($scope.visited,item)
+			$state.go(ressName+'.list', $stateParams) 
+		}
+	
+  }
+var initList = function (ResName,nameField,$scope,   $state,   $stateParams) {
+		var i18nNotifications = $injector.get('i18nNotifications')
+		var Res = $injector.get(ResName)
+
+  		$scope.data = []// display items
+		$scope.numPerPage=10
+		$scope.currentPage = 1
+		$scope.totalItems=0
+		
+		$scope.setPage = function (pageNo) {
+			$scope.currentPage = pageNo
+		}
+       
+		$scope.maxSize = 5
+
+
+		$scope.$watch("currentPage + numPerPage + _data", function() {
+			$scope.totalItems = $scope._data.length
+			var begin = (($scope.currentPage - 1) * $scope.numPerPage)
+				, end = begin + $scope.numPerPage
+
+			if(end>$scope._data.length) 
+				   end=$scope._data.length
+
+			$scope.data = $scope._data.slice(begin, end)
+		})
+  
+		$scope.remove = function(item, $index, $event) {
+			// Don't let the click bubble up to the ng-click on the enclosing div, which will try to trigger
+			// an edit of this item.
+			$event.stopPropagation()
+			item.$remove().then(function() {
+				$scope.onRemove(item)
+			}, function() {
+				i18nNotifications.pushForCurrentRoute('crud.user.remove.error', 'danger', {id : item[nameField]})
+			})
+		}
+		var ressName=Res.getName(false,false)
+		$scope.view = function (item) {
+			$state.go(ressName+'.detail', {itemId: item.$id()})
+		}
+	
+		$scope.create = function () {
+			$state.go(ressName+'.create')
+		}
+		
+}
+var initDetail = function (ResName,nameField,$scope,   $state,   $stateParams) {
+		var i18nNotifications = $injector.get('i18nNotifications')
+		var Res = $injector.get(ResName)
+		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.addToVisited($scope.item)
+		var ressName=Res.getName(false,false)
+		$scope.edit = function () {
+			$state.go(ressName+'.edit', {itemId: $scope.item.$id()})
+		}
+		$scope.list = function () {
+			$state.go(ressName+'.list')
+		}
+}
+  return {
+	  initMain:initMain
+	,initDetail:initDetail
+	,initList:initList  
+  }
+}])
+  
+
 angular.module('app').constant('I18N.MESSAGES', {
   'errors.state.changeError':'前端状态转换出错',
   'crud.save.success':"成功保存'{{id}}'",
@@ -188,68 +325,15 @@ angular.module('controllers.issues',
 ])  
 
 .controller('IssuesMainCtrl',   [
-               '$scope', '$state', '$stateParams', 'i18nNotifications','Issue','User',
-	function ( $scope,   $state,   $stateParams,    i18nNotifications,  Issue,User) {
-      
-		$scope._data = []//load from server
-		$scope.query = ''
-		$scope.visited=[]
-		$scope.users=[]
-
+               'crudContrllersHelp','$scope', '$state', '$stateParams', 'User',
+	function ( crudContrllersHelp,$scope,   $state,   $stateParams,   User) {
+		
+       crudContrllersHelp.initMain('Issue','name',$scope,   $state,   $stateParams)
+   
 		User.all().then(function(ds){
 			$scope.users =ds
 	   })
-		$scope.search=function() {
-			var q={'name':$scope.query}
-			Issue.query(q).then(function(msgs){
-				//console.log(msgs)
-				$scope._data=msgs
-				$scope.visited=[]
-				
-		  })
-	    }
-		$scope.findById = function (id) {
-			for (var i = 0; i < $scope._data.length; i++) {
-				var rt=$scope._data[i]
-				//
-				if ($scope._data[i].$id() == id)
-					return rt
-			}
-			return null
-		}
-		$scope.removeFromArray = function (data,item) {
-			var index = data.indexOf(item);
-			if (index > -1)
-				data.splice(index, 1);
-		}
-		$scope.addToVisited = function (item) {
-			var index = $scope.visited.indexOf(item);
-			if (index > -1) 
-			$scope.visited.splice(index, 1);
-			$scope.visited.push(item)
-			while ($scope.visited.length>10)
-				$scope.visited.shift()
-		}
-		$scope.onSave = function (item) {
-			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item.name})
-			//console.log($state.current.name)
-			var idx=$state.current.name.indexOf('create')
-			//console.log(idx)
-			if(idx > -1){
-				$scope._data.push(item)
-				
-			}
-			$state.go('issues.list', $stateParams) 
-		}
-		$scope.onError = function() {
-			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
-		}
-		$scope.onRemove = function(item) {
-			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item.name})
-			$scope.removeFromArray($scope._data,item)
-			$scope.removeFromArray($scope.visited,item)
-			$state.go('issues.list', $stateParams) 
-		}
+	
 		$scope.checkDate= function(item){
 			var now = new Date(Date.now())
 			if(!item.regDate)
@@ -261,51 +345,18 @@ angular.module('controllers.issues',
 	}
 ])
 .controller('IssuesListCtrl',   [
-                '$scope', '$state', '$stateParams', 'i18nNotifications', 
-	function (  $scope,   $state,   $stateParams,    i18nNotifications) {
-		
-		$scope.data = []// display items
-		$scope.numPerPage=10
-		$scope.currentPage = 1
-		$scope.totalItems=0
-		
-		$scope.setPage = function (pageNo) {
-			$scope.currentPage = pageNo
-		}
-       
-		$scope.maxSize = 5
-
-
-		$scope.$watch("currentPage + numPerPage + _data", function() {
-			$scope.totalItems = $scope._data.length
-			var begin = (($scope.currentPage - 1) * $scope.numPerPage)
-				, end = begin + $scope.numPerPage
-
-			if(end>$scope._data.length) 
-				   end=$scope._data.length
-
-			$scope.data = $scope._data.slice(begin, end)
-		})
-  
-		$scope.remove = function(item, $index, $event) {
-			// Don't let the click bubble up to the ng-click on the enclosing div, which will try to trigger
-			// an edit of this item.
-			$event.stopPropagation()
-			item.$remove().then(function() {
-				$scope.onRemove(item)
-			}, function() {
-				i18nNotifications.pushForCurrentRoute('crud.user.remove.error', 'danger', {id : item.name})
-			})
-		}
-		$scope.view = function (item) {
-			$state.go('issues.list.detail', {itemId: item.$id()})
-		}
-	
-		$scope.create = function () {
-			$state.go('issues.create')
-		}
+                 'crudContrllersHelp','$scope', '$state', '$stateParams', 
+	function ( crudContrllersHelp, $scope,   $state,   $stateParams) {
+		crudContrllersHelp.initList('Issue','name',$scope,   $state,   $stateParams)
 	}
 ])
+.controller('IssuesDetailCtrl',   [
+                 'crudContrllersHelp','$scope','$stateParams', '$state',
+	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
+		crudContrllersHelp.initDetail('Issue','name',$scope,   $state,   $stateParams)
+	}
+])
+
 .controller('IssuesCreateCtrl',   [
                 '$scope', 'Issue',
 	function (  $scope,   Issue) {
@@ -313,17 +364,7 @@ angular.module('controllers.issues',
 		$scope.checkDate($scope.item)
 	}
 ])
-.controller('IssuesDetailCtrl',   [
-                '$scope','$stateParams', '$state',
-	function (  $scope,$stateParams,   $state) {
-		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.addToVisited($scope.item)
-		
-		$scope.edit = function () {
-			$state.go('issues.edit', {itemId: $scope.item.$id()})
-		}
-	}
-])
+
 .controller('IssuesEditCtrl',   [
                 '$scope', '$stateParams', '$state',
 	function (  $scope,   $stateParams,   $state) {
@@ -337,67 +378,13 @@ angular.module('controllers.messages', ['ui.router','ngMessages'
 , 'directives.dropdownMultiselect'
 , 'resources.messages'])  
 .controller('MessagesMainCtrl',   [
-               '$scope', '$state', '$stateParams', 'i18nNotifications','Message',
-	function ( $scope,   $state,   $stateParams,    i18nNotifications,  Message) {
-      
-		$scope._data = []//load from server
+                'crudContrllersHelp','$scope', '$state', '$stateParams','Message',
+	function ( crudContrllersHelp,  $scope,    $state,    $stateParams,  Message) {
 
-		$scope.query = ''
-		$scope.availableTags=["娱乐","科技"]
-		$scope.visited=[]
-
+		crudContrllersHelp.initMain('Message','title',$scope,   $state,   $stateParams)
 		
-		$scope.search=function() {
-			var q={'title':$scope.query}
-			Message.query(q).then(function(msgs){
-				//console.log(msgs)
-				$scope._data=msgs
-				$scope.visited=[]
-				
-		  })
-	    }
-		$scope.findById = function (id) {
-			for (var i = 0; i < $scope._data.length; i++) {
-				var rt=$scope._data[i]
-				//
-				if ($scope._data[i].$id() == id)
-					return rt
-			}
-			return null
-		}
-		$scope.removeFromArray = function (data,item) {
-			var index = data.indexOf(item);
-			if (index > -1)
-				data.splice(index, 1);
-		}
-		$scope.addToVisited = function (item) {
-			var index = $scope.visited.indexOf(item);
-			if (index > -1) 
-			$scope.visited.splice(index, 1);
-			$scope.visited.push(item)
-			while ($scope.visited.length>10)
-				$scope.visited.shift()
-		}
-		$scope.onSave = function (item) {
-			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item.title})
-			//console.log($state.current.name)
-			var idx=$state.current.name.indexOf('create')
-			//console.log(idx)
-			if(idx > -1){
-				$scope._data.push(item)
-				
-			}
-			$state.go('messages.list', $stateParams) 
-		}
-		$scope.onError = function() {
-			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
-		}
-		$scope.onRemove = function(item) {
-			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item.title})
-			$scope.removeFromArray($scope._data,item)
-			$scope.removeFromArray($scope.visited,item)
-			$state.go('messages.list', $stateParams) 
-		}
+		$scope.availableTags=["娱乐","科技"]
+			
 		$scope.checkDate= function(item){
 			var now = new Date(Date.now())
 			if(!item.recDate)
@@ -409,72 +396,26 @@ angular.module('controllers.messages', ['ui.router','ngMessages'
 	}
 ])
 .controller('MessagesListCtrl',   [
-                '$scope', '$state', '$stateParams', 'i18nNotifications', 
-	function (  $scope,   $state,   $stateParams,    i18nNotifications) {
-		
-		$scope.data = []// display items
-		$scope.numPerPage=10
-		$scope.currentPage = 1
-		$scope.totalItems=0
-		
-		$scope.setPage = function (pageNo) {
-			$scope.currentPage = pageNo
-		}
-       
-		$scope.maxSize = 5
-
-
-		$scope.$watch("currentPage + numPerPage + _data", function() {
-			$scope.totalItems = $scope._data.length
-			var begin = (($scope.currentPage - 1) * $scope.numPerPage)
-				, end = begin + $scope.numPerPage
-
-			if(end>$scope._data.length) 
-				   end=$scope._data.length
-
-			$scope.data = $scope._data.slice(begin, end)
-		})
-  
-		$scope.remove = function(item, $index, $event) {
-			// Don't let the click bubble up to the ng-click on the enclosing div, which will try to trigger
-			// an edit of this item.
-			$event.stopPropagation()
-			item.$remove().then(function() {
-				$scope.onRemove(item)
-			}, function() {
-				i18nNotifications.pushForCurrentRoute('crud.user.remove.error', 'danger', {id : item.title})
-			})
-		}
-		$scope.view = function (item) {
-			$state.go('messages.detail', {itemId: item.$id()})
-		}
-	
-		$scope.create = function () {
-			$state.go('messages.create')
-		}
+                'crudContrllersHelp','$scope', '$state', '$stateParams', 
+	function (  crudContrllersHelp,$scope,   $state,   $stateParams) {
+		crudContrllersHelp.initList('Message','title',$scope,   $state,   $stateParams)
 	}
 ])
+.controller('MessagesDetailCtrl',   [
+                'crudContrllersHelp','$scope','$stateParams', '$state',
+	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
+		crudContrllersHelp.initDetail('Message','title',$scope,   $state,   $stateParams)
+	}
+])
+
 .controller('MessagesCreateCtrl',   [
                 '$scope', 'Message',
 	function (  $scope,   Message) {
 		$scope.item = new Message()
-		/*var now=new Date()
-		$scope.item.recDate=now
-		$scope.item.closeDate= now.setDate(now.getDate()+14)*/
 		$scope.checkDate($scope.item)
 	}
 ])
-.controller('MessagesDetailCtrl',   [
-                '$scope','$stateParams', '$state',
-	function (  $scope,$stateParams,   $state) {
-		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.addToVisited($scope.item)
-		
-		$scope.edit = function () {
-			$state.go('messages.edit', {itemId: $scope.item.$id()})
-		}
-	}
-])
+
 .controller('MessagesEditCtrl',   [
                 '$scope', '$stateParams', '$state',
 	function (  $scope,   $stateParams,   $state) {
@@ -520,124 +461,33 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 , 'resources.users'
 ])  
 .controller('ProjectsMainCtrl',   [
-               '$scope', '$state', '$stateParams', 'i18nNotifications','Project','User',
-	function ( $scope,   $state,   $stateParams,    i18nNotifications, Project,User) {
-      
-		$scope._data = []//load from server
-		$scope.users=[]
-
-		$scope.query = ''
-	//	$scope.availableStates=['计划','开发中','完成','失败']
-		$scope.visited=[]
-
-		User.all().then(function(ds){
-				//console.log(ds)
+               'crudContrllersHelp','$scope', '$state', '$stateParams', 'i18nNotifications','Project','User',
+	function ( crudContrllersHelp,$scope,   $state,   $stateParams,    i18nNotifications, Project,User) {
+ 		User.all().then(function(ds){
 			$scope.users =ds
-	   })
-		$scope.search=function() {
-			var q={'name':$scope.query}
-			Project.query(q).then(function(ds){
-				//console.log(ds)
-				$scope._data=ds
-				$scope.visited=[]
-				$state.go('projects.list') 
-		  })
-	    }
-		$scope.findById = function (id) {
-			for (var i = 0; i < $scope._data.length; i++) {
-				var rt=$scope._data[i]
-				//
-				if ($scope._data[i].$id() == id)
-					return rt
-			}
-			return null
-		}
-		$scope.removeFromArray = function (data,item) {
-			var index = data.indexOf(item);
-			if (index > -1)
-				data.splice(index, 1);
-		}
-		$scope.addToVisited = function (item) {
-			var index = $scope.visited.indexOf(item);
-			if (index > -1) 
-			$scope.visited.splice(index, 1);
-			$scope.visited.push(item)
-			while ($scope.visited.length>10)
-				$scope.visited.shift()
-		}
-		$scope.onSave = function (item) {
-			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item.name})
-			//console.log($state.current.name)
-			var idx=$state.current.name.indexOf('create')
-			//console.log(idx)
-			if(idx > -1){
-				$scope._data.push(item)
-				
-			}
-			$state.go('projects.list', $stateParams) 
-		}
-		$scope.onError = function() {
-			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
-		}
-		$scope.onRemove = function(item) {
-			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item.name})
-			$scope.removeFromArray($scope._data,item)
-			$scope.removeFromArray($scope.visited,item)
-			$state.go('projects.list', $stateParams) 
-		}
-	
-
+		})
+		crudContrllersHelp.initMain('Project','name',$scope,   $state,   $stateParams)     
 	}
 ])
 .controller('ProjectsListCtrl',   [
-                '$scope', '$state', '$stateParams', 'i18nNotifications', 
-	function (  $scope,   $state,   $stateParams,    i18nNotifications) {
-		
-		$scope.data = []// display items
-		$scope.numPerPage=10
-		$scope.currentPage = 1
-		$scope.totalItems=0
-		
-		$scope.setPage = function (pageNo) {
-			$scope.currentPage = pageNo
-		}
-       
-		$scope.maxSize = 5
-
-
-		$scope.$watch("currentPage + numPerPage + _data", function() {
-			$scope.totalItems = $scope._data.length
-			var begin = (($scope.currentPage - 1) * $scope.numPerPage)
-				, end = begin + $scope.numPerPage
-
-			if(end>$scope._data.length) 
-				   end=$scope._data.length
-
-			$scope.data = $scope._data.slice(begin, end)
-		})
-  
-		$scope.remove = function(item, $index, $event) {
-			// Don't let the click bubble up to the ng-click on the enclosing div, which will try to trigger
-			// an edit of this item.
-			$event.stopPropagation()
-			item.$remove().then(function() {
-				$scope.onRemove(item)
-			}, function() {
-				i18nNotifications.pushForCurrentRoute('crud.user.remove.error', 'danger', {id : item.name})
-			})
-		}
-		$scope.view = function (item) {
-			$state.go('projects.detail', {itemId: item.$id()})
-		}
-	
-		$scope.create = function () {
-			$state.go('projects.create')
-		}
+                'crudContrllersHelp','$scope', '$state', '$stateParams', 'i18nNotifications', 
+	function ( crudContrllersHelp, $scope,   $state,   $stateParams,    i18nNotifications) {
+		crudContrllersHelp.initList('Project','name',$scope,   $state,   $stateParams)
 		$scope.backlogs=function (item) {
 			$state.go('backlogs-list', {projectId: item.$id()})
 		}
+	
+
 	}
 ])
+.controller('ProjectsDetailCtrl',   [
+                'crudContrllersHelp','$scope','$stateParams', '$state',
+	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
+		crudContrllersHelp.initDetail('Project','name',$scope,   $state,   $stateParams)
+
+	}
+])
+
 .controller('ProjectsCreateCtrl',   [
                 '$scope', 'Project',
 	function (  $scope,   Project) {
@@ -647,23 +497,11 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 
 	}
 ])
-.controller('ProjectsDetailCtrl',   [
-                '$scope','$stateParams', '$state',
-	function (  $scope,$stateParams,   $state) {
-		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.addToVisited($scope.item)
-		
-		$scope.edit = function () {
-			$state.go('projects.edit', {itemId: $scope.item.$id()})
-		}
-	}
-])
+
 .controller('ProjectsEditCtrl',   [
                 '$scope', '$stateParams', '$state',
 	function (  $scope,   $stateParams,   $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
-		//$scope.userNameFilter
-		
 
 	}
 ])
@@ -800,70 +638,12 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 , 'directives.dropdownMultiselect'
 , 'resources.users'])  
 .controller('UsersMainCtrl',   [
-               '$scope', '$state', '$stateParams', 'i18nNotifications', 'User',
-	function ( $scope,   $state,   $stateParams,    i18nNotifications,User) {
-        $scope._ress="users"
-		$scope._data =[]//load from server
-		$scope.data = []// display items
+               'crudContrllersHelp','$scope', '$state', '$stateParams', 
+	function ( crudContrllersHelp,$scope,   $state,   $stateParams) {
 		
+		crudContrllersHelp.initMain('User','name',$scope,   $state,   $stateParams)
 		$scope.availableSkills=['协调','后端编码','前端编码','2D做图','3D建模','文档写作','测试']
-		$scope.visited=[]
-		
-		$scope.query = ''
-		$scope.search=function() {
-			var q={'name':$scope.query}
-			//console.log(q)
-			User.query(q).then(function(msgs){
-				$scope._data=msgs
-				$scope.visited=[]
-				$state.go($scope._ress+'.list', $stateParams) 
-				
-		  })
-	    }
 
-		$scope.findById = function (id) {
-			//console.log($scope._data.length)
-			for (var i = 0; i < $scope._data.length; i++) {
-				var rt=$scope._data[i]
-				//
-				if (rt.$id() == id)
-					return rt
-			}
-			return null
-		}
-		$scope.removeFromArray = function (data,item) {
-			var index = data.indexOf(item);
-			if (index > -1)
-				data.splice(index, 1);
-		}
-		$scope.addToVisited = function (item) {
-			var index = $scope.visited.indexOf(item);
-			if (index > -1) 
-			$scope.visited.splice(index, 1);
-			$scope.visited.push(item)
-			while ($scope.visited.length>10)
-				$scope.visited.shift()
-		}
-		$scope.onSave = function (item) {
-			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item.name})
-			//console.log($state.current.name)
-			var idx=$state.current.name.indexOf('create')
-			//console.log(idx)
-			if(idx > -1){
-				$scope._data.push(item)
-				
-			}
-			$state.go($scope._ress+'.list', $stateParams) 
-		}
-		$scope.onError = function() {
-			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
-		}
-		$scope.onRemove = function(item) {
-			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item.name})
-			$scope.removeFromArray($scope._data,item)
-			$scope.removeFromArray($scope.visited,item)
-			$state.go($scope._ress+'.list', $stateParams) 
-		}
 		$scope.checkDate= function(item){
 			var now = new Date(Date.now())
 			if(!item.regDate)
@@ -872,54 +652,18 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 
 	}
 ])
+.controller('UsersDetailCtrl',   [
+               'crudContrllersHelp', '$scope','$stateParams', '$state',
+	function ( crudContrllersHelp,$scope,  $stateParams,    $state) {
+		crudContrllersHelp.initDetail('Message','title',$scope,   $state,   $stateParams)
+		
+	}
+])
+
 .controller('UsersListCtrl',   [
-                '$scope', '$state', '$stateParams', 'i18nNotifications', 'User',
-	function (  $scope,   $state,   $stateParams,    i18nNotifications,  User) {
-		
-
-		$scope.numPerPage=10
-		$scope.currentPage = 1
-		$scope.totalItems=0
-		$scope.maxSize = 5
-		
-				
-		$scope.setPage = function (pageNo) {
-			$scope.currentPage = pageNo
-		}
-
-
-		$scope.$watch("currentPage + numPerPage + _data", function() {
-			$scope.totalItems = $scope._data.length
-			var begin = (($scope.currentPage - 1) * $scope.numPerPage)
-				, end = begin + $scope.numPerPage
-
-			if(end>$scope._data.length) 
-				   end=$scope._data.length
-
-			$scope.data = $scope._data.slice(begin, end)
-		})
-  
-		$scope.remove = function(item, $index, $event) {
-			// Don't let the click bubble up to the ng-click on the enclosing div, which will try to trigger
-			// an edit of this item.
-			$event.stopPropagation()
-			item.$remove().then(function() {
-				$scope.onRemove(item)
-			}, function() {
-				i18nNotifications.pushForCurrentRoute('crud.user.remove.error', 'danger', {id : item.name})
-			})
-		}
-		$scope.view = function (item) {
-			$state.go($scope._ress+'.detail', {itemId: item.$id()})
-		}
-		$scope.edit = function (item) {
-			$state.go($scope._ress+'.edit', {itemId: item.$id()})
-		}
-	
-
-		$scope.create = function () {
-			$state.go($scope._ress+'.create')
-		}
+                'crudContrllersHelp','$scope', '$state', '$stateParams',
+	function ( crudContrllersHelp, $scope,   $state,   $stateParams) {
+		crudContrllersHelp.initList('User','name',$scope,   $state,   $stateParams)
 	}
 ])
 .controller('UsersCreateCtrl',   [
@@ -931,21 +675,7 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 		$scope.checkDate($scope.item)
 	}
 ])
-.controller('UsersDetailCtrl',   [
-                '$scope','$stateParams', '$state',
-	function ( $scope,  $stateParams,    $state) {
-		$scope.item = $scope.findById( $stateParams.itemId)
-		
-		$scope.addToVisited($scope.item)
-		
-		$scope.edit = function () {
-			$state.go($scope._ress+'.edit', {itemId: $scope.item.$id()})
-		}
-		$scope.list = function () {
-			$state.go($scope._ress+'.list')
-		}
-	}
-])
+
 .controller('UsersEditCtrl',   [
                 '$scope', '$stateParams', '$state','$timeout',
 	function (  $scope,   $stateParams,   $state,$timeout) {
