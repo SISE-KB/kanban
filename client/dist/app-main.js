@@ -652,18 +652,17 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 
 	}
 ])
-.controller('UsersDetailCtrl',   [
-               'crudContrllersHelp', '$scope','$stateParams', '$state',
-	function ( crudContrllersHelp,$scope,  $stateParams,    $state) {
-		crudContrllersHelp.initDetail('Message','title',$scope,   $state,   $stateParams)
-		
-	}
-])
-
 .controller('UsersListCtrl',   [
                 'crudContrllersHelp','$scope', '$state', '$stateParams',
 	function ( crudContrllersHelp, $scope,   $state,   $stateParams) {
 		crudContrllersHelp.initList('User','name',$scope,   $state,   $stateParams)
+	}
+])
+.controller('UsersDetailCtrl',   [
+               'crudContrllersHelp', '$scope','$stateParams', '$state',
+	function ( crudContrllersHelp,$scope,  $stateParams,    $state) {
+		crudContrllersHelp.initDetail('User','name',$scope,   $state,   $stateParams)
+		
 	}
 ])
 .controller('UsersCreateCtrl',   [
