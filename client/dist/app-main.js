@@ -23,7 +23,7 @@ function ($stateProvider,$urlRouterProvider) {
 }])
 .run(
   [          '$rootScope', '$state', '$stateParams','security',
-    function ($rootScope,   $state,   $stateParams,security,stateBuilder) {
+    function ($rootScope,   $state,   $stateParams,security) {
       $rootScope.$state = $state
       $rootScope.$stateParams = $stateParams
       $rootScope.currentUser=security.requestCurrentUser()
@@ -373,6 +373,36 @@ angular.module('controllers.issues',
 	}
 ])
 
+angular.module('prj-dashboard', ['ui.router','resources.projects'])
+
+.config(['$stateProvider', function ($stateProvider) {
+  $stateProvider.state('prj-dashboard', {
+    templateUrl:'views/myprojects/prj-dashboard.tpl.html',
+    controller:'ProjectDashboardCtrl',
+  })
+}])
+
+.controller('ProjectDashboardCtrl', [
+          '$http','$scope', 'Project',
+function ($http,$scope,Project) {
+	$scope.projects = [
+	 {_id:1,name:'prj1'}
+	,{_id:2,name:'prj2'}]
+	var baseURL= 'http://localhost:3000/api/'
+  $http.post(baseURL+'project/projectsForUser',{userid:'admin'})
+  .then(function(resp){
+	  console.log('api--',resp.data)
+  })
+  /*Project.all().then(function(prjs){
+	  $scope.projects = prjs
+	  console.log(prjs[0].name)
+  })*/
+  $scope.tasks = [
+      {name:'T1',estimation:2,remaining:1}
+     ,{name:'T2',estimation:6,remaining:4}
+  ]
+}])
+
 angular.module('controllers.messages', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
 , 'directives.dropdownMultiselect'
@@ -425,87 +455,6 @@ angular.module('controllers.messages', ['ui.router','ngMessages'
 	}
 ])
 
-angular.module('prj-dashboard', ['ui.router','resources.projects'])
-
-.config(['$stateProvider', function ($stateProvider) {
-  $stateProvider.state('prj-dashboard', {
-    templateUrl:'views/myprojects/prj-dashboard.tpl.html',
-    controller:'ProjectDashboardCtrl',
-  })
-}])
-
-.controller('ProjectDashboardCtrl', [
-          '$http','$scope', 'Project',
-function ($http,$scope,Project) {
-	$scope.projects = [
-	 {_id:1,name:'prj1'}
-	,{_id:2,name:'prj2'}]
-	var baseURL= 'http://localhost:3000/api/'
-  $http.post(baseURL+'project/projectsForUser',{userid:'admin'})
-  .then(function(resp){
-	  console.log('api--',resp.data)
-  })
-  /*Project.all().then(function(prjs){
-	  $scope.projects = prjs
-	  console.log(prjs[0].name)
-  })*/
-  $scope.tasks = [
-      {name:'T1',estimation:2,remaining:1}
-     ,{name:'T2',estimation:6,remaining:4}
-  ]
-}])
-
-angular.module('controllers.projects', ['ui.router','ngMessages'
-, 'services.i18nNotifications'
-, 'resources.projects'
-, 'resources.users'
-])  
-.controller('ProjectsMainCtrl',   [
-               'crudContrllersHelp','$scope', '$state', '$stateParams', 'i18nNotifications','Project','User',
-	function ( crudContrllersHelp,$scope,   $state,   $stateParams,    i18nNotifications, Project,User) {
- 		User.all().then(function(ds){
-			$scope.users =ds
-		})
-		crudContrllersHelp.initMain('Project','name',$scope,   $state,   $stateParams)     
-	}
-])
-.controller('ProjectsListCtrl',   [
-                'crudContrllersHelp','$scope', '$state', '$stateParams', 'i18nNotifications', 
-	function ( crudContrllersHelp, $scope,   $state,   $stateParams,    i18nNotifications) {
-		crudContrllersHelp.initList('Project','name',$scope,   $state,   $stateParams)
-		$scope.backlogs=function (item) {
-			$state.go('backlogs-list', {projectId: item.$id()})
-		}
-	
-
-	}
-])
-.controller('ProjectsDetailCtrl',   [
-                'crudContrllersHelp','$scope','$stateParams', '$state',
-	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
-		crudContrllersHelp.initDetail('Project','name',$scope,   $state,   $stateParams)
-
-	}
-])
-
-.controller('ProjectsCreateCtrl',   [
-                '$scope', 'Project',
-	function (  $scope,   Project) {
-		$scope.item = new Project()
-		$scope.item.iterationDuration=4
-		$scope.item.isSample=false
-
-	}
-])
-
-.controller('ProjectsEditCtrl',   [
-                '$scope', '$stateParams', '$state',
-	function (  $scope,   $stateParams,   $state) {
-		$scope.item = $scope.findById( $stateParams.itemId)
-
-	}
-])
-
 angular.module('resources.backlogs', ['mongoResourceHttp'])
 
 .factory('Backlog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
@@ -545,8 +494,9 @@ angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', f
 
   var Project = $mongoResourceHttp('projects');
 
-  Project.forUser = function(userId, successcb, errorcb) {
-    return Project.query({}, successcb, errorcb);
+  Project.forProductMgr = function(userId) {
+    //return Project.query({}, successcb, errorcb);
+	return Project.query({productOwner:userId},{strict:true});
   };
 
   Project.prototype.isProductOwner = function (userId) {
@@ -632,6 +582,69 @@ angular.module('resources.users').factory('User', ['$mongoResourceHttp', functio
 
   return userResource;
 }]);
+
+angular.module('controllers.projects', ['ui.router','ngMessages'
+, 'services.i18nNotifications'
+, 'resources.projects'
+, 'resources.users'
+])  
+.controller('ProjectsMainCtrl',   [
+               'crudContrllersHelp','$scope', '$state', '$stateParams', 'i18nNotifications','Project','User',
+	function ( crudContrllersHelp,$scope,   $state,   $stateParams,    i18nNotifications, Project,User) {
+ 		User.all().then(function(ds){
+			$scope.users =ds
+		})
+		crudContrllersHelp.initMain('Project','name',$scope,   $state,   $stateParams)     
+	}
+])
+.controller('ProjectsListCtrl',   [
+                'security','crudContrllersHelp','$scope', '$state', '$stateParams', 'i18nNotifications', 
+	function ( security,crudContrllersHelp, $scope,   $state,   $stateParams,    i18nNotifications) {
+		crudContrllersHelp.initList('Project','name',$scope,   $state,   $stateParams)
+		$scope.backlogs=function (item) {
+			$state.go('backlogs-list', {projectId: item.$id()})
+		}
+		$scope.isProductMgr=function(item) {
+		    if(!security.currentUser) return false;
+		    var mgrId=security.currentUser.id;
+			//console.log(mgrId,item.productOwner)
+			return item.productOwner==mgrId
+		}
+		$scope.isDevMgr=function(item) {
+		    if(!security.currentUser) return false;
+		    var mgrId=security.currentUser.id;
+			//console.log(mgrId,item.procMaster)
+			return item.procMaster==mgrId
+		}
+
+	}
+])
+.controller('ProjectsDetailCtrl',   [
+                'crudContrllersHelp','$scope','$stateParams', '$state',
+	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
+		crudContrllersHelp.initDetail('Project','name',$scope,   $state,   $stateParams)
+
+
+	}
+])
+
+.controller('ProjectsCreateCtrl',   [
+                '$scope', 'Project',
+	function (  $scope,   Project) {
+		$scope.item = new Project()
+		$scope.item.iterationDuration=4
+		$scope.item.isSample=false
+
+	}
+])
+
+.controller('ProjectsEditCtrl',   [
+                '$scope', '$stateParams', '$state',
+	function (  $scope,   $stateParams,   $state) {
+		$scope.item = $scope.findById( $stateParams.itemId)
+
+	}
+])
 
 angular.module('controllers.users', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
@@ -778,8 +791,7 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
 				url: "backlogs/:projectId",
 				templateUrl: 'views/projects/backlogs/list.tpl.html',
 				resolve: {
-					// projectId: projectId,
-					 backlogs : [     '$stateParams', 'Backlog', 
+					 backlogs : ['$stateParams', 'Backlog', 
 					    function($stateParams, Backlog){
                            return Backlog.forProject($stateParams.projectId)
                         }]
@@ -794,14 +806,21 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
  }])
 
  .controller('BacklogsListCtrl', [
-             '$scope',  'backlogs', '$state','$stateParams',
-    function($scope,   backlogs, $state,$stateParams){
+            'security','$scope', '$state','$stateParams','backlogs','Project',
+    function(security,$scope,   $state,  $stateParams,backlogs,Project){
       $scope.data = backlogs;
+	  var mgrId=security.currentUser.id;
+	  console.log(mgrId);
+      Project.forProductMgr(mgrId).then(function(data){
+	    console.log(data);
+		$scope.myPrjs=data;
+	  });
+					  
       $scope.create = function () {
 		 $state.go('backlogs-create', 
 		  {projectId:$stateParams.projectId}
 		  )
-	  }
+	  };
    
   }])
   .controller('BacklogsCreateCtrl', [

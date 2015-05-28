@@ -15,8 +15,7 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
 				url: "backlogs/:projectId",
 				templateUrl: 'views/projects/backlogs/list.tpl.html',
 				resolve: {
-					// projectId: projectId,
-					 backlogs : [     '$stateParams', 'Backlog', 
+					 backlogs : ['$stateParams', 'Backlog', 
 					    function($stateParams, Backlog){
                            return Backlog.forProject($stateParams.projectId)
                         }]
@@ -31,14 +30,21 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
  }])
 
  .controller('BacklogsListCtrl', [
-             '$scope',  'backlogs', '$state','$stateParams',
-    function($scope,   backlogs, $state,$stateParams){
+            'security','$scope', '$state','$stateParams','backlogs','Project',
+    function(security,$scope,   $state,  $stateParams,backlogs,Project){
       $scope.data = backlogs;
+	  var mgrId=security.currentUser.id;
+	  console.log(mgrId);
+      Project.forProductMgr(mgrId).then(function(data){
+	    console.log(data);
+		$scope.myPrjs=data;
+	  });
+					  
       $scope.create = function () {
 		 $state.go('backlogs-create', 
 		  {projectId:$stateParams.projectId}
 		  )
-	  }
+	  };
    
   }])
   .controller('BacklogsCreateCtrl', [

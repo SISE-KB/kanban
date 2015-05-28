@@ -3,8 +3,9 @@ angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', f
 
   var Project = $mongoResourceHttp('projects');
 
-  Project.forUser = function(userId, successcb, errorcb) {
-    return Project.query({}, successcb, errorcb);
+  Project.forProductMgr = function(userId) {
+    //return Project.query({}, successcb, errorcb);
+	return Project.query({productOwner:userId},{strict:true});
   };
 
   Project.prototype.isProductOwner = function (userId) {

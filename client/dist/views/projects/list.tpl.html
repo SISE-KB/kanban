@@ -11,7 +11,7 @@
 		<th>样本</th>
         <th>状态</th>
         <th>预计完成日期</th>
-        <th ng-if="isAdmin()">操作</th>
+        <th>操作</th>
     </tr>
     </thead>
     <tbody>
@@ -22,10 +22,10 @@
 		<td>{{item.isSample}}</td>
 		<td>{{item.state}}</td>
 		<td>{{item.planDate | date:'yyyy/MM/dd'}}</td>
-        <td ng-if="isAdmin()">
-		  <button class="btn btn-default " ng-click="backlogs(item)">交付件清单</button>
-		  <button class="btn btn-default " ng-click="sprints(item)">开发计划</button>
-          <button class="btn btn-danger remove" ng-click="remove(item, $index, $event)">删除</button>
+        <td>
+		  <button class="btn btn-default " ng-click="backlogs(item)" ng-if="isProductMgr(item)">交付件清单</button>
+		  <button class="btn btn-default " ng-click="sprints(item)" ng-if="isDevMgr(item)">开发计划</button>
+          <button class="btn btn-danger remove" ng-click="remove(item, $index, $event)" ng-if="isAdmin()">删除</button>
         </td>
     </tr>
     </tbody>

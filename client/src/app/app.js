@@ -23,7 +23,7 @@ function ($stateProvider,$urlRouterProvider) {
 }])
 .run(
   [          '$rootScope', '$state', '$stateParams','security',
-    function ($rootScope,   $state,   $stateParams,security,stateBuilder) {
+    function ($rootScope,   $state,   $stateParams,security) {
       $rootScope.$state = $state
       $rootScope.$stateParams = $stateParams
       $rootScope.currentUser=security.requestCurrentUser()

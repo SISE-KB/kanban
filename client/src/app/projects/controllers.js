@@ -13,13 +13,24 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 	}
 ])
 .controller('ProjectsListCtrl',   [
-                'crudContrllersHelp','$scope', '$state', '$stateParams', 'i18nNotifications', 
-	function ( crudContrllersHelp, $scope,   $state,   $stateParams,    i18nNotifications) {
+                'security','crudContrllersHelp','$scope', '$state', '$stateParams', 'i18nNotifications', 
+	function ( security,crudContrllersHelp, $scope,   $state,   $stateParams,    i18nNotifications) {
 		crudContrllersHelp.initList('Project','name',$scope,   $state,   $stateParams)
 		$scope.backlogs=function (item) {
 			$state.go('backlogs-list', {projectId: item.$id()})
 		}
-	
+		$scope.isProductMgr=function(item) {
+		    if(!security.currentUser) return false;
+		    var mgrId=security.currentUser.id;
+			//console.log(mgrId,item.productOwner)
+			return item.productOwner==mgrId
+		}
+		$scope.isDevMgr=function(item) {
+		    if(!security.currentUser) return false;
+		    var mgrId=security.currentUser.id;
+			//console.log(mgrId,item.procMaster)
+			return item.procMaster==mgrId
+		}
 
 	}
 ])
@@ -27,6 +38,7 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
                 'crudContrllersHelp','$scope','$stateParams', '$state',
 	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
 		crudContrllersHelp.initDetail('Project','name',$scope,   $state,   $stateParams)
+
 
 	}
 ])

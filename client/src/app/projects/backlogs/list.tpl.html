@@ -1,24 +1,34 @@
-<table class="table table-bordered table-condensed table-striped table-hover">
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>State</th>
-        <th>Priority</th>
-        <th>Estimation</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr ng-repeat="backlogItem in data" ng-click="">
-        <td>{{backlogItem.name}}</td>
-        <td>{{backlogItem.state}}</td>
-        <td>{{backlogItem.priority}}</td>
-        <td>{{backlogItem.estimation}}</td>
-    </tr>
-    <tr ng-show="!data.length">
-        <td colspan="4">No items in the backlog</td>
-    </tr>
-    </tbody>
-</table>
-<div class="well">
-    <button class="btn btn-default" ng-click="create()">New backlog item</button>
+<div class="row">
+  <div class="col-md-3 well well-small">
+    <p ng-repeat="item in myPrjs">
+	  {{item.name}}</p>
+
+  </div>
+  <div class="col-md-9 well">
+    <table class="table table-bordered table-condensed table-striped table-hover">
+		<thead>
+		<tr>
+			<th>Name</th>
+			<th>State</th>
+			<th>Priority</th>
+			<th>Estimation</th>
+		</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="backlogItem in data" ng-click="">
+				<td>{{backlogItem.name}}</td>
+				<td>{{backlogItem.state}}</td>
+				<td>{{backlogItem.priority}}</td>
+				<td>{{backlogItem.estimation}}</td>
+			</tr>
+			<tr ng-show="!data.length">
+				<td colspan="4">No items in the backlog</td>
+			</tr>
+		</tbody>
+		</table>
+		<div class="well">
+			<button class="btn btn-default" ng-click="create()">New backlog item</button>
+		</div>
+  </div>
 </div>
+
