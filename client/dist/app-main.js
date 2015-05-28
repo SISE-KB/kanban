@@ -1,6 +1,6 @@
 angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngDroplet'
 ,'ngSanitize',  'ui.select'
- ,'hc.marked', 'ui.bootstrap'
+ ,'hc.marked', 'ui.bootstrap','ng-sortable'
 ,'services.i18nNotifications', 'services.httpRequestTracker','services.stateBuilderProvider',
 ,'directives.crud', 'security'
 ,'resources','controllers'
@@ -403,58 +403,6 @@ function ($http,$scope,Project) {
   ]
 }])
 
-angular.module('controllers.messages', ['ui.router','ngMessages'
-, 'services.i18nNotifications'
-, 'directives.dropdownMultiselect'
-, 'resources.messages'])  
-.controller('MessagesMainCtrl',   [
-                'crudContrllersHelp','$scope', '$state', '$stateParams','Message',
-	function ( crudContrllersHelp,  $scope,    $state,    $stateParams,  Message) {
-
-		crudContrllersHelp.initMain('Message','title',$scope,   $state,   $stateParams)
-		
-		$scope.availableTags=["娱乐","科技"]
-			
-		$scope.checkDate= function(item){
-			var now = new Date(Date.now())
-			if(!item.recDate)
-				item.recDate=now
-			if(!item.closeDate)
-				item.closeDate= now.setDate(now.getDate()+14)
-		}
-
-	}
-])
-.controller('MessagesListCtrl',   [
-                'crudContrllersHelp','$scope', '$state', '$stateParams', 
-	function (  crudContrllersHelp,$scope,   $state,   $stateParams) {
-		crudContrllersHelp.initList('Message','title',$scope,   $state,   $stateParams)
-	}
-])
-.controller('MessagesDetailCtrl',   [
-                'crudContrllersHelp','$scope','$stateParams', '$state',
-	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
-		crudContrllersHelp.initDetail('Message','title',$scope,   $state,   $stateParams)
-	}
-])
-
-.controller('MessagesCreateCtrl',   [
-                '$scope', 'Message',
-	function (  $scope,   Message) {
-		$scope.item = new Message()
-		$scope.checkDate($scope.item)
-	}
-])
-
-.controller('MessagesEditCtrl',   [
-                '$scope', '$stateParams', '$state',
-	function (  $scope,   $stateParams,   $state) {
-		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.item.tags=$scope.item.tags||[]
-		$scope.checkDate($scope.item)
-	}
-])
-
 angular.module('resources.backlogs', ['mongoResourceHttp'])
 
 .factory('Backlog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
@@ -774,6 +722,58 @@ angular.module('controllers.users')
   }
 }])
 
+angular.module('controllers.messages', ['ui.router','ngMessages'
+, 'services.i18nNotifications'
+, 'directives.dropdownMultiselect'
+, 'resources.messages'])  
+.controller('MessagesMainCtrl',   [
+                'crudContrllersHelp','$scope', '$state', '$stateParams','Message',
+	function ( crudContrllersHelp,  $scope,    $state,    $stateParams,  Message) {
+
+		crudContrllersHelp.initMain('Message','title',$scope,   $state,   $stateParams)
+		
+		$scope.availableTags=["娱乐","科技"]
+			
+		$scope.checkDate= function(item){
+			var now = new Date(Date.now())
+			if(!item.recDate)
+				item.recDate=now
+			if(!item.closeDate)
+				item.closeDate= now.setDate(now.getDate()+14)
+		}
+
+	}
+])
+.controller('MessagesListCtrl',   [
+                'crudContrllersHelp','$scope', '$state', '$stateParams', 
+	function (  crudContrllersHelp,$scope,   $state,   $stateParams) {
+		crudContrllersHelp.initList('Message','title',$scope,   $state,   $stateParams)
+	}
+])
+.controller('MessagesDetailCtrl',   [
+                'crudContrllersHelp','$scope','$stateParams', '$state',
+	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
+		crudContrllersHelp.initDetail('Message','title',$scope,   $state,   $stateParams)
+	}
+])
+
+.controller('MessagesCreateCtrl',   [
+                '$scope', 'Message',
+	function (  $scope,   Message) {
+		$scope.item = new Message()
+		$scope.checkDate($scope.item)
+	}
+])
+
+.controller('MessagesEditCtrl',   [
+                '$scope', '$stateParams', '$state',
+	function (  $scope,   $stateParams,   $state) {
+		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.item.tags=$scope.item.tags||[]
+		$scope.checkDate($scope.item)
+	}
+])
+
 angular.module('controllers.backlogs', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
 , 'resources.projects'
@@ -808,7 +808,7 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
  .controller('BacklogsListCtrl', [
             'security','$scope', '$state','$stateParams','backlogs','Project',
     function(security,$scope,   $state,  $stateParams,backlogs,Project){
-      $scope.data = backlogs;
+      $scope.doneItems = backlogs;
 	  var mgrId=security.currentUser.id;
 	  console.log(mgrId);
       Project.forProductMgr(mgrId).then(function(data){
@@ -821,8 +821,56 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
 		  {projectId:$stateParams.projectId}
 		  )
 	  };
+	    
+		$scope.doingItems = [];
+		$scope.todoItems = []; 
+		$scope.okItems = [];
+		 
+        $scope.todoConfig = {
+		    animation: 150,
+            group: {name:'todo',put: false},
+			 onRemove:function(data){
+			   console.log("onRemove--",data.model,data.oldIndex) 
+			}
+        };
+		$scope.doingConfig = {
+			animation: 150,
+             group: {name:'doing', put: false},
+			 onAdd:function(data){
+			   data.model.state="DOING";
+			}
+		};
+		$scope.doneConfig = {
+			animation: 150,
+            group: {name:'done',put: false},
+			onAdd:function(data){
+			   data.model.state="DONE";
+			   console.log("onAdd--",data.model,data.newIndex) 
+			}
+		};
+		$scope.okConfig = {
+			animation: 150,
+            group: {name:'ok',put: ['done']},
+			onAdd:function(data){
+			   data.model.state="OK";
+			   console.log("onAdd--",data.model,data.newIndex) 
+			}
+		};
+		
    
   }])
+  .controller('TodoController',[
+             '$scope',
+	function ($scope) {
+		$scope.addTodo = function () {
+			$scope.items1.push({name:$scope.todoName,text: $scope.todoText,
+								catalog:$scope.todoCatalog,projectId :$scope.todoProjectId,
+								priority:$scope.todoPriority,estimation:$scope.todoEstimation,
+								state:'todo'});
+			$scope.todoName = '';
+		}
+	}
+  ])
   .controller('BacklogsCreateCtrl', [
              '$scope',  'Backlog',  'i18nNotifications','$state','$stateParams',
     function($scope,   Backlog,    i18nNotifications,$state,$stateParams){
