@@ -20,6 +20,7 @@ angular.module('security.authorization', ['security.service'])
       // (use this in a route resolve to prevent non-authenticated users from entering that route)
       requireAuthenticatedUser: function() {
         var promise = security.requestCurrentUser().then(function(userInfo) {
+			console.log('requireAuthenticatedUser',userInfo);
           if ( !security.isAuthenticated() ) {
             return queue.pushRetryFn('unauthenticated-client', service.requireAuthenticatedUser);
           }

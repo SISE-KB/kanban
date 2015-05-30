@@ -29,20 +29,12 @@ section.container {
 }
 
 section.container section.droplet {
-    width: 670px;
+    width: 1024px;
     margin: auto;
     text-align: left;
     position: relative;
 }
 
-section.container section.droplet h1 a {
-    font-family: Lato, Arial, Tahoma, Helvetica, sans-serif;
-    color: white;
-    text-decoration: none;
-    font-weight: normal;
-    font-size: 40px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, .25);
-}
 
 section.container section.droplet ul.statistics {
     list-style-type: none;
@@ -73,29 +65,11 @@ section.container section.droplet droplet {
     position: relative;
     border-radius: 2px;
     width: 100%;
-    height: 200px;
+    height: 768px;
     background-color: rgba(255, 255, 255, .1);
     margin-top: -5px;
     padding-top: 5px;
     transition: box-shadow 0.35s;
-}
-
-section.container section.droplet droplet div.loading {
-    display: block;
-    height: 240px;
-    width: 80%;
-    margin: 1px;
-    margin-top: 6px;
-    pointer-events: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
-    transition: all .35s;
-}
-
-section.container section.droplet droplet div.loading.visible {
-    opacity: 1;
 }
 
 section.container section.droplet droplet.event-dragover {
@@ -103,7 +77,7 @@ section.container section.droplet droplet.event-dragover {
 }
 
 section.container section.droplet droplet comment:after {
-    content: "Drag Image...";
+    content: "可以直接拖入文件...";
     width: 100%;
     height: 100%;
     pointer-events: none;
@@ -120,9 +94,12 @@ section.container section.droplet droplet comment:after {
 }
 
 section.container section.droplet droplet.event-dragover comment:after {
-    content: "...And Drop!";
+    content: "...请放开鼠标!";
 }
-
+section.container section.droplet droplet comment ul li {
+  color: rgba(155, 205, 155, .75);
+  font-size: 20px;
+}
 section.container section.droplet droplet ul.files {
     height: 100%;
     width: 100%;
@@ -161,7 +138,6 @@ section.container section.droplet droplet ul.files li img.droplet-preview {
     border: 1px solid white;
     display: block;
 }
-
 section.container section.droplet droplet ul.files li div.delete {
     background-color: rgba(0, 0, 0, .25);
     width: 50px;
@@ -191,7 +167,6 @@ section.container section.droplet droplet ul.files li:hover div.delete {
 section.container section.droplet droplet ul.files li div.delete:hover {
     background-color: rgba(0, 0, 0, .45);
 }
-
 section.container section.droplet droplet ul.files li div.size {
     background-color: rgba(255, 255, 255, .5);
     position: absolute;
@@ -224,7 +199,6 @@ section.container section.droplet section.message.visible {
     padding: 15px 12px 10px 12px;
     top: 0;
 }
-
 section.container section.droplet section.message.success {
     background: linear-gradient(to bottom, rgba(112, 176, 224, 1) 0%, rgba(136, 191, 232, 1) 100%);
 }
@@ -262,7 +236,6 @@ section.container section.droplet section.toolbar .button {
 section.container section.droplet section.toolbar .button:hover {
     background-color: rgba(0, 0, 0, .1);
 }
-
 section.container section.droplet section.toolbar div.add-files {
     float: left;
     height: 100%;
@@ -295,29 +268,11 @@ section.container section.droplet section.toolbar input.upload-files.clickable {
     pointer-events: all;
     color: rgba(0, 0, 0, .75);
 }
-
-section.container section.droplet section.toolbar comment.progress {
-    display: inline-block;
-    height: 25px;
-    line-height: 25px;
-    float: right;
-    overflow: hidden;
-    font-family: Lato, Arial, Tahoma, Helvetica, sans-serif;
-    font-weight: 400;
-    color: rgba(0, 0, 0, .35);
-    font-size: 11px;
-    padding: 0 8px;
-    margin-right: -60px;
-    opacity: 0;
-    transition: all 0.55s;
-}
-
-section.container section.droplet section.toolbar comment.progress.visible {
-    margin-right: 0;
-    opacity: 1;
-}
-
 section.container section.droplet input.droplet-multiple {
     color: white;
     margin-top: 5px;
 }
+
+
+
+

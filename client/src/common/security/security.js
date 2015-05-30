@@ -6,8 +6,8 @@ angular.module('security.service', [
 ])
 
 .factory('security', [
-       '$http', '$q', '$state', 'securityRetryQueue', '$modal', 
-function($http, $q, $state, queue, $modal) {
+       '$http', '$q', '$state', 'securityRetryQueue', '$modal', '$rootScope',
+function($http, $q, $state, queue, $modal,$rootScope) {
 
   // Redirect to the given url (defaults to '/')
   function redirect(state) {
@@ -66,6 +66,7 @@ function($http, $q, $state, queue, $modal) {
         service.currentUser = response.data.user;
         if ( service.isAuthenticated() ) {
           closeLoginDialog(true);
+          $rootScope.currentUser=service.currentUser;
         }
         return service.isAuthenticated();
       });
@@ -91,7 +92,9 @@ function($http, $q, $state, queue, $modal) {
         return $q.when(service.currentUser);
       } else {
         return $http.get('/current-user').then(function(response) {
-          service.currentUser = response.data.user;
+		  service.currentUser = response.data.user;
+          console.log("$http.get('/current-user')",service.currentUser);
+          $rootScope.currentUser=service.currentUser;
           return service.currentUser;
         });
       }

@@ -1,4 +1,46 @@
-<div>
-  <h4>{{item.name}}<button class="btn" ng-click="edit()" ng-show="isAdmin()">修　改</button></h4>
-  <div  marked="item.type"></div>
+ <div class="well">
+      <h4>{{item.name}}
+        <button class="btn" ng-click="edit()" ng-show="isAdmin()">修　改</button>
+        <button class="btn" ng-click="list()">列　表</button>
+      </h4>
+      
+      <div class="row">
+            <div class="col-md-6">
+   			    <div>
+					<label>类型:</label>
+					<br>
+                {{item.type}}
+                </div>
+				<div>
+			 		 <label>问题来源:</label>
+			 		 <br>{{item.targetType}}
+			 	</div>	   
+				<div >
+					<label>来源名称:</label>
+					<br>{{item.target}}
+				</div>
+			</div>
+            <div class="col-md-6">
+				<div>
+					<label>优先级:</label>
+					<br>{{item.priority}}
+				</div>
+				<div >
+			 		   <label>状态:</label>
+			 		   <br>{{item.state}}
+		         </div>
+				 <div>
+                    <label>预计完成时间:</label>
+                    <br>{{item.closeDate | date:'yyyy/MM/dd'}}
+  			    </div>
+		
+             </div>
+
+      </div>
+       <div class="row">
+		      <div class="col-md-10">
+				     <label>具体内容</label>
+                    <div  marked="item.spec"></div>
+               </div>
+ 	   </div>
 </div>

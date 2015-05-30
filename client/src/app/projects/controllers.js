@@ -6,18 +6,23 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 .controller('ProjectsMainCtrl',   [
                'crudContrllersHelp','$scope', '$state', '$stateParams', 'i18nNotifications','Project','User',
 	function ( crudContrllersHelp,$scope,   $state,   $stateParams,    i18nNotifications, Project,User) {
- 		User.all().then(function(ds){
+ 		User.query({isActive:true,isAdmin:false},{strict:true}).then(function(ds){
 			$scope.users =ds
 		})
 		crudContrllersHelp.initMain('Project','name',$scope,   $state,   $stateParams)     
 	}
 ])
 .controller('ProjectsListCtrl',   [
-                'security','crudContrllersHelp','$scope', '$state', '$stateParams', 'i18nNotifications', 
-	function ( security,crudContrllersHelp, $scope,   $state,   $stateParams,    i18nNotifications) {
+                'security','crudContrllersHelp','$rootScope','$scope', '$state', '$stateParams', 'i18nNotifications', 
+	function ( security,crudContrllersHelp,$rootScope, $scope,   $state,   $stateParams,    i18nNotifications) {
 		crudContrllersHelp.initList('Project','name',$scope,   $state,   $stateParams)
 		$scope.backlogs=function (item) {
 			$state.go('backlogs-list', {projectId: item.$id()})
+		}
+		$scope.issues=function (item) {
+			$rootScope.exchangeData={targetType:'项目',target: item.name
+				                            ,projectId:item.$id(),backlogId:null}
+			$state.go('issues.create')
 		}
 		$scope.isProductMgr=function(item) {
 		    if(!security.currentUser) return false;
@@ -49,6 +54,8 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 		$scope.item = new Project()
 		$scope.item.iterationDuration=4
 		$scope.item.isSample=false
+		$scope.item.state='TODO'
+		$scope.isNew=true
 
 	}
 ])
@@ -57,6 +64,7 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
                 '$scope', '$stateParams', '$state',
 	function (  $scope,   $stateParams,   $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.isNew=false
 
 	}
 ])

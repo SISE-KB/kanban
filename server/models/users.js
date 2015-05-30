@@ -4,7 +4,7 @@ var mongoose = require('mongoose'),
     passportLocalMongoose = require('passport-local-mongoose'),
     Schema = mongoose.Schema,
     ObjectId = Schema.ObjectId;
-      
+//var hooker = require('hooker');      
 
 var UserSchema = new Schema({
   name : String,	
@@ -29,23 +29,20 @@ UserSchema.plugin(passportLocalMongoose,{
 	keylen:32
 });
 
+
 UserSchema.pre('save', function (next) {
 	if(this.password&&this.password.length < 20){ 
-        this.setPassword(this.password,function(err,user){
-			console.log("setpasswod:",user.password);
-		    next();
-		});
-    }
- })
+		  this.setPassword(this.password,function(err,user){
+			  console.log("setPasswod:",user.password);
+			  if(err) console.log("setPasswod ERROR");
+			  else
+			    next();
+		  });
+	}		
+ });
+
 /*
-UserSchema.statics.JoinProject = function (userId,pid,cb) {
-   this.findById(userId,function(err,u){
-		  if(err) throw err;
-		  //todo:if pid not in projects
-	      u.projects.push(pid);
-	      u.save(cb);  
-    });
-};
+
 UserSchema.statics.loadData = function (query) {
  return  this.find(query)
    .select('-__v')

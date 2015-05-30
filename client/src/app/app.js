@@ -5,34 +5,34 @@ angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngDroplet'
 ,'directives.crud', 'security'
 ,'resources','controllers'
 ])
-.config(['$stateProvider','$urlRouterProvider', 
-function ($stateProvider,$urlRouterProvider) {
-  $urlRouterProvider
-       .otherwise('/');
-        
+.config(['$stateProvider','$urlRouterProvider', 'securityAuthorizationProvider',
+function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
+  $urlRouterProvider.otherwise('/');
+ // $locationProvider.html5Mode(true);     
   $stateProvider
     .state('home',  {
-	  url: '/home',	
+	  url: '/',	
       template: '<h1>项目状态看板.....</h1>'
     }) 
-    .state('demo',  {
-	  url: '/',	
-      templateUrl: 'views/upload.tpl.html'
+    .state('upload',  {
+	  url: '/upload',	
+	  resolve: {
+	    _currentUser: securityAuthorizationProvider.requireAuthenticatedUser// null if not login
+	  },
+      templateUrl: 'views/upload.tpl.html',
+      controller: 'UploadCtrl'
     })
    			
 }])
-.run(
-  [          '$rootScope', '$state', '$stateParams','security',
+.run([        '$rootScope', '$state', '$stateParams','security',
     function ($rootScope,   $state,   $stateParams,security) {
       $rootScope.$state = $state
       $rootScope.$stateParams = $stateParams
-      $rootScope.currentUser=security.requestCurrentUser()
+    
       $rootScope.isAuthenticated = security.isAuthenticated
       $rootScope.isAdmin = security.isAdmin
-	  
-    }
-  ]
-)
+   }
+])
 .controller('AppCtrl', [
            '$scope', 'i18nNotifications', 'localizedMessages',
  function($scope, i18nNotifications, localizedMessages) {
@@ -55,9 +55,7 @@ function ($stateProvider,$urlRouterProvider) {
   $scope.home = function () {
     if (security.isAuthenticated()) {
          $scope.$state.go('home');
-    } else {
-         $scope.$state.go('demo');
-    }
+    } 
   }
  }])
 

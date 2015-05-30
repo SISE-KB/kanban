@@ -1,5 +1,5 @@
 var gulp = require('gulp');
-var templateCache = require('gulp-angular-templatecache');
+//var templateCache = require('gulp-angular-templatecache');
 var jshint = require('gulp-jshint');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
@@ -37,8 +37,8 @@ gulp.task('copy-static', function () {
       gulp.src('libs/ui-select.js'),
       gulp.src('libs/marked.js'),
       gulp.src('libs/angular-marked.js'),
-      gulp.src('libs/angular-marked.js'),
-      gulp.src('libs/progressbar.js'),
+      gulp.src('libs/Sortable.js'),
+      gulp.src('libs/ng-sortable.js'),
       gulp.src('libs/ng-droplet.js')
    )
    .pipe(gulp.dest('dist')),
@@ -70,7 +70,6 @@ gulp.task('watch', ['lint', 'build'], function () {
 });
 gulp.task('build-js', ['build-comm-js', 'build-app-js']);
 gulp.task('build', ['copy-static', 'build-js']);
-gulp.task('all', ['lint', 'test', 'build']);
 gulp.task('default', ['build']);
 
 

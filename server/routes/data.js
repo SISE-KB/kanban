@@ -1,25 +1,18 @@
 var express = require('express')
  ,mongoose = require('mongoose')
  ,debug = require('debug')('kb:route:data')
- /*
- require('../models/users')
- require('../models/projects')
- require('../models/messages')
- require('../models/productbacklogs')
- require('../models/sprints')
- require('../models/tasks')*/
+
  
 exports.addRoutes = function(app, config) {
 var dbRouter = express.Router()
 
 function likeHandle(obj)
 {
- 
-   for(var p in obj){
-     obj[p]=new RegExp(obj[p])
-   }
-  // console.log(obj) 
-   return obj	 
+
+    for(var p in obj){
+       obj[p]=new RegExp(obj[p])
+      }
+     return obj	 
 }
 
 
@@ -32,7 +25,7 @@ dbRouter
 	  var m=require('../models/'+cname)
        ,strict=req.query.strict
        ,search=JSON.parse(req.query.q||'{}')
-      debug(cname)
+      debug(cname,search)
 	  if(!strict)
 		  search=likeHandle(search)
       if(!!id)  m.findById(id,function(err,data){
@@ -41,7 +34,7 @@ dbRouter
 		  res.json(data)
 	  })
 	  else{
-		  debug('search-->',search)
+		 // debug('search-->',search)
 		  m.find(search,function(err,data){
 		    if(err) return next(err);
 		    debug(data)
@@ -53,22 +46,27 @@ dbRouter
 	  var id=req.params.id
 	  var cname=req.params.collection
 	  var m=require('../models/'+cname)
-      if(!!id)   m.findByIdAndUpdate(id, req.body, function (err, post) {
-		if (err) return next(err);
-		debug(req.body)
-		res.json(post);
+	  //m.findByIdAndUpdate(id, req.body, function (err, post) {
+	  if(!!id)  m.findById(id,function(err,doc){
+		  if(err) throw err;
+		  debug("update:",req.body)
+      	  for( var p in req.body){
+			  doc[p]=req.body[p];
+			 // console.log(p);
+	      }
+	      doc.save();  
+		  res.json(doc);
 	  })
-		else {
-			res.json({err:'not id'})
-	  }
-  })
+	  else {
+				res.json({err:'not id'})
+	 }
+   })
   .post(function (req, res) {
 	  var cname=req.params.collection
 	  var m=require('../models/'+cname)
 	 // debug(req.body)
       m.create(req.body, function (err, post) {
-		
-		if (err) {
+	 if (err) {
 			debug(err) 
 			return next(err);
 		}

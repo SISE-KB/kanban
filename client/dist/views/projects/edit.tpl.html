@@ -14,7 +14,7 @@
 						<br>
 					</div>
 					<div class="form-group">
-						<label>技术类型(空格相隔)</label>
+						<label>技术类型(空格相隔)　比如：HTML5 UNITY3D COCOS等</label>
 						<input ng-model="item.catalog" class="form-control" >
 				   		<br>
 					</div>
@@ -24,7 +24,7 @@
 					   <br>
 					</div>
 					<div class="form-group">
-						<label>产品代表</label>
+						<label>产品经理</label>
 						<ui-select ng-model="item.productOwner" close-on-select="true">
    　　　　　　　　　  	<ui-select-match placeholder="请选择 ...">{{$select.selected.name}}</ui-select-match>
     　　　　　　　　　		<ui-select-choices repeat="u._id as u in users | filter:$select.search">
@@ -34,7 +34,7 @@
                         <br>
 				    </div>
 				   	<div class="form-group">
-						<label>流程专员</label>
+						<label>开发组长</label>
 						<ui-select ng-model="item.procMaster" close-on-select="true">
    　　　　　　　　　  	<ui-select-match placeholder="请选择 ...">{{$select.selected.name}}</ui-select-match>
     　　　　　　　　　		<ui-select-choices repeat="u._id as u in users | filter:$select.search">
@@ -56,7 +56,7 @@
                         </ui-select>
                         <br>
 				    </div>
-					<div class="from-group">
+					<div class="from-group" ng-if="!isNew">
 					  <label>是否样本？</label>
 					  <input type="checkbox" ng-model="item.isSample">
 					  <br>
@@ -69,13 +69,13 @@
 	
 			</div>
 			  <div class="col-md-6">
-					<div class="form-group">
+					<div class="form-group" ng-if="!isNew">
 			 		   <label>状态</label>
 					   <div class="btn-group">
-						  	<label class="btn btn-primary" ng-model="item.state" btn-radio="'计划'">计划</label>
-							<label class="btn btn-primary" ng-model="item.state" btn-radio="'开发中'">开发中</label>
-							<label class="btn btn-primary" ng-model="item.state" btn-radio="'完成'">完成</label>
-							<label class="btn btn-primary" ng-model="item.state" btn-radio="'失败'">失败</label>
+						  	<label class="btn btn-primary" ng-model="item.state" btn-radio="'TODO'">计划</label>
+							<label class="btn btn-primary" ng-model="item.state" btn-radio="'DOING'">开发中</label>
+							<label class="btn btn-primary" ng-model="item.state" btn-radio="'CLOSE-OK'">完成</label>
+							<label class="btn btn-primary" ng-model="item.state" btn-radio="'CLOSE'">失败</label>
 					   </div>
 					   <br>
 					</div>  

@@ -177,6 +177,7 @@ angular.module('security.authorization', ['security.service'])
       // (use this in a route resolve to prevent non-authenticated users from entering that route)
       requireAuthenticatedUser: function() {
         var promise = security.requestCurrentUser().then(function(userInfo) {
+			console.log('requireAuthenticatedUser',userInfo);
           if ( !security.isAuthenticated() ) {
             return queue.pushRetryFn('unauthenticated-client', service.requireAuthenticatedUser);
           }
@@ -200,6 +201,7 @@ angular.module('security.authorization', ['security.service'])
     return service;
   }]
 });
+
 // Based loosely around work by Witold Szczerba - https://github.com/witoldsz/angular-http-auth
 angular.module('security', [
   'security.service',
@@ -306,8 +308,8 @@ angular.module('security.service', [
 ])
 
 .factory('security', [
-       '$http', '$q', '$state', 'securityRetryQueue', '$modal', 
-function($http, $q, $state, queue, $modal) {
+       '$http', '$q', '$state', 'securityRetryQueue', '$modal', '$rootScope',
+function($http, $q, $state, queue, $modal,$rootScope) {
 
   // Redirect to the given url (defaults to '/')
   function redirect(state) {
@@ -366,6 +368,7 @@ function($http, $q, $state, queue, $modal) {
         service.currentUser = response.data.user;
         if ( service.isAuthenticated() ) {
           closeLoginDialog(true);
+          $rootScope.currentUser=service.currentUser;
         }
         return service.isAuthenticated();
       });
@@ -391,7 +394,9 @@ function($http, $q, $state, queue, $modal) {
         return $q.when(service.currentUser);
       } else {
         return $http.get('/current-user').then(function(response) {
-          service.currentUser = response.data.user;
+		  service.currentUser = response.data.user;
+          console.log("$http.get('/current-user')",service.currentUser);
+          $rootScope.currentUser=service.currentUser;
           return service.currentUser;
         });
       }
@@ -759,7 +764,6 @@ function($parse, $stateParams,   $state) {
   };
 }]);
 
-angular.module('security.login', ['security.login.form', 'security.login.toolbar']);
 angular.module('security.login.form', ['services.localizedMessages'])
 
 // The LoginFormController provides the behaviour behind a reusable form to allow users to authenticate.
@@ -806,6 +810,7 @@ angular.module('security.login.form', ['services.localizedMessages'])
   };
 }]);
 
+angular.module('security.login', ['security.login.form', 'security.login.toolbar']);
 angular.module('security.login.toolbar', [])
 
 // The loginToolbar directive is a reusable widget that can show login or logout buttons

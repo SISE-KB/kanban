@@ -3,9 +3,6 @@ var express = require('express')
  //  ,multipart = require('connect-multiparty')
   multer         = require('multer')
 
-
-   
-
 exports.addRoutes = function(app, config) {
 	var publicDir  = config.server.distFolder
 	   ,uploadDir  = publicDir+"/uploads"
@@ -22,22 +19,36 @@ exports.addRoutes = function(app, config) {
     // Just send the index.html for other files to support HTML5Mode
     res.sendFile('favicon.ico', { root: config.server.distFolder });
      });
+     /*
 	app.get('/images', function(req, res) {
 		var files=fs.readdirSync(uploadDir);
 		res.json(files);
-	})
+	})*/
 
-   app.post('/upload', function(request, response) {
+   app.post('/upload/:userMobileNo', function(request, response) {
         var count = request.files.file.length;
+        var userMobileNo=request.params.userMobileNo
 		var files=[];
-		
-		if(!count) files.push(request.files.file.name)
+
+		if(!fs.existsSync(uploadDir+'/'+userMobileNo)){//不存在就创建一个
+            fs.mkdirSync(uploadDir+'/'+userMobileNo, 0755);
+        }
+		if(!count) {
+			 var fn=request.files.file.name;
+			 var oldFn=request.files.file.originalname;
+			 console.log(oldFn,fn);
+			 files.push(oldFn);
+			 fs.renameSync(uploadDir+'/'+fn,
+			                  uploadDir+'/'+userMobileNo+'/'+oldFn);
+		}	                  
 		else for(var i=0;i<count;i++){
-		  files.push(request.files.file[i].name);
+			 var fn=request.files.file[i].name;
+			 var oldFn=request.files.file[i].originalname;
+		     files.push(oldFn);
+		     fs.renameSync(uploadDir+'/'+fn,
+			                  uploadDir+'/'+userMobileNo+'/'+oldFn);
 		}
 		
-		//console.log(file.mimetype,file.originalname,file.name);
-		//console.log(file.size,file.path);
         response.status(200).send(JSON.stringify({ success: true, fileCount: count,names:files }));
     })
 

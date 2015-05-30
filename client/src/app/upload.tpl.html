@@ -1,56 +1,53 @@
-  <section class="background colourful"></section>
+<section class="background colourful"></section>
+<section class="container">
+   <section class="droplet"  ng-class="{ uploading: interface.isUploading() }">
+       <ul class="statistics">
+           <li><label>有　效:</label> {{interface.getFiles(interface.FILE_TYPES.VALID).length}}</li>
+           <li><label>无　效:</label> {{interface.getFiles(interface.FILE_TYPES.INVALID).length}}</li>
+           <li><label>已上传:</label> {{interface.getFiles(interface.FILE_TYPES.UPLOADED).length}}</li>
+           <li><label>已删除:</label> {{interface.getFiles(interface.FILE_TYPES.DELETED).length}}</li>
+           <li><label>总　计:</label> {{interface.getFiles().length}}</li>
+       </ul>
 
-    <section class="container">
-
-        <section class="droplet" ng-controller="IndexController" ng-class="{ uploading: interface.isUploading() }">
-
-            <ul class="statistics">
-                <li><label>有　效:</label> {{interface.getFiles(interface.FILE_TYPES.VALID).length}}</li>
-                <li><label>无　效:</label> {{interface.getFiles(interface.FILE_TYPES.INVALID).length}}</li>
-                <li><label>已上传:</label> {{interface.getFiles(interface.FILE_TYPES.UPLOADED).length}}</li>
-                <li><label>已删除:</label> {{interface.getFiles(interface.FILE_TYPES.DELETED).length}}</li>
-                <li><label>总　计:</label> {{interface.getFiles().length}}</li>
-            </ul>
-
-            <section class="toolbar">
-
-                <input type="button" class="button upload-files" value="批量上传"
+       <section class="toolbar">
+          <input type="button" class="button upload-files" value="批量上传"
                        ng-click="interface.uploadFiles()"
                        ng-hide="interface.isUploading()"
                        ng-class="{ clickable: interface.isReady() }" />
 
-                <div class="add-files">
-                    <input type="button" class="button add-files" value="打开本地文件..." />
-                    <droplet-upload-multiple ng-model="interface"></droplet-upload-multiple>
-                </div>
-				<progressbar  value="interface.progress.percent" ng-show="interface.isUploading()">
-				    <span style="color:black; white-space:nowrap;">{{interface.progress.percent}}%</span>
-				</progressbar>
-               
+          <div class="add-files">
+                <input type="button" class="button add-files" value="打开本地文件..." />
+                <droplet-upload-multiple ng-model="interface"></droplet-upload-multiple>
+          </div>
+	    <progressbar  value="interface.progress.percent" ng-show="interface.isUploading()">
+		  <span style="color:black; white-space:nowrap;">{{interface.progress.percent}}%</span>
+	    </progressbar>
+       </section>
 
-            </section>
-
-            <droplet ng-model="interface">
-                 <section class="message success" ng-class="{ visible: success }" ng-click="success = false">
+       <droplet ng-model="interface">
+             <comment>
+			   <ul>
+				  <li ng-repeat="fn in filenames" >
+					 {{fn}}
+                   </li>
+               </ul>
+           </comment>
+           <section class="message success" ng-class="{ visible: success }" ng-click="success = false">
                     成功上传 {{uploadCount}}个文件．
-                </section>
-
-                <section class="message error" ng-class="{ visible: error }" ng-click="error = false">
+           </section>
+           <section class="message error" ng-class="{ visible: error }" ng-click="error = false">
                    上传文件失败 .
-                </section>
-
-                <ul class="files">
-
-                    <li ng-repeat="model in interface.getFiles(interface.FILE_TYPES.VALID)">
+           </section>
+           <ul class="files">
+                  <li ng-repeat="model in interface.getFiles(interface.FILE_TYPES.VALID)">
                         <droplet-preview ng-model="model"></droplet-preview>
                         <div class="delete" ng-click="model.deleteFile()">&times;</div>
-                        <div class="size">{{model.file.size / 1024 / 1024 | number: 1}}MB</div>
+                        <div class="size">{{model.file.name}}[{{model.file.size / 1024 / 1024 | number: 1}}MB]</div>
                     </li>
+            </ul>
+    
+         </droplet>
 
-                </ul>
+      </section>
 
-            </droplet>
-
-        </section>
-
-    </section>
+ </section>

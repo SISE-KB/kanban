@@ -7,13 +7,12 @@
         <!--<li ui-sref-active="active"><a ui-sref="issues.list">所有消息</a></li>-->
         <li class="nav-header">最近访问</li>
         <li ng-repeat="item in visited" ui-sref-active="active">
-        <a ui-sref="issues.list.detail({itemId:item.$id()})">{{item.name}}</a>
+        <a ui-sref="issues.detail({itemId:item.$id()})">{{item.name}}</a>
         </li>
       </ul>
     </div>
   </div>
 
-  <!-- Our unnamed main ui-view for this template -->
   <div ui-view class="col-md-9 slide"></div>
 </div>
 

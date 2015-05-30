@@ -5,34 +5,34 @@ angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngDroplet'
 ,'directives.crud', 'security'
 ,'resources','controllers'
 ])
-.config(['$stateProvider','$urlRouterProvider', 
-function ($stateProvider,$urlRouterProvider) {
-  $urlRouterProvider
-       .otherwise('/');
-        
+.config(['$stateProvider','$urlRouterProvider', 'securityAuthorizationProvider',
+function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
+  $urlRouterProvider.otherwise('/');
+ // $locationProvider.html5Mode(true);     
   $stateProvider
     .state('home',  {
-	  url: '/home',	
+	  url: '/',	
       template: '<h1>项目状态看板.....</h1>'
     }) 
-    .state('demo',  {
-	  url: '/',	
-      templateUrl: 'views/upload.tpl.html'
+    .state('upload',  {
+	  url: '/upload',	
+	  resolve: {
+	    _currentUser: securityAuthorizationProvider.requireAuthenticatedUser// null if not login
+	  },
+      templateUrl: 'views/upload.tpl.html',
+      controller: 'UploadCtrl'
     })
    			
 }])
-.run(
-  [          '$rootScope', '$state', '$stateParams','security',
+.run([        '$rootScope', '$state', '$stateParams','security',
     function ($rootScope,   $state,   $stateParams,security) {
       $rootScope.$state = $state
       $rootScope.$stateParams = $stateParams
-      $rootScope.currentUser=security.requestCurrentUser()
+    
       $rootScope.isAuthenticated = security.isAuthenticated
       $rootScope.isAdmin = security.isAdmin
-	  
-    }
-  ]
-)
+   }
+])
 .controller('AppCtrl', [
            '$scope', 'i18nNotifications', 'localizedMessages',
  function($scope, i18nNotifications, localizedMessages) {
@@ -55,9 +55,7 @@ function ($stateProvider,$urlRouterProvider) {
   $scope.home = function () {
     if (security.isAuthenticated()) {
          $scope.$state.go('home');
-    } else {
-         $scope.$state.go('demo');
-    }
+    } 
   }
  }])
 
@@ -246,76 +244,74 @@ function (stateBuilderProvider) {
 
 
 angular.module('app')
-.controller('IndexController', function IndexController($scope, $timeout) {
-
-        /**
-         * @property interface
-         * @type {Object}
-         */
+.controller('UploadCtrl', [
+           '$scope', '$timeout',
+function ($scope, $timeout,currentUser) {
         $scope.interface = {};
-
-        /**
-         * @property uploadCount
-         * @type {Number}
-         */
         $scope.uploadCount = 0;
-
-        /**
-         * @property success
-         * @type {Boolean}
-         */
         $scope.success = false;
-
-        /**
-         * @property error
-         * @type {Boolean}
-         */
         $scope.error = false;
-$scope.interface.useParser=function (responseText) {
-   // console.log(responseText);
-    return responseText;
-};
+		$scope.interface.useParser=function (responseText) {
+		   // console.log(responseText);
+			return responseText;
+		};
         // Listen for when the interface has been configured.
         $scope.$on('$dropletReady', function whenDropletReady() {
-
-            $scope.interface.allowedExtensions(['png', 'jpg', 'bmp', 'gif', 'svg', 'torrent']);
-            $scope.interface.setRequestUrl('upload');
+            $scope.interface.allowedExtensions(['png', 'jpg', 'gif','ppt', 'doc', 'docx']);
+           // console.log($scope.currentUser);
+            $scope.interface.setRequestUrl('upload'+'/'+$scope.currentUser.mobileNo);
             $scope.interface.defineHTTPSuccess([/2.{2}/]);
             $scope.interface.useArray(false);
-
         });
 
         // Listen for when the files have been successfully uploaded.
         $scope.$on('$dropletSuccess', function onDropletSuccess(event, response, files) {
-
             $scope.uploadCount = files.length;
             $scope.success     = true;
-			//console.log(response);
-			for(var i=0;i<response.names.length;i++){
-			    console.log(response.names[i])
-			 // var file=files[i].file;
-             // console.log(file.type,file.name,file.size);
-            }
-
+            $scope.filenames  = response.names;
+	
             $timeout(function timeout() {
                 $scope.success = false;
-            }, 5000);
+              //  $scope.filenames=null;
+            }, 2000);
 
         });
 
         // Listen for when the files have failed to upload.
         $scope.$on('$dropletError', function onDropletError(event, response) {
-
             $scope.error = true;
             console.log(response);
 
             $timeout(function timeout() {
                 $scope.error = false;
-            }, 5000);
+              //  $scope.filenames=null;
+            }, 2000);
 
         });
+}]);
 
-    });
+/*
+ * section.container section.droplet droplet comment:after {
+    content: "可以直接拖入文件...";
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    display: inline-block;
+    position: absolute;
+    z-index: -1;
+    font-family: Lato, Arial, Tahoma, Helvetica, sans-serif;
+    color: rgba(255, 255, 255, .45);
+    text-decoration: none;
+    font-weight: normal;
+    font-size: 20px;
+    line-height: 400px;
+    text-align: center;
+}
+
+section.container section.droplet droplet.event-dragover comment:after {
+    content: "...请放开鼠标!";
+}
+*/
 
 angular.module('controllers.issues', 
 ['ui.router'
@@ -325,17 +321,29 @@ angular.module('controllers.issues',
 ])  
 
 .controller('IssuesMainCtrl',   [
-               'crudContrllersHelp','$scope', '$state', '$stateParams', 'User',
-	function ( crudContrllersHelp,$scope,   $state,   $stateParams,   User) {
-		
-       crudContrllersHelp.initMain('Issue','name',$scope,   $state,   $stateParams)
-   
-		User.all().then(function(ds){
-			$scope.users =ds
-	   })
-	
-		$scope.checkDate= function(item){
-			var now = new Date(Date.now())
+               'crudContrllersHelp','$rootScope','$scope','$state',   '$stateParams',  'Project','User',
+	function ( crudContrllersHelp,$rootScope,$scope,   $state,   $stateParams,   Project,User) {
+	   crudContrllersHelp.initMain('Issue','name',$scope,   $state,   $stateParams)
+       if(!$rootScope.exchangeData){
+		   //User.query({isActive:true,isAdmin:false},{strict:true}).then(function(ds){
+			 $scope.users =[]
+		  //})
+	   }else{
+		   Project.getById($rootScope.exchangeData.projectId).then(function(prj){
+			   console.log(prj)
+			   var members=[ ]
+			   for(var i=0;i<prj.teamMembers.length;i++)
+			      members.push(''+prj.teamMembers[i])
+			  
+		       console.log(members)   
+			   User.getByObjectIds(members).then(function(ds){
+				    $scope.users=ds
+				     console.log(ds)   
+				})
+		   })
+		}   
+	   $scope.checkDate= function(item){
+			var now = new Date()
 			if(!item.regDate)
 				item.regDate=now
 			if(!item.closeDate)
@@ -358,17 +366,91 @@ angular.module('controllers.issues',
 ])
 
 .controller('IssuesCreateCtrl',   [
-                '$scope', 'Issue',
-	function (  $scope,   Issue) {
+                '$rootScope','$scope', 'Issue','$stateParams',
+	function ( $rootScope, $scope,   Issue ,$stateParams) {
 		$scope.item = new Issue()
+		$scope.isNew=true
 		$scope.checkDate($scope.item)
+		if(!!$rootScope.exchangeData){
+		   $scope.item.targetType=$rootScope.exchangeData.targetType
+		   $scope.item.target=$rootScope.exchangeData.target
+		   $scope.item.projectId=$rootScope.exchangeData.projectId
+	       $scope.item.backlogId=$rootScope.exchangeData.backlogId
+		   $scope.item.state='TODO'
+		   $rootScope.exchangeData=null
+		}  
 	}
 ])
 
 .controller('IssuesEditCtrl',   [
+                '$scope', '$stateParams', '$state', 'Project','User',
+	function (  $scope,   $stateParams,   $state,Project,User) {
+		$scope.isNew=false
+		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.checkDate($scope.item)
+		if(!$scope.item.projectId) return
+		Project.getById($scope.item.projectId).then(function(prj){
+			 //  var members=[ ]
+			 //  for(var i=0;i<prj.teamMembers.length;i++)
+			 //     members.push(''+prj.teamMembers[i])
+			  
+		      // console.log(members)   
+			   User.getByObjectIds(prj.teamMembers).then(function(ds){
+				    $scope.users=ds
+				     //console.log(ds)   
+				})
+		   })
+	}
+])
+
+angular.module('controllers.messages', ['ui.router','ngMessages'
+, 'services.i18nNotifications'
+, 'directives.dropdownMultiselect'
+, 'resources.messages'])  
+.controller('MessagesMainCtrl',   [
+                'crudContrllersHelp','$scope', '$state', '$stateParams','Message',
+	function ( crudContrllersHelp,  $scope,    $state,    $stateParams,  Message) {
+
+		crudContrllersHelp.initMain('Message','title',$scope,   $state,   $stateParams)
+		
+		$scope.availableTags=["娱乐","科技"]
+			
+		$scope.checkDate= function(item){
+			var now = new Date(Date.now())
+			if(!item.recDate)
+				item.recDate=now
+			if(!item.closeDate)
+				item.closeDate= now.setDate(now.getDate()+14)
+		}
+
+	}
+])
+.controller('MessagesListCtrl',   [
+                'crudContrllersHelp','$scope', '$state', '$stateParams', 
+	function (  crudContrllersHelp,$scope,   $state,   $stateParams) {
+		crudContrllersHelp.initList('Message','title',$scope,   $state,   $stateParams)
+	}
+])
+.controller('MessagesDetailCtrl',   [
+                'crudContrllersHelp','$scope','$stateParams', '$state',
+	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
+		crudContrllersHelp.initDetail('Message','title',$scope,   $state,   $stateParams)
+	}
+])
+
+.controller('MessagesCreateCtrl',   [
+                '$scope', 'Message',
+	function (  $scope,   Message) {
+		$scope.item = new Message()
+		$scope.checkDate($scope.item)
+	}
+])
+
+.controller('MessagesEditCtrl',   [
                 '$scope', '$stateParams', '$state',
 	function (  $scope,   $stateParams,   $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.item.tags=$scope.item.tags||[]
 		$scope.checkDate($scope.item)
 	}
 ])
@@ -539,18 +621,23 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 .controller('ProjectsMainCtrl',   [
                'crudContrllersHelp','$scope', '$state', '$stateParams', 'i18nNotifications','Project','User',
 	function ( crudContrllersHelp,$scope,   $state,   $stateParams,    i18nNotifications, Project,User) {
- 		User.all().then(function(ds){
+ 		User.query({isActive:true,isAdmin:false},{strict:true}).then(function(ds){
 			$scope.users =ds
 		})
 		crudContrllersHelp.initMain('Project','name',$scope,   $state,   $stateParams)     
 	}
 ])
 .controller('ProjectsListCtrl',   [
-                'security','crudContrllersHelp','$scope', '$state', '$stateParams', 'i18nNotifications', 
-	function ( security,crudContrllersHelp, $scope,   $state,   $stateParams,    i18nNotifications) {
+                'security','crudContrllersHelp','$rootScope','$scope', '$state', '$stateParams', 'i18nNotifications', 
+	function ( security,crudContrllersHelp,$rootScope, $scope,   $state,   $stateParams,    i18nNotifications) {
 		crudContrllersHelp.initList('Project','name',$scope,   $state,   $stateParams)
 		$scope.backlogs=function (item) {
 			$state.go('backlogs-list', {projectId: item.$id()})
+		}
+		$scope.issues=function (item) {
+			$rootScope.exchangeData={targetType:'项目',target: item.name
+				                            ,projectId:item.$id(),backlogId:null}
+			$state.go('issues.create')
 		}
 		$scope.isProductMgr=function(item) {
 		    if(!security.currentUser) return false;
@@ -582,6 +669,8 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 		$scope.item = new Project()
 		$scope.item.iterationDuration=4
 		$scope.item.isSample=false
+		$scope.item.state='TODO'
+		$scope.isNew=true
 
 	}
 ])
@@ -590,6 +679,7 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
                 '$scope', '$stateParams', '$state',
 	function (  $scope,   $stateParams,   $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.isNew=false
 
 	}
 ])
@@ -632,39 +722,43 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 		$scope.item = new User()
 		$scope.item.isActive=true
 		$scope.item.isAdmin=false
+		$scope.isNew=true
 		$scope.checkDate($scope.item)
+		$scope.item.desc=
+"expressjs/multer [![NPM version](https://badge.fury.io/js/multer.svg)](https://badge.fury.io/js/multer)\r\n"
++"\r\n"
++"Multer is a node.js middleware for handling `multipart/form-data`.\r\n"
++"\r\n"
++"It is written on top of [busboy](https://github.com/mscdex/busboy) for maximum efficiency.\r\n"
++"\r\n"
++"## API\r\n"
++"\r\n"
++"#### Installation\r\n"
++"\r\n"
++"`$ npm install multer`\r\n"
++"\r\n"
++"#### Usage\r\n"
++"\r\n"
++"```js\r\n"
++"var express = require('express')\r\n"
++"var multer  = require('multer')\r\n"
++"\r\n"
++"var app = express()\r\n"
++"app.use(multer({ dest: './uploads/'}))\r\n"
++"```\r\n"
++"\r\n"
++"\r\n"
++"**IMPORTANT**: Multer will not process any form which is not `multipart/form-data`."
 	}
 ])
 
 .controller('UsersEditCtrl',   [
-                '$scope', '$stateParams', '$state','$timeout',
-	function (  $scope,   $stateParams,   $state,$timeout) {
+                '$scope', '$stateParams', '$state',
+	function (  $scope,   $stateParams,   $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
 		$scope.checkDate($scope.item)
-		$scope.interface = {}
-		$scope.success = false //for upload image
-        $scope.error = false
-        $scope.interface.useParser=function (responseText) {
-                    return responseText
-         }
-        $scope.$on('$dropletReady', function whenDropletReady() {
-            $scope.interface.allowedExtensions(['png', 'jpg', 'bmp', 'gif', 'svg', 'torrent'])
-            $scope.interface.setRequestUrl('upload')
-            $scope.interface.defineHTTPSuccess([/2.{2}/])
-            $scope.interface.useArray(false)
-        })
-        $scope.$on('$dropletSuccess', function onDropletSuccess(event, response, files) {
-            $scope.uploadCount = files.length
-            $scope.success     = true
-			console.log(response);
-			if($scope.uploadCount>0)
-			  $scope.item.image="uploads/"+response.names[0]
-		
-            $timeout(function timeout() {
-                $scope.success = false;
-            }, 3000)
-
-        });
+		$scope.isNew=false
+	
 	}
 ])
 
@@ -721,58 +815,6 @@ angular.module('controllers.users')
     }
   }
 }])
-
-angular.module('controllers.messages', ['ui.router','ngMessages'
-, 'services.i18nNotifications'
-, 'directives.dropdownMultiselect'
-, 'resources.messages'])  
-.controller('MessagesMainCtrl',   [
-                'crudContrllersHelp','$scope', '$state', '$stateParams','Message',
-	function ( crudContrllersHelp,  $scope,    $state,    $stateParams,  Message) {
-
-		crudContrllersHelp.initMain('Message','title',$scope,   $state,   $stateParams)
-		
-		$scope.availableTags=["娱乐","科技"]
-			
-		$scope.checkDate= function(item){
-			var now = new Date(Date.now())
-			if(!item.recDate)
-				item.recDate=now
-			if(!item.closeDate)
-				item.closeDate= now.setDate(now.getDate()+14)
-		}
-
-	}
-])
-.controller('MessagesListCtrl',   [
-                'crudContrllersHelp','$scope', '$state', '$stateParams', 
-	function (  crudContrllersHelp,$scope,   $state,   $stateParams) {
-		crudContrllersHelp.initList('Message','title',$scope,   $state,   $stateParams)
-	}
-])
-.controller('MessagesDetailCtrl',   [
-                'crudContrllersHelp','$scope','$stateParams', '$state',
-	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
-		crudContrllersHelp.initDetail('Message','title',$scope,   $state,   $stateParams)
-	}
-])
-
-.controller('MessagesCreateCtrl',   [
-                '$scope', 'Message',
-	function (  $scope,   Message) {
-		$scope.item = new Message()
-		$scope.checkDate($scope.item)
-	}
-])
-
-.controller('MessagesEditCtrl',   [
-                '$scope', '$stateParams', '$state',
-	function (  $scope,   $stateParams,   $state) {
-		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.item.tags=$scope.item.tags||[]
-		$scope.checkDate($scope.item)
-	}
-])
 
 angular.module('controllers.backlogs', ['ui.router','ngMessages'
 , 'services.i18nNotifications'

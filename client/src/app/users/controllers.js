@@ -36,38 +36,42 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 		$scope.item = new User()
 		$scope.item.isActive=true
 		$scope.item.isAdmin=false
+		$scope.isNew=true
 		$scope.checkDate($scope.item)
+		$scope.item.desc=
+"expressjs/multer [![NPM version](https://badge.fury.io/js/multer.svg)](https://badge.fury.io/js/multer)\r\n"
++"\r\n"
++"Multer is a node.js middleware for handling `multipart/form-data`.\r\n"
++"\r\n"
++"It is written on top of [busboy](https://github.com/mscdex/busboy) for maximum efficiency.\r\n"
++"\r\n"
++"## API\r\n"
++"\r\n"
++"#### Installation\r\n"
++"\r\n"
++"`$ npm install multer`\r\n"
++"\r\n"
++"#### Usage\r\n"
++"\r\n"
++"```js\r\n"
++"var express = require('express')\r\n"
++"var multer  = require('multer')\r\n"
++"\r\n"
++"var app = express()\r\n"
++"app.use(multer({ dest: './uploads/'}))\r\n"
++"```\r\n"
++"\r\n"
++"\r\n"
++"**IMPORTANT**: Multer will not process any form which is not `multipart/form-data`."
 	}
 ])
 
 .controller('UsersEditCtrl',   [
-                '$scope', '$stateParams', '$state','$timeout',
-	function (  $scope,   $stateParams,   $state,$timeout) {
+                '$scope', '$stateParams', '$state',
+	function (  $scope,   $stateParams,   $state) {
 		$scope.item = $scope.findById( $stateParams.itemId)
 		$scope.checkDate($scope.item)
-		$scope.interface = {}
-		$scope.success = false //for upload image
-        $scope.error = false
-        $scope.interface.useParser=function (responseText) {
-                    return responseText
-         }
-        $scope.$on('$dropletReady', function whenDropletReady() {
-            $scope.interface.allowedExtensions(['png', 'jpg', 'bmp', 'gif', 'svg', 'torrent'])
-            $scope.interface.setRequestUrl('upload')
-            $scope.interface.defineHTTPSuccess([/2.{2}/])
-            $scope.interface.useArray(false)
-        })
-        $scope.$on('$dropletSuccess', function onDropletSuccess(event, response, files) {
-            $scope.uploadCount = files.length
-            $scope.success     = true
-			console.log(response);
-			if($scope.uploadCount>0)
-			  $scope.item.image="uploads/"+response.names[0]
-		
-            $timeout(function timeout() {
-                $scope.success = false;
-            }, 3000)
-
-        });
+		$scope.isNew=false
+	
 	}
 ])

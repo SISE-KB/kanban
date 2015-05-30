@@ -8,8 +8,8 @@ gulp.task('default', ['test'])
 
 gulp.task('test',   function () {
   return gulp.src('./test/**/*.js')
-             .pipe($.mocha({reporter: 'spec'}))
-             .pipe($.exit())
+                .pipe($.mocha({reporter: 'spec'}))
+                .pipe($.exit())
 })
 
 

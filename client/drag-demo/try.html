@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <title>AngularJS Demo</title>
+   <link href="../css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+   <script src="lib/angular.min.js"></script>
+   <script src="../libs/ui-bootstrap-tpls.min.js"></script>
+   <script src="directives/PrjCard.js"></script>
+   <script src="try.js"></script>
+
+
+</head>
+<body ng-app="myApp">
+	<div  class="container"  ng-controller="demo">
+   	   <div class="row">	
+			<div class="col-md-4">		
+			   <project-card mgr-image="1.jpg" prj-name="prj1" items1="items1" items2="items2"></project-card>	
+			</div>
+			<div class="col-md-4">	
+			   <project-card mgr-image="2.jpg" prj-name="神庙逃亡" items1="items2" items2="items3"></project-card>	
+			</div>
+			<div class="col-md-4">	
+			   <project-card mgr-image="3.jpg" prj-name="prj3" items1="items3" items2="items1"></project-card>	
+			</div>
+	   </div>    
+   </div>
+    <script type="text/ng-template" id="templates/card-list.html">
+        <div >
+           <ul>
+			  <li ng-repeat='item in items'>{{item.name}}</li>
+		   </ul>
+        </div>
+   </script>
+</body>
+</html>
