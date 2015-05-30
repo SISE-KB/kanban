@@ -10,9 +10,15 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
   $urlRouterProvider.otherwise('/');
  // $locationProvider.html5Mode(true);     
   $stateProvider
-    .state('home',  {
+    .state('dashboard',  {
 	  url: '/',	
-      template: '<h1>项目状态看板.....</h1>'
+	  controller: 'DashboardCtrl',
+      templateUrl: 'views/dashboard/index.tpl.html'
+    }) 
+     .state('home',  {
+	  url: '/home',	
+	 // controller: 'DashboardCtrl',
+      template: '<h1>个人工作看板，正在开发......</h1>'
     }) 
     .state('upload',  {
 	  url: '/upload',	
@@ -53,9 +59,15 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
     return httpRequestTracker.hasPendingRequests()
   }
   $scope.home = function () {
-    if (security.isAuthenticated()) {
-         $scope.$state.go('home');
-    } 
+	  
+	  if(security.isAuthenticated()){
+		 console.log("home");
+	     $scope.$state.go('home');
+	 }
+	  else{
+		 console.log("dashboard");
+         $scope.$state.go('dashboard');
+	 }
   }
  }])
 
@@ -217,6 +229,7 @@ angular.module('controllers',[
 ,'controllers.projects'
 ,'controllers.backlogs'
 ,'controllers.issues'
+,'controllers.dashboard'
 ])
 angular.module('resources', [
  'resources.messages'
@@ -313,6 +326,109 @@ section.container section.droplet droplet.event-dragover comment:after {
 }
 */
 
+angular.module('controllers.dashboard', ['ui.router','ui.bootstrap'])  
+.controller('DashboardCtrl',   
+              [ '$scope', '$state', '$stateParams', 
+	function ($scope,   $state,   $stateParams) {
+		$scope.data=[
+		{ prjName: '神庙逃亡'
+		  ,prdMgrImage:'1.jpg'
+		  ,backlogsOk:	[
+		      {name:'backlog1', effort:9}
+             ,{name:'backlog2',effort:9}
+             ,{name:'backlog3',effort:12}
+		  ]
+		 ,backlogsTodo:	[
+		      {name:'backlog4', effort:9}
+             ,{name:'backlog5', effort:9}
+	     ]
+	  }
+    ,{    prjName: '顽皮鳄鱼爱洗澡'
+		 ,prdMgrImage:'2.jpg'
+		 ,backlogsOk:	[
+		      {name:'backlog5', effort:10}
+             ,{name:'backlog6',effort:8}
+      	  ]
+		 ,backlogsTodo:	[
+		      {name:'backlog7', effort:9}
+	     ]
+	  }
+    ,{    prjName: '机械迷城'
+		 ,prdMgrImage:'3.jpg'
+		 ,backlogsOk:	[
+		      {name:'backlog8', effort:10}
+             ,{name:'backlog9',effort:8}
+      	  ]
+		 ,backlogsTodo:	[
+		      {name:'backlog10', effort:9}
+	     ]
+	  }
+  ,{    prjName: '地域边境'
+		 ,prdMgrImage:'4.jpg'
+		 ,backlogsOk:	[
+		      {name:'backlog11', effort:10}
+             ,{name:'backlog12',effort:8}
+      	  ]
+		 ,backlogsTodo:	[
+		      {name:'backlog13', effort:9}
+	     ]
+	  }
+    ];
+}])
+
+angular.module('controllers.dashboard')  
+.directive('projectCard', function () {
+	return {
+				restrict: 'E',
+				replace:true,
+				scope: {
+				    mgrImage: '@',
+					prjName: '@',
+					items1: '=',
+					items2: '='
+				},
+				templateUrl:'templates/prj-card.html'
+	}
+})
+.directive('cardList', function () {
+	return {
+				restrict: 'E',
+				replace:true,
+				scope: {
+					placement:"@",
+					listTemplate:"@",
+					items: '='
+				},
+				templateUrl:'templates/card-btn.html',
+				controller: function ($scope) {
+					//console.log($scope.placement,$scope.items)
+				}
+				 
+	}
+})
+.run(["$templateCache", function($templateCache) {
+	$templateCache.put("templates/card-btn.html",
+	 '<button popover-placement="{{placement}}"' 
+	 +'       popover-trigger="mouseenter" '
+	 +'       popover-animation="true"'
+     +'       popover-template="listTemplate" '
+     +'       class="btn btn-default">{{items.length}}</button>'
+	);
+  $templateCache.put("templates/prj-card.html",
+     "<div class='well'>"
+   +"  <div class='row'>"	
+   +" 		<div class='col-md-3'>"	
+   +"       <img ng-src='img/{{mgrImage}}'  class='img-circle'>"
+   +"     </div>"
+   +" 		<div class='col-md-9' style='text-align: center;'>"
+   +" 		<a ui-sref='projects.list'>{{prjName}}</a><br>"
+   +"       OK:<card-list placement='bottom' list-template='templates/card-list.html' items='items1'> </card-list>"
+   +"       TODO:<card-list placement='bottom' list-template='templates/card-list.html' items='items2'> </card-list>"
+   +" 		</div>"
+   +"  </div>"
+   +"</div>");
+}]);
+
 angular.module('controllers.issues', 
 ['ui.router'
 , 'services.i18nNotifications'
@@ -330,15 +446,15 @@ angular.module('controllers.issues',
 		  //})
 	   }else{
 		   Project.getById($rootScope.exchangeData.projectId).then(function(prj){
-			   console.log(prj)
-			   var members=[ ]
-			   for(var i=0;i<prj.teamMembers.length;i++)
-			      members.push(''+prj.teamMembers[i])
+			  // console.log(prj)
+			  // var members=[ ]
+			 //  for(var i=0;i<prj.teamMembers.length;i++)
+			 //     members.push(''+prj.teamMembers[i])
 			  
-		       console.log(members)   
-			   User.getByObjectIds(members).then(function(ds){
+		      // console.log(members)   
+			   User.getByObjectIds(prj.teamMembers).then(function(ds){
 				    $scope.users=ds
-				     console.log(ds)   
+				  //   console.log(ds)   
 				})
 		   })
 		}   
@@ -390,15 +506,9 @@ angular.module('controllers.issues',
 		$scope.checkDate($scope.item)
 		if(!$scope.item.projectId) return
 		Project.getById($scope.item.projectId).then(function(prj){
-			 //  var members=[ ]
-			 //  for(var i=0;i<prj.teamMembers.length;i++)
-			 //     members.push(''+prj.teamMembers[i])
-			  
-		      // console.log(members)   
-			   User.getByObjectIds(prj.teamMembers).then(function(ds){
+		      User.getByObjectIds(prj.teamMembers).then(function(ds){
 				    $scope.users=ds
-				     //console.log(ds)   
-				})
+			  })
 		   })
 	}
 ])
@@ -484,6 +594,84 @@ function ($http,$scope,Project) {
      ,{name:'T2',estimation:6,remaining:4}
   ]
 }])
+
+angular.module('controllers.projects', ['ui.router','ngMessages'
+, 'services.i18nNotifications'
+, 'resources.projects'
+, 'resources.users'
+])  
+.controller('ProjectsMainCtrl',   [
+               'crudContrllersHelp','$scope', '$state', '$stateParams', '$http','Project','SERVER_CFG',
+	function ( crudContrllersHelp,$scope,   $state,   $stateParams,    $http, Project,SERVER_CFG) {
+ 		/*User.query({isActive:true,isAdmin:false},{strict:true}).then(function(ds){
+			$scope.users =ds
+		})*/
+			var baseURL= SERVER_CFG.URL+'/api/'
+		  	$http.post(baseURL+'users/load',{})//只加载主要资料
+		  	.then(function(resp){
+				  var data=resp.data
+				  console.log('users/load--',data)
+				  $scope.users =data
+          })
+		crudContrllersHelp.initMain('Project','name',$scope,   $state,   $stateParams)     
+	}
+])
+.controller('ProjectsListCtrl',   [
+                'security','crudContrllersHelp','$rootScope','$scope', '$state', '$stateParams', 'i18nNotifications', 
+	function ( security,crudContrllersHelp,$rootScope, $scope,   $state,   $stateParams,    i18nNotifications) {
+		crudContrllersHelp.initList('Project','name',$scope,   $state,   $stateParams)
+		$scope.backlogs=function (item) {
+			$state.go('backlogs-list', {projectId: item.$id()})
+		}
+		$scope.issues=function (item) {
+			$rootScope.exchangeData={targetType:'项目',target: item.name
+				                            ,projectId:item.$id(),backlogId:null}
+			$state.go('issues.create')
+		}
+		$scope.isProductMgr=function(item) {
+		    if(!security.currentUser) return false;
+		    var mgrId=security.currentUser.id;
+			//console.log(mgrId,item.productOwner)
+			return item.productOwner==mgrId
+		}
+		$scope.isDevMgr=function(item) {
+		    if(!security.currentUser) return false;
+		    var mgrId=security.currentUser.id;
+			//console.log(mgrId,item.procMaster)
+			return item.procMaster==mgrId
+		}
+
+	}
+])
+.controller('ProjectsDetailCtrl',   [
+                'crudContrllersHelp','$scope','$stateParams', '$state',
+	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
+		crudContrllersHelp.initDetail('Project','name',$scope,   $state,   $stateParams)
+
+
+	}
+])
+
+.controller('ProjectsCreateCtrl',   [
+                '$scope', 'Project',
+	function (  $scope,   Project) {
+		$scope.item = new Project()
+		$scope.item.iterationDuration=4
+		$scope.item.isSample=false
+		$scope.item.state='TODO'
+		$scope.isNew=true
+
+	}
+])
+
+.controller('ProjectsEditCtrl',   [
+                '$scope', '$stateParams', '$state',
+	function (  $scope,   $stateParams,   $state) {
+		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.isNew=false
+
+	}
+])
 
 angular.module('resources.backlogs', ['mongoResourceHttp'])
 
@@ -612,77 +800,6 @@ angular.module('resources.users').factory('User', ['$mongoResourceHttp', functio
 
   return userResource;
 }]);
-
-angular.module('controllers.projects', ['ui.router','ngMessages'
-, 'services.i18nNotifications'
-, 'resources.projects'
-, 'resources.users'
-])  
-.controller('ProjectsMainCtrl',   [
-               'crudContrllersHelp','$scope', '$state', '$stateParams', 'i18nNotifications','Project','User',
-	function ( crudContrllersHelp,$scope,   $state,   $stateParams,    i18nNotifications, Project,User) {
- 		User.query({isActive:true,isAdmin:false},{strict:true}).then(function(ds){
-			$scope.users =ds
-		})
-		crudContrllersHelp.initMain('Project','name',$scope,   $state,   $stateParams)     
-	}
-])
-.controller('ProjectsListCtrl',   [
-                'security','crudContrllersHelp','$rootScope','$scope', '$state', '$stateParams', 'i18nNotifications', 
-	function ( security,crudContrllersHelp,$rootScope, $scope,   $state,   $stateParams,    i18nNotifications) {
-		crudContrllersHelp.initList('Project','name',$scope,   $state,   $stateParams)
-		$scope.backlogs=function (item) {
-			$state.go('backlogs-list', {projectId: item.$id()})
-		}
-		$scope.issues=function (item) {
-			$rootScope.exchangeData={targetType:'项目',target: item.name
-				                            ,projectId:item.$id(),backlogId:null}
-			$state.go('issues.create')
-		}
-		$scope.isProductMgr=function(item) {
-		    if(!security.currentUser) return false;
-		    var mgrId=security.currentUser.id;
-			//console.log(mgrId,item.productOwner)
-			return item.productOwner==mgrId
-		}
-		$scope.isDevMgr=function(item) {
-		    if(!security.currentUser) return false;
-		    var mgrId=security.currentUser.id;
-			//console.log(mgrId,item.procMaster)
-			return item.procMaster==mgrId
-		}
-
-	}
-])
-.controller('ProjectsDetailCtrl',   [
-                'crudContrllersHelp','$scope','$stateParams', '$state',
-	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
-		crudContrllersHelp.initDetail('Project','name',$scope,   $state,   $stateParams)
-
-
-	}
-])
-
-.controller('ProjectsCreateCtrl',   [
-                '$scope', 'Project',
-	function (  $scope,   Project) {
-		$scope.item = new Project()
-		$scope.item.iterationDuration=4
-		$scope.item.isSample=false
-		$scope.item.state='TODO'
-		$scope.isNew=true
-
-	}
-])
-
-.controller('ProjectsEditCtrl',   [
-                '$scope', '$stateParams', '$state',
-	function (  $scope,   $stateParams,   $state) {
-		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.isNew=false
-
-	}
-])
 
 angular.module('controllers.users', ['ui.router','ngMessages'
 , 'services.i18nNotifications'

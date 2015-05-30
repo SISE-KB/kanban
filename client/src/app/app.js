@@ -10,9 +10,15 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
   $urlRouterProvider.otherwise('/');
  // $locationProvider.html5Mode(true);     
   $stateProvider
-    .state('home',  {
+    .state('dashboard',  {
 	  url: '/',	
-      template: '<h1>项目状态看板.....</h1>'
+	  controller: 'DashboardCtrl',
+      templateUrl: 'views/dashboard/index.tpl.html'
+    }) 
+     .state('home',  {
+	  url: '/home',	
+	 // controller: 'DashboardCtrl',
+      template: '<h1>个人工作看板，正在开发......</h1>'
     }) 
     .state('upload',  {
 	  url: '/upload',	
@@ -53,9 +59,15 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
     return httpRequestTracker.hasPendingRequests()
   }
   $scope.home = function () {
-    if (security.isAuthenticated()) {
-         $scope.$state.go('home');
-    } 
+	  
+	  if(security.isAuthenticated()){
+		 console.log("home");
+	     $scope.$state.go('home');
+	 }
+	  else{
+		 console.log("dashboard");
+         $scope.$state.go('dashboard');
+	 }
   }
  }])
 

@@ -4,11 +4,18 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 , 'resources.users'
 ])  
 .controller('ProjectsMainCtrl',   [
-               'crudContrllersHelp','$scope', '$state', '$stateParams', 'i18nNotifications','Project','User',
-	function ( crudContrllersHelp,$scope,   $state,   $stateParams,    i18nNotifications, Project,User) {
- 		User.query({isActive:true,isAdmin:false},{strict:true}).then(function(ds){
+               'crudContrllersHelp','$scope', '$state', '$stateParams', '$http','Project','SERVER_CFG',
+	function ( crudContrllersHelp,$scope,   $state,   $stateParams,    $http, Project,SERVER_CFG) {
+ 		/*User.query({isActive:true,isAdmin:false},{strict:true}).then(function(ds){
 			$scope.users =ds
-		})
+		})*/
+			var baseURL= SERVER_CFG.URL+'/api/'
+		  	$http.post(baseURL+'users/load',{})//只加载主要资料
+		  	.then(function(resp){
+				  var data=resp.data
+				  console.log('users/load--',data)
+				  $scope.users =data
+          })
 		crudContrllersHelp.initMain('Project','name',$scope,   $state,   $stateParams)     
 	}
 ])

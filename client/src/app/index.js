@@ -4,6 +4,7 @@ angular.module('controllers',[
 ,'controllers.projects'
 ,'controllers.backlogs'
 ,'controllers.issues'
+,'controllers.dashboard'
 ])
 angular.module('resources', [
  'resources.messages'

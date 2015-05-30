@@ -27,16 +27,25 @@ router
   .post(function (req, res) {
 	  var sname=req.params.service
 	  debug(sname)
-	 
-	  if('uniqueMobileNo'==sname){
-		  User.find({mobileNo:req.body.mobileNo}).then(function(data){
-			  debug(data)
-	         res.json({uniqueMobileNo: data&&data.length==0})
-	      })   
+	  switch (sname)
+        {
+            case "uniqueMobileNo":
+	   		   User.find({mobileNo:req.body.mobileNo}).then(function(data){
+			     debug('uniqueMobileNo',data)
+	             res.json({uniqueMobileNo: data&&data.length==0})
+	           })
+	           break  
+	        case "load":
+	   		   User.loadData({}).then(function(data){
+			     debug('load',data)
+	             res.json(data)
+	           })
+	           break     
+	        default:
+	            res.json({state: 'NONE'} )
+	            break   
 	  }
-	  else
-        res.json({state: 'NONE'} )
-	  
+  
   })
  
   return router

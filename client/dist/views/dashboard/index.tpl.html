@@ -1,0 +1,17 @@
+<div  class="container"  ng-controller="DashboardCtrl">
+	<div ng-repeat="item in data" class="col-md-4">		
+		   <project-card mgr-image="{{item.prdMgrImage}}" 
+		     prj-name="{{item.prjName}}"  
+		     items1="item.backlogsOk" 
+		     items2="item.backlogsTodo">
+		  </project-card>	
+	</div>
+</div>
+ <script type="text/ng-template" id="templates/card-list.html">
+        <div >
+           <ul>
+			  <li ng-repeat='item in items'>{{item.name}} 
+			  <span class="badge">{{item.effort}}</span></li>
+		   </ul>
+        </div>
+  </script>
