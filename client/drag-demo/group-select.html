@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN" ng-app='myApp'>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <title>AngularJS Demo</title>
+   <link href="bootstrap.min.css" rel="stylesheet" type="text/css"/>
+   <script src="lib/angular.min.js"></script>
+  <link rel="stylesheet" href="app.css">
+  <script src="app.js"></script>
+</head>
+<body ng-controller="MainCtrl">
+ <!-- <label>Select a user value with email for label</label>
+  <select ng-model="chosenUser" ng-options="user.email for user in users"></select>
+  Selected User: {{ chosenUser }}
+  <label>Select a user value with a computed label</label>
+  <select ng-model="chosenUser" ng-options="getFullName(user) for user in users"></select>
+  Selected User: {{ chosenUser }}
+  <label>Select a user's email with a computed label</label>
+  <select ng-model="chosenUserEmail" ng-options="user.email as getFullName(user) for user in users"></select>
+  Selected User's Email: {{ chosenUserEmail }}-->
+  <label>Select users grouped by sex</label>
+  <select multiple ng-model="chosenUsers" ng-options="user.email as getFullName(user) group by user.sex for user in users"></select>
+  Selected User: {{ chosenUsers }}
+</body>
+</html>
