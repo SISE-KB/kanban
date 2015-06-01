@@ -108,7 +108,9 @@ var initList = function (ResName,nameField,$scope,   $state,   $stateParams) {
 		$scope.view = function (item) {
 			$state.go(ressName+'.detail', {itemId: item.$id()})
 		}
-	
+		$scope.edit = function (item) {
+			$state.go(ressName+'.edit', {itemId: item.$id()})
+		}
 		$scope.create = function () {
 			$state.go(ressName+'.create')
 		}

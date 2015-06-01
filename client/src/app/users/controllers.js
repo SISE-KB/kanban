@@ -22,6 +22,7 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 	function ( crudContrllersHelp, $scope,   $state,   $stateParams) {
 		crudContrllersHelp.initList('User','name',$scope,   $state,   $stateParams)
 	}
+	
 ])
 .controller('UsersDetailCtrl',   [
                'crudContrllersHelp', '$scope','$stateParams', '$state',

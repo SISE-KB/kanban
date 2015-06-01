@@ -31,21 +31,22 @@ UserSchema.plugin(passportLocalMongoose,{
 
 
 UserSchema.pre('save', function (next) {
-	if(this.password&&this.password.length < 20){ 
+    if(this.password&&this.password.length < 20){ 
 		  this.setPassword(this.password,function(err,user){
 			  console.log("setPasswod:",user.password);
 			  if(err) console.log("setPasswod ERROR");
 			  else
 			    next();
 		  });
-	}		
- });
+	}else{
+      next();
+	}	
+});
 
 
 
 UserSchema.statics.loadData = function (query) {
- return  this.find(query)
-   .select('name mobileNo') // 
+ return  this.find(query).select('name mobileNo')
  };
 
 

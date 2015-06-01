@@ -34,7 +34,6 @@ dbRouter
 		  res.json(data)
 	  })
 	  else{
-		 // debug('search-->',search)
 		  m.find(search,function(err,data){
 		    if(err) return next(err);
 		    debug(data)
@@ -46,19 +45,37 @@ dbRouter
 	  var id=req.params.id
 	  var cname=req.params.collection
 	  var m=require('../models/'+cname)
-	  //m.findByIdAndUpdate(id, req.body, function (err, post) {
-	  if(!!id)  m.findById(id,function(err,doc){
-		  if(err) throw err;
-		  debug("update:",req.body)
-      	  for( var p in req.body){
-			  doc[p]=req.body[p];
-			 // console.log(p);
-	      }
-	      doc.save();  
-		  res.json(doc);
-	  })
-	  else {
-				res.json({err:'not id'})
+	  if(!!id) {
+        
+		/* var item=new m(req.body);
+		 if(cname==="users"&&item.password&&item.password.length < 20){
+		    item.setPassword(req.body.password,function(err,user){
+			    req.body.password=user.password;
+			    console.log(req.body);
+			    m.findByIdAndUpdate(id, req.body);
+			});
+		 }else{
+  		   m.findByIdAndUpdate(id, req.body);
+         }
+		 res.json(req.body); 		 
+	  }*/
+	    var q=m.findById(id).lean(false);
+		q.exec(function(err,doc){
+		     //
+			  if(err) throw err;
+			   //debug("update:",req.body)
+			  
+			  for( var p in req.body)
+				  doc[p]=req.body[p];
+			  	  
+	          //console.log(doc);
+			  doc.save();
+			  res.json(req.body);
+			
+          });
+		  
+	  }else {
+		res.json({err:'invalid id'})
 	 }
    })
   .post(function (req, res) {

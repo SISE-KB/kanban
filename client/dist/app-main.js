@@ -183,7 +183,9 @@ var initList = function (ResName,nameField,$scope,   $state,   $stateParams) {
 		$scope.view = function (item) {
 			$state.go(ressName+'.detail', {itemId: item.$id()})
 		}
-	
+		$scope.edit = function (item) {
+			$state.go(ressName+'.edit', {itemId: item.$id()})
+		}
 		$scope.create = function () {
 			$state.go(ressName+'.create')
 		}
@@ -565,36 +567,6 @@ angular.module('controllers.messages', ['ui.router','ngMessages'
 	}
 ])
 
-angular.module('prj-dashboard', ['ui.router','resources.projects'])
-
-.config(['$stateProvider', function ($stateProvider) {
-  $stateProvider.state('prj-dashboard', {
-    templateUrl:'views/myprojects/prj-dashboard.tpl.html',
-    controller:'ProjectDashboardCtrl',
-  })
-}])
-
-.controller('ProjectDashboardCtrl', [
-          '$http','$scope', 'Project',
-function ($http,$scope,Project) {
-	$scope.projects = [
-	 {_id:1,name:'prj1'}
-	,{_id:2,name:'prj2'}]
-	var baseURL= 'http://localhost:3000/api/'
-  $http.post(baseURL+'project/projectsForUser',{userid:'admin'})
-  .then(function(resp){
-	  console.log('api--',resp.data)
-  })
-  /*Project.all().then(function(prjs){
-	  $scope.projects = prjs
-	  console.log(prjs[0].name)
-  })*/
-  $scope.tasks = [
-      {name:'T1',estimation:2,remaining:1}
-     ,{name:'T2',estimation:6,remaining:4}
-  ]
-}])
-
 angular.module('controllers.projects', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
 , 'resources.projects'
@@ -672,6 +644,169 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 
 	}
 ])
+
+angular.module('prj-dashboard', ['ui.router','resources.projects'])
+
+.config(['$stateProvider', function ($stateProvider) {
+  $stateProvider.state('prj-dashboard', {
+    templateUrl:'views/myprojects/prj-dashboard.tpl.html',
+    controller:'ProjectDashboardCtrl',
+  })
+}])
+
+.controller('ProjectDashboardCtrl', [
+          '$http','$scope', 'Project',
+function ($http,$scope,Project) {
+	$scope.projects = [
+	 {_id:1,name:'prj1'}
+	,{_id:2,name:'prj2'}]
+	var baseURL= 'http://localhost:3000/api/'
+  $http.post(baseURL+'project/projectsForUser',{userid:'admin'})
+  .then(function(resp){
+	  console.log('api--',resp.data)
+  })
+  /*Project.all().then(function(prjs){
+	  $scope.projects = prjs
+	  console.log(prjs[0].name)
+  })*/
+  $scope.tasks = [
+      {name:'T1',estimation:2,remaining:1}
+     ,{name:'T2',estimation:6,remaining:4}
+  ]
+}])
+
+angular.module('controllers.users', ['ui.router','ngMessages'
+, 'services.i18nNotifications'
+, 'directives.dropdownMultiselect'
+, 'resources.users'])  
+.controller('UsersMainCtrl',   [
+               'crudContrllersHelp','$scope', '$state', '$stateParams', 
+	function ( crudContrllersHelp,$scope,   $state,   $stateParams) {
+		
+		crudContrllersHelp.initMain('User','name',$scope,   $state,   $stateParams)
+		$scope.availableSkills=['协调','后端编码','前端编码','2D做图','3D建模','文档写作','测试']
+
+		$scope.checkDate= function(item){
+			var now = new Date(Date.now())
+			if(!item.regDate)
+				item.regDate=now
+		}
+
+	}
+])
+.controller('UsersListCtrl',   [
+                'crudContrllersHelp','$scope', '$state', '$stateParams',
+	function ( crudContrllersHelp, $scope,   $state,   $stateParams) {
+		crudContrllersHelp.initList('User','name',$scope,   $state,   $stateParams)
+	}
+	
+])
+.controller('UsersDetailCtrl',   [
+               'crudContrllersHelp', '$scope','$stateParams', '$state',
+	function ( crudContrllersHelp,$scope,  $stateParams,    $state) {
+		crudContrllersHelp.initDetail('User','name',$scope,   $state,   $stateParams)
+		
+	}
+])
+.controller('UsersCreateCtrl',   [
+                '$scope', 'User',
+	function (  $scope,   User) {
+		$scope.item = new User()
+		$scope.item.isActive=true
+		$scope.item.isAdmin=false
+		$scope.isNew=true
+		$scope.checkDate($scope.item)
+		$scope.item.desc=
+"expressjs/multer [![NPM version](https://badge.fury.io/js/multer.svg)](https://badge.fury.io/js/multer)\r\n"
++"\r\n"
++"Multer is a node.js middleware for handling `multipart/form-data`.\r\n"
++"\r\n"
++"It is written on top of [busboy](https://github.com/mscdex/busboy) for maximum efficiency.\r\n"
++"\r\n"
++"## API\r\n"
++"\r\n"
++"#### Installation\r\n"
++"\r\n"
++"`$ npm install multer`\r\n"
++"\r\n"
++"#### Usage\r\n"
++"\r\n"
++"```js\r\n"
++"var express = require('express')\r\n"
++"var multer  = require('multer')\r\n"
++"\r\n"
++"var app = express()\r\n"
++"app.use(multer({ dest: './uploads/'}))\r\n"
++"```\r\n"
++"\r\n"
++"\r\n"
++"**IMPORTANT**: Multer will not process any form which is not `multipart/form-data`."
+	}
+])
+
+.controller('UsersEditCtrl',   [
+                '$scope', '$stateParams', '$state',
+	function (  $scope,   $stateParams,   $state) {
+		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.checkDate($scope.item)
+		$scope.isNew=false
+	
+	}
+])
+
+angular.module('controllers.users')  
+.directive('validateEquals', function() {
+  return {
+    restrict: 'A',
+    require: 'ngModel',
+    link: function(scope, elm, attrs, ctrl) {
+      function validateEqual(myValue, otherValue) {
+        if (myValue === otherValue) {
+          ctrl.$setValidity('equal', true)
+          return myValue
+        } else {
+          ctrl.$setValidity('equal', false)
+          return undefined
+        }
+      }
+
+      scope.$watch(attrs.validateEquals, function(otherModelValue) {
+        ctrl.$setValidity('equal', ctrl.$viewValue === otherModelValue)
+      })
+
+      ctrl.$parsers.push(function(viewValue) {
+        return validateEqual(viewValue, scope.$eval(attrs.validateEquals))
+      })
+
+      ctrl.$formatters.push(function(modelValue) {
+        return validateEqual(modelValue, scope.$eval(attrs.validateEquals))
+      })
+    }
+  }
+})
+.directive('uniqueMobileNo', [
+            "$http","SERVER_CFG",
+ function ($http,SERVER_CFG) {
+  return {
+    require:'ngModel',
+    restrict:'A',
+    link:function (scope, el, attrs, ctrl) {
+     //using push() here to run it as the last parser, after we are sure that other validators were run
+      ctrl.$parsers.push(function (viewValue) {
+        if (viewValue) {
+		  	var baseURL= SERVER_CFG.URL+'/api/'
+		  	$http.post(baseURL+'users/uniqueMobileNo',{mobileNo:viewValue})
+		  	.then(function(resp){
+				  var uniqueMobileNo=resp.data.uniqueMobileNo
+				 //console.log('users/uniqueMobileNo--',uniqueMobileNo)
+				 ctrl.$setValidity('uniqueMobileNo', uniqueMobileNo )
+          })
+          return viewValue
+        }
+      })
+    }
+  }
+}])
 
 angular.module('resources.backlogs', ['mongoResourceHttp'])
 
@@ -800,138 +935,6 @@ angular.module('resources.users').factory('User', ['$mongoResourceHttp', functio
 
   return userResource;
 }]);
-
-angular.module('controllers.users', ['ui.router','ngMessages'
-, 'services.i18nNotifications'
-, 'directives.dropdownMultiselect'
-, 'resources.users'])  
-.controller('UsersMainCtrl',   [
-               'crudContrllersHelp','$scope', '$state', '$stateParams', 
-	function ( crudContrllersHelp,$scope,   $state,   $stateParams) {
-		
-		crudContrllersHelp.initMain('User','name',$scope,   $state,   $stateParams)
-		$scope.availableSkills=['协调','后端编码','前端编码','2D做图','3D建模','文档写作','测试']
-
-		$scope.checkDate= function(item){
-			var now = new Date(Date.now())
-			if(!item.regDate)
-				item.regDate=now
-		}
-
-	}
-])
-.controller('UsersListCtrl',   [
-                'crudContrllersHelp','$scope', '$state', '$stateParams',
-	function ( crudContrllersHelp, $scope,   $state,   $stateParams) {
-		crudContrllersHelp.initList('User','name',$scope,   $state,   $stateParams)
-	}
-])
-.controller('UsersDetailCtrl',   [
-               'crudContrllersHelp', '$scope','$stateParams', '$state',
-	function ( crudContrllersHelp,$scope,  $stateParams,    $state) {
-		crudContrllersHelp.initDetail('User','name',$scope,   $state,   $stateParams)
-		
-	}
-])
-.controller('UsersCreateCtrl',   [
-                '$scope', 'User',
-	function (  $scope,   User) {
-		$scope.item = new User()
-		$scope.item.isActive=true
-		$scope.item.isAdmin=false
-		$scope.isNew=true
-		$scope.checkDate($scope.item)
-		$scope.item.desc=
-"expressjs/multer [![NPM version](https://badge.fury.io/js/multer.svg)](https://badge.fury.io/js/multer)\r\n"
-+"\r\n"
-+"Multer is a node.js middleware for handling `multipart/form-data`.\r\n"
-+"\r\n"
-+"It is written on top of [busboy](https://github.com/mscdex/busboy) for maximum efficiency.\r\n"
-+"\r\n"
-+"## API\r\n"
-+"\r\n"
-+"#### Installation\r\n"
-+"\r\n"
-+"`$ npm install multer`\r\n"
-+"\r\n"
-+"#### Usage\r\n"
-+"\r\n"
-+"```js\r\n"
-+"var express = require('express')\r\n"
-+"var multer  = require('multer')\r\n"
-+"\r\n"
-+"var app = express()\r\n"
-+"app.use(multer({ dest: './uploads/'}))\r\n"
-+"```\r\n"
-+"\r\n"
-+"\r\n"
-+"**IMPORTANT**: Multer will not process any form which is not `multipart/form-data`."
-	}
-])
-
-.controller('UsersEditCtrl',   [
-                '$scope', '$stateParams', '$state',
-	function (  $scope,   $stateParams,   $state) {
-		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.checkDate($scope.item)
-		$scope.isNew=false
-	
-	}
-])
-
-angular.module('controllers.users')  
-.directive('validateEquals', function() {
-  return {
-    restrict: 'A',
-    require: 'ngModel',
-    link: function(scope, elm, attrs, ctrl) {
-      function validateEqual(myValue, otherValue) {
-        if (myValue === otherValue) {
-          ctrl.$setValidity('equal', true)
-          return myValue
-        } else {
-          ctrl.$setValidity('equal', false)
-          return undefined
-        }
-      }
-
-      scope.$watch(attrs.validateEquals, function(otherModelValue) {
-        ctrl.$setValidity('equal', ctrl.$viewValue === otherModelValue)
-      })
-
-      ctrl.$parsers.push(function(viewValue) {
-        return validateEqual(viewValue, scope.$eval(attrs.validateEquals))
-      })
-
-      ctrl.$formatters.push(function(modelValue) {
-        return validateEqual(modelValue, scope.$eval(attrs.validateEquals))
-      })
-    }
-  }
-})
-.directive('uniqueMobileNo', [
-            "$http","SERVER_CFG",
- function ($http,SERVER_CFG) {
-  return {
-    require:'ngModel',
-    restrict:'A',
-    link:function (scope, el, attrs, ctrl) {
-     //using push() here to run it as the last parser, after we are sure that other validators were run
-      ctrl.$parsers.push(function (viewValue) {
-        if (viewValue) {
-		  	var baseURL= SERVER_CFG.URL+'/api/'
-		  	$http.post(baseURL+'users/uniqueMobileNo',{mobileNo:viewValue})
-		  	.then(function(resp){
-				  var uniqueMobileNo=resp.data.uniqueMobileNo
-				 //console.log('users/uniqueMobileNo--',uniqueMobileNo)
-				 ctrl.$setValidity('uniqueMobileNo', uniqueMobileNo )
-          })
-          return viewValue
-        }
-      })
-    }
-  }
-}])
 
 angular.module('controllers.backlogs', ['ui.router','ngMessages'
 , 'services.i18nNotifications'

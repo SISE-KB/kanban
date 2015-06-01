@@ -419,33 +419,35 @@ function($http, $q, $state, queue, $modal,$rootScope) {
   return service;
 }]);
 
-angular.module('services.exceptionHandler', ['services.i18nNotifications']);
+angular.module('services.exceptionHandler', ['services.i18nNotifications'])
+.factory('exceptionHandlerFactory', [
+             '$injector',
+   function($injector) {
+      return function($delegate) {
+         return function (exception, cause) {
+            // Lazy load notifications to get around circular dependency
+            //Circular dependency: $rootScope <- notifications <- i18nNotifications <- $exceptionHandler
+            var i18nNotifications = $injector.get('i18nNotifications')
+            // Pass through to original handler
+            $delegate(exception, cause)
 
-angular.module('services.exceptionHandler').factory('exceptionHandlerFactory', ['$injector', function($injector) {
-  return function($delegate) {
-
-    return function (exception, cause) {
-      // Lazy load notifications to get around circular dependency
-      //Circular dependency: $rootScope <- notifications <- i18nNotifications <- $exceptionHandler
-      var i18nNotifications = $injector.get('i18nNotifications');
-
-      // Pass through to original handler
-      $delegate(exception, cause);
-
-      // Push a notification error
-      i18nNotifications.pushForCurrentRoute('error.fatal', 'danger', {}, {
-        exception:exception,
-        cause:cause
-      });
-    };
-  };
-}]);
-
-angular.module('services.exceptionHandler').config(['$provide', function($provide) {
-  $provide.decorator('$exceptionHandler', ['$delegate', 'exceptionHandlerFactory', function ($delegate, exceptionHandlerFactory) {
-    return exceptionHandlerFactory($delegate);
-  }]);
-}]);
+            // Push a notification error
+            i18nNotifications.pushForCurrentRoute('error.fatal', 'danger', {}, {
+               exception:exception,
+               cause:cause
+            })
+        }
+    }
+}])
+.config(['$provide', 
+ function($provide) {
+    $provide.decorator('$exceptionHandler', [
+                   '$delegate', 'exceptionHandlerFactory',
+        function ($delegate, exceptionHandlerFactory) {
+            return exceptionHandlerFactory($delegate)
+        }
+    ])
+}])
 
 angular.module('services.httpRequestTracker', []);
 angular.module('services.httpRequestTracker').factory('httpRequestTracker', ['$http', function($http){
@@ -764,6 +766,7 @@ function($parse, $stateParams,   $state) {
   };
 }]);
 
+angular.module('security.login', ['security.login.form', 'security.login.toolbar']);
 angular.module('security.login.form', ['services.localizedMessages'])
 
 // The LoginFormController provides the behaviour behind a reusable form to allow users to authenticate.
@@ -810,7 +813,6 @@ angular.module('security.login.form', ['services.localizedMessages'])
   };
 }]);
 
-angular.module('security.login', ['security.login.form', 'security.login.toolbar']);
 angular.module('security.login.toolbar', [])
 
 // The loginToolbar directive is a reusable widget that can show login or logout buttons
