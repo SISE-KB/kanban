@@ -17,13 +17,17 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
     }) 
      .state('home',  {
 	  url: '/home',	
-	 // controller: 'DashboardCtrl',
-      template: '<h1>个人工作看板，正在开发......</h1>'
+	  controller: 'HomeCtrl',
+	  resolve: {
+	    myDevPrjs:securityAuthorizationProvider.getMyDevProjects
+		,myPrdMgrPrjs:securityAuthorizationProvider.getMyPrdMgrPrjs
+	  },
+      template: '<h1>个人工作看板，正在开发......</h1><span>产品代表：{{myPrdMgrPrjs}};参与开发：{{myPrdMgrPrjs}}</span>'
     }) 
     .state('upload',  {
 	  url: '/upload',	
 	  resolve: {
-	    _currentUser: securityAuthorizationProvider.requireAuthenticatedUser// null if not login
+	    currentUser: securityAuthorizationProvider.requireAuthenticatedUser// null if not login
 	  },
       templateUrl: 'views/upload.tpl.html',
       controller: 'UploadCtrl'
@@ -34,11 +38,18 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
     function ($rootScope,   $state,   $stateParams,security) {
       $rootScope.$state = $state
       $rootScope.$stateParams = $stateParams
-    
       $rootScope.isAuthenticated = security.isAuthenticated
       $rootScope.isAdmin = security.isAdmin
    }
 ])
+.controller('HomeCtrl', [
+            '$scope', 'myDevPrjs','myPrdMgrPrjs',
+  function ( $scope,   myDevPrjs,myPrdMgrPrjs) {
+	  $scope.myDevPrjs=myDevPrjs
+      $scope.myPrdMgrPrjs=myPrdMgrPrjs
+    //console.log('myDevPrjs',myDevPrjs)
+	//console.log('myPrdMgrPrjs',myPrdMgrPrjs)
+ }])
 .controller('AppCtrl', [
            '$scope', 'i18nNotifications', 'localizedMessages',
  function($scope, i18nNotifications, localizedMessages) {
@@ -49,10 +60,15 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
   $scope.$on('$stateChangeError', function(event, current, previous, rejection){
     i18nNotifications.pushForCurrentRoute('errors.state.changeError', 'error', {}, {rejection: rejection})
   })
+  $scope.$on('$stateChangeStart', 
+    function(event, toState, toParams, fromState, fromParams){ 
+        //event.preventDefault(); 
+		console.log(toState.name,toParams)
+    })
 }])
 .controller('HeaderCtrl', [
-            '$scope',  'security', 'notifications', 'httpRequestTracker',
-  function ($scope,  security,  notifications, httpRequestTracker) {
+            '$scope', 'security','httpRequestTracker',
+  function ( $scope,   security,  httpRequestTracker) {
 
   
   $scope.hasPendingRequests = function () {
@@ -61,15 +77,15 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
   $scope.home = function () {
 	  
 	  if(security.isAuthenticated()){
-		 console.log("home");
-	     $scope.$state.go('home');
+	     $scope.$state.go('home')
 	 }
 	  else{
-		 console.log("dashboard");
-         $scope.$state.go('dashboard');
+		// console.log("dashboard");
+         $scope.$state.go('dashboard')
 	 }
   }
  }])
+ 
 
 
 
@@ -260,12 +276,13 @@ function (stateBuilderProvider) {
 
 angular.module('app')
 .controller('UploadCtrl', [
-           '$scope', '$timeout',
+           '$scope', '$timeout','currentUser',
 function ($scope, $timeout,currentUser) {
         $scope.interface = {};
         $scope.uploadCount = 0;
         $scope.success = false;
         $scope.error = false;
+		console.log('currentUser',currentUser);
 		$scope.interface.useParser=function (responseText) {
 		   // console.log(responseText);
 			return responseText;
@@ -274,7 +291,7 @@ function ($scope, $timeout,currentUser) {
         $scope.$on('$dropletReady', function whenDropletReady() {
             $scope.interface.allowedExtensions(['png', 'jpg', 'gif','ppt', 'doc', 'docx']);
            // console.log($scope.currentUser);
-            $scope.interface.setRequestUrl('upload'+'/'+$scope.currentUser.mobileNo);
+            $scope.interface.setRequestUrl('upload'+'/'+currentUser.mobileNo);
             $scope.interface.defineHTTPSuccess([/2.{2}/]);
             $scope.interface.useArray(false);
         });
@@ -305,28 +322,7 @@ function ($scope, $timeout,currentUser) {
         });
 }]);
 
-/*
- * section.container section.droplet droplet comment:after {
-    content: "可以直接拖入文件...";
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    display: inline-block;
-    position: absolute;
-    z-index: -1;
-    font-family: Lato, Arial, Tahoma, Helvetica, sans-serif;
-    color: rgba(255, 255, 255, .45);
-    text-decoration: none;
-    font-weight: normal;
-    font-size: 20px;
-    line-height: 400px;
-    text-align: center;
-}
 
-section.container section.droplet droplet.event-dragover comment:after {
-    content: "...请放开鼠标!";
-}
-*/
 
 angular.module('controllers.dashboard', ['ui.router','ui.bootstrap'])  
 .controller('DashboardCtrl',   
@@ -567,6 +563,164 @@ angular.module('controllers.messages', ['ui.router','ngMessages'
 	}
 ])
 
+angular.module('prj-dashboard', ['ui.router','resources.projects'])
+
+.config(['$stateProvider', function ($stateProvider) {
+  $stateProvider.state('prj-dashboard', {
+    templateUrl:'views/myprojects/prj-dashboard.tpl.html',
+    controller:'ProjectDashboardCtrl',
+  })
+}])
+
+.controller('ProjectDashboardCtrl', [
+          '$http','$scope', 'Project',
+function ($http,$scope,Project) {
+	$scope.projects = [
+	 {_id:1,name:'prj1'}
+	,{_id:2,name:'prj2'}]
+	var baseURL= 'http://localhost:3000/api/'
+  $http.post(baseURL+'project/projectsForUser',{userid:'admin'})
+  .then(function(resp){
+	  console.log('api--',resp.data)
+  })
+  /*Project.all().then(function(prjs){
+	  $scope.projects = prjs
+	  console.log(prjs[0].name)
+  })*/
+  $scope.tasks = [
+      {name:'T1',estimation:2,remaining:1}
+     ,{name:'T2',estimation:6,remaining:4}
+  ]
+}])
+
+angular.module('resources.backlogs', ['mongoResourceHttp'])
+
+.factory('Backlog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+  var res = $mongoResourceHttp('backlogs');
+
+  res.forProject = function (projectId) {
+      return res.query({projectId:projectId},{strict:true});
+  }
+
+  return res
+}])
+
+angular.module('resources.issues', ['mongoResourceHttp'])
+
+angular.module('resources.issues').factory('Issue', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var res = $mongoResourceHttp('issues');
+
+
+  return res;
+}]);
+
+angular.module('resources.messages', ['mongoResourceHttp'])
+
+.factory('Message', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var resource = $mongoResourceHttp('messages');
+  /*resource.prototype.getFullName = function () {
+    return this.lastName + " " + this.firstName + " (" + this.email + ")";
+  };*/
+
+  return resource;
+}]);
+
+angular.module('resources.projects', ['mongoResourceHttp']);
+angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var Project = $mongoResourceHttp('projects');
+
+  Project.forProductMgr = function(userId) {
+    //return Project.query({}, successcb, errorcb);
+	return Project.query({productOwner:userId},{strict:true});
+  };
+
+  Project.prototype.isProductOwner = function (userId) {
+    return this.productOwner === userId;
+  };
+  Project.prototype.canActAsProductOwner = function (userId) {
+    return !this.isScrumMaster(userId) && !this.isDevTeamMember(userId);
+  };
+  Project.prototype.isScrumMaster = function (userId) {
+    return this.processMaster === userId;
+  };
+  Project.prototype.canActAsScrumMaster = function (userId) {
+    return !this.isProductOwner(userId);
+  };
+  Project.prototype.isDevTeamMember = function (userId) {
+    return this.teamMembers.indexOf(userId) >= 0;
+  };
+  Project.prototype.canActAsDevTeamMember = function (userId) {
+    return !this.isProductOwner(userId);
+  };
+
+  Project.prototype.getRoles = function (userId) {
+    var roles = [];
+    if (this.isProductOwner(userId)) {
+      roles.push('PO');
+    } else {
+      if (this.isScrumMaster(userId)){
+        roles.push('SM');
+      }
+      if (this.isDevTeamMember(userId)){
+        roles.push('DEV');
+      }
+    }
+    return roles;
+  };
+
+  return Project;
+}]);
+
+angular.module('resources.sprints', ['mongoResourceHttp']);
+angular.module('resources.sprints').factory('Sprint', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var Sprint = $mongoResourceHttp('sprints');
+  Sprint.forProject = function (projectId) {
+    return Sprint.query({projectId:projectId});
+  };
+  return Sprint;
+}]);
+
+angular.module('resources.tasks', ['mongoResourceHttp']);
+angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var Task = $mongoResourceHttp('tasks');
+
+  Task.statesEnum = ['TODO', 'IN_DEV', 'BLOCKED', 'IN_TEST', 'DONE'];
+
+  Task.forProductBacklogItem = function (productBacklogItem) {
+    return Task.query({productBacklogItem:productBacklogItem});
+  };
+
+  Task.forSprint = function (sprintId) {
+    return Task.query({sprintId:sprintId});
+  };
+
+  Task.forUser = function (userId) {
+    return Task.query({userId:userId});
+  };
+
+  Task.forProject = function (projectId) {
+    return Task.query({projectId:projectId});
+  };
+
+  return Task;
+}]);
+
+angular.module('resources.users', ['mongoResourceHttp']);
+angular.module('resources.users').factory('User', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var userResource = $mongoResourceHttp('users');
+  /*userResource.prototype.getFullName = function () {
+    return this.lastName + " " + this.firstName + " (" + this.email + ")";
+  };*/
+
+  return userResource;
+}]);
+
 angular.module('controllers.projects', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
 , 'resources.projects'
@@ -644,36 +798,6 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 
 	}
 ])
-
-angular.module('prj-dashboard', ['ui.router','resources.projects'])
-
-.config(['$stateProvider', function ($stateProvider) {
-  $stateProvider.state('prj-dashboard', {
-    templateUrl:'views/myprojects/prj-dashboard.tpl.html',
-    controller:'ProjectDashboardCtrl',
-  })
-}])
-
-.controller('ProjectDashboardCtrl', [
-          '$http','$scope', 'Project',
-function ($http,$scope,Project) {
-	$scope.projects = [
-	 {_id:1,name:'prj1'}
-	,{_id:2,name:'prj2'}]
-	var baseURL= 'http://localhost:3000/api/'
-  $http.post(baseURL+'project/projectsForUser',{userid:'admin'})
-  .then(function(resp){
-	  console.log('api--',resp.data)
-  })
-  /*Project.all().then(function(prjs){
-	  $scope.projects = prjs
-	  console.log(prjs[0].name)
-  })*/
-  $scope.tasks = [
-      {name:'T1',estimation:2,remaining:1}
-     ,{name:'T2',estimation:6,remaining:4}
-  ]
-}])
 
 angular.module('controllers.users', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
@@ -807,134 +931,6 @@ angular.module('controllers.users')
     }
   }
 }])
-
-angular.module('resources.backlogs', ['mongoResourceHttp'])
-
-.factory('Backlog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-  var res = $mongoResourceHttp('backlogs');
-
-  res.forProject = function (projectId) {
-      return res.query({projectId:projectId},{strict:true});
-  }
-
-  return res
-}])
-
-angular.module('resources.issues', ['mongoResourceHttp'])
-
-angular.module('resources.issues').factory('Issue', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var res = $mongoResourceHttp('issues');
-
-
-  return res;
-}]);
-
-angular.module('resources.messages', ['mongoResourceHttp'])
-
-.factory('Message', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var resource = $mongoResourceHttp('messages');
-  /*resource.prototype.getFullName = function () {
-    return this.lastName + " " + this.firstName + " (" + this.email + ")";
-  };*/
-
-  return resource;
-}]);
-
-angular.module('resources.projects', ['mongoResourceHttp']);
-angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var Project = $mongoResourceHttp('projects');
-
-  Project.forProductMgr = function(userId) {
-    //return Project.query({}, successcb, errorcb);
-	return Project.query({productOwner:userId},{strict:true});
-  };
-
-  Project.prototype.isProductOwner = function (userId) {
-    return this.productOwner === userId;
-  };
-  Project.prototype.canActAsProductOwner = function (userId) {
-    return !this.isScrumMaster(userId) && !this.isDevTeamMember(userId);
-  };
-  Project.prototype.isScrumMaster = function (userId) {
-    return this.processMaster === userId;
-  };
-  Project.prototype.canActAsScrumMaster = function (userId) {
-    return !this.isProductOwner(userId);
-  };
-  Project.prototype.isDevTeamMember = function (userId) {
-    return this.teamMembers.indexOf(userId) >= 0;
-  };
-  Project.prototype.canActAsDevTeamMember = function (userId) {
-    return !this.isProductOwner(userId);
-  };
-
-  Project.prototype.getRoles = function (userId) {
-    var roles = [];
-    if (this.isProductOwner(userId)) {
-      roles.push('PO');
-    } else {
-      if (this.isScrumMaster(userId)){
-        roles.push('SM');
-      }
-      if (this.isDevTeamMember(userId)){
-        roles.push('DEV');
-      }
-    }
-    return roles;
-  };
-
-  return Project;
-}]);
-
-angular.module('resources.sprints', ['mongoResourceHttp']);
-angular.module('resources.sprints').factory('Sprint', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var Sprint = $mongoResourceHttp('sprints');
-  Sprint.forProject = function (projectId) {
-    return Sprint.query({projectId:projectId});
-  };
-  return Sprint;
-}]);
-
-angular.module('resources.tasks', ['mongoResourceHttp']);
-angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var Task = $mongoResourceHttp('tasks');
-
-  Task.statesEnum = ['TODO', 'IN_DEV', 'BLOCKED', 'IN_TEST', 'DONE'];
-
-  Task.forProductBacklogItem = function (productBacklogItem) {
-    return Task.query({productBacklogItem:productBacklogItem});
-  };
-
-  Task.forSprint = function (sprintId) {
-    return Task.query({sprintId:sprintId});
-  };
-
-  Task.forUser = function (userId) {
-    return Task.query({userId:userId});
-  };
-
-  Task.forProject = function (projectId) {
-    return Task.query({projectId:projectId});
-  };
-
-  return Task;
-}]);
-
-angular.module('resources.users', ['mongoResourceHttp']);
-angular.module('resources.users').factory('User', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var userResource = $mongoResourceHttp('users');
-  /*userResource.prototype.getFullName = function () {
-    return this.lastName + " " + this.firstName + " (" + this.email + ")";
-  };*/
-
-  return userResource;
-}]);
 
 angular.module('controllers.backlogs', ['ui.router','ngMessages'
 , 'services.i18nNotifications'

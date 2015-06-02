@@ -1,9 +1,9 @@
 var passport = require('passport')
    ,LocalStrategy = require('passport-local').Strategy
    ,Account = require('./models/users')
-
+   ,Project = require('./models/projects')
 var filterUser = function(user) {
-  if ( user ) {
+  if ( !!user ) {
     return {
       user : {
         id: user._id,
@@ -53,11 +53,20 @@ var security = {
     })
   },
   sendCurrentUser: function(req, res, next) {
-	  var data=filterUser(req.user);
-	  console.log('sendCurrentUser:',data);
-	  res.json(data);
-      //res.status(200).json(data);
-
+      var data=filterUser(req.user);
+	  if(!!data.user){
+	    //Project.find({productOwner:'556bcc1d2f4c7ab41c91b982'}).select('name')
+		Project.find({teamMembers:{$in:[data.id]}}).select('name')
+	    .then(function(ids){
+	      // console.log(ids);
+		   data.user.dev_prjs=ids;
+		   res.json(data);
+		   console.log('sendCurrentUser:',data);
+	    })
+	 }else{
+	      res.json(data);
+		  console.log('sendCurrentUser:',data);
+	 }
   },
   login: function(req, res, next) {
     function authenticationFailed(err, user, info){

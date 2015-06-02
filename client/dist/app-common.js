@@ -156,51 +156,77 @@ angular.module('directives.dropdownSelect', [])
 });
 
 angular.module('security.authorization', ['security.service'])
-
-// This service provides guard methods to support AngularJS routes.
-// You can add them as resolves to routes to require authorization levels
-// before allowing a route change to complete
 .provider('securityAuthorization', {
-
   requireAdminUser: ['securityAuthorization', function(securityAuthorization) {
-    return securityAuthorization.requireAdminUser();
+    return securityAuthorization.requireAdminUser()
   }],
-
+   getMyDevProjects: ['securityAuthorization', function(securityAuthorization) {
+     return securityAuthorization.getMyDevProjects()
+   }],
+   getMyPrdMgrPrjs: ['securityAuthorization', function(securityAuthorization) {
+     return securityAuthorization.getMyPrdMgrPrjs()
+   }],
   requireAuthenticatedUser: ['securityAuthorization', function(securityAuthorization) {
-    return securityAuthorization.requireAuthenticatedUser();
+    return securityAuthorization.requireAuthenticatedUser()
   }],
 
-  $get: ['security', 'securityRetryQueue', function(security, queue) {
+  $get: [  '$http', 'security', 'securityRetryQueue','SERVER_CFG',
+    function($http,  security,   queue,               SERVER_CFG) {
     var service = {
-
-      // Require that there is an authenticated user
-      // (use this in a route resolve to prevent non-authenticated users from entering that route)
+	  getMyPrdMgrPrjs: function() {
+		var userId= !security.currentUser ? 'NONE':security.currentUser.id;
+		var req= SERVER_CFG.URL+'/api/projects/mgrby';
+		console.log("myPrdMgrPrjs",req);
+		var p=$http.post(req,{userId:userId}).then(function(response) {
+		    //console.log("/api/projects/mgrby",response.data);
+            return response.data;
+        });
+        return p;
+			  
+      },
+	  getMyDevProjects: function() {
+		var userId= !security.currentUser ? 'NONE':security.currentUser.id;
+		var req= SERVER_CFG.URL+'/api/projects/devby';
+		console.log("getMyDevProjects",req);
+		var p=$http.post(req,{userId:userId}).then(function(response) {
+		    //console.log("/api/projects/foruser",response.data);
+            return response.data;
+        });
+        return p;
+			  
+      },
       requireAuthenticatedUser: function() {
         var promise = security.requestCurrentUser().then(function(userInfo) {
-			console.log('requireAuthenticatedUser',userInfo);
+			console.log('requireAuthenticatedUser： return：',userInfo)
           if ( !security.isAuthenticated() ) {
-            return queue.pushRetryFn('unauthenticated-client', service.requireAuthenticatedUser);
-          }
+		     console.log('unauthenticated-client！ push requireAuthenticatedUser again' )
+            return queue.pushRetryFn('unauthenticated-client', service.requireAuthenticatedUser)
+          } else{
+		    return security.currentUser
+		  }
         });
-        return promise;
+        return promise
       },
 
       // Require that there is an administrator logged in
       // (use this in a route resolve to prevent non-administrators from entering that route)
       requireAdminUser: function() {
         var promise = security.requestCurrentUser().then(function(userInfo) {
+		console.log('requireAdminUser',userInfo)
           if ( !security.isAdmin() ) {
-            return queue.pushRetryFn('unauthorized-client', service.requireAdminUser);
-          }
+            return queue.pushRetryFn('unauthorized-client', service.requireAdminUser)
+          }else{
+		    return security.currentUser
+		  }
         });
-        return promise;
+        return promise
       }
 
-    };
+    }
 
-    return service;
+    return service
   }]
-});
+})
 
 // Based loosely around work by Witold Szczerba - https://github.com/witoldsz/angular-http-auth
 angular.module('security', [
@@ -235,30 +261,30 @@ angular.module('security.retryQueue', [])
 
 // This is a generic retry queue for security failures.  Each item is expected to expose two functions: retry and cancel.
 .factory('securityRetryQueue', ['$q', '$log', function($q, $log) {
-  var retryQueue = [];
+  var retryQueue = []
   var service = {
     // The security service puts its own handler in here!
     onItemAddedCallbacks: [],
     
     hasMore: function() {
-      return retryQueue.length > 0;
+      return retryQueue.length > 0
     },
     push: function(retryItem) {
-      retryQueue.push(retryItem);
-      // Call all the onItemAdded callbacks
+      retryQueue.push(retryItem)
+      // 可以插入自己的处理代码。比如显示登录对话框等
       angular.forEach(service.onItemAddedCallbacks, function(cb) {
         try {
-          cb(retryItem);
+          cb(retryItem)
         } catch(e) {
-          $log.error('securityRetryQueue.push(retryItem): callback threw an error' + e);
+          $log.error('securityRetryQueue.push(retryItem): callback threw an error' + e)
         }
       });
     },
     pushRetryFn: function(reason, retryFn) {
       // The reason parameter is optional
       if ( arguments.length === 1) {
-        retryFn = reason;
-        reason = undefined;
+        retryFn = reason
+        reason = undefined
       }
 
       // The deferred object that will be resolved or rejected by calling retry or cancel
@@ -269,36 +295,37 @@ angular.module('security.retryQueue', [])
           // Wrap the result of the retryFn into a promise if it is not already
           $q.when(retryFn()).then(function(value) {
             // If it was successful then resolve our deferred
-            deferred.resolve(value);
+			console.log('retryFn()',value)
+            deferred.resolve(value)
           }, function(value) {
             // Othewise reject it
-            deferred.reject(value);
-          });
+            deferred.reject(value)
+          })
         },
         cancel: function() {
           // Give up on retrying and reject our deferred
-          deferred.reject();
+          deferred.reject()
         }
       };
-      service.push(retryItem);
-      return deferred.promise;
+      service.push(retryItem)
+      return deferred.promise
     },
     retryReason: function() {
-      return service.hasMore() && retryQueue[0].reason;
+      return service.hasMore() && retryQueue[0].reason
     },
     cancelAll: function() {
       while(service.hasMore()) {
-        retryQueue.shift().cancel();
+        retryQueue.shift().cancel()
       }
     },
     retryAll: function() {
       while(service.hasMore()) {
-        retryQueue.shift().retry();
+        retryQueue.shift().retry()
       }
     }
   };
-  return service;
-}]);
+  return service
+}])
 
 // Based loosely around work by Witold Szczerba - https://github.com/witoldsz/angular-http-auth
 angular.module('security.service', [
@@ -313,7 +340,7 @@ function($http, $q, $state, queue, $modal,$rootScope) {
 
   // Redirect to the given url (defaults to '/')
   function redirect(state) {
-    state = state || 'home';
+    state = state || 'dashboard';
     $state.go(state);
   }
 
@@ -321,7 +348,7 @@ function($http, $q, $state, queue, $modal,$rootScope) {
   var loginDialog = null;
   function openLoginDialog() {
     if ( loginDialog ) {
-      throw new Error('Trying to open a dialog that is already open!');
+        return;//throw new Error('Trying to open a dialog that is already open!');
     }
     loginDialog = $modal.open({ templateUrl:'views/security/login/form.tpl.html', controller: 'LoginFormController'});
     loginDialog.result.then(onLoginDialogClose);
@@ -350,7 +377,19 @@ function($http, $q, $state, queue, $modal,$rootScope) {
 
   // The public API of the service
   var service = {
-
+      getMyProjects: function() {
+	    
+		var userId= !security.currentUser ? 'NONE':security.currentUser.id;
+		var req= SERVER_CFG.URL+'/api/projects/foruser';
+		console.log("getMyProjects",req);
+		var p=$http.post(req,{userId:userId});
+		p.then(function(response) {
+		    console.log("/api/projects/foruser",response.data);
+            return response.data;
+        });
+        return p;
+			  
+      },
     // Get the first reason for needing a login
     getLoginReason: function() {
       return queue.retryReason();
@@ -363,12 +402,18 @@ function($http, $q, $state, queue, $modal,$rootScope) {
 
     // Attempt to authenticate a user by the given email and password
     login: function(mobileNo, password) {
+	  /*if(!queue.hasMore()){
+	      var securityAuthorization=$$inject.get('securityAuthorization');
+	      queue.pushRetryFn('unauthenticated-client', 
+		    securityAuthorization.requireAuthenticatedUser);
+	  }*/  
       var request = $http.post('/login', {mobileNo: mobileNo, password: password});
       return request.then(function(response) {
         service.currentUser = response.data.user;
+		console.log("/login-->",service.currentUser);
         if ( service.isAuthenticated() ) {
           closeLoginDialog(true);
-          $rootScope.currentUser=service.currentUser;
+          //$rootScope.currentUser=service.currentUser;
         }
         return service.isAuthenticated();
       });
@@ -396,7 +441,7 @@ function($http, $q, $state, queue, $modal,$rootScope) {
         return $http.get('/current-user').then(function(response) {
 		  service.currentUser = response.data.user;
           console.log("$http.get('/current-user')",service.currentUser);
-          $rootScope.currentUser=service.currentUser;
+         // $rootScope.currentUser=service.currentUser;
           return service.currentUser;
         });
       }
@@ -449,16 +494,14 @@ angular.module('services.exceptionHandler', ['services.i18nNotifications'])
     ])
 }])
 
-angular.module('services.httpRequestTracker', []);
-angular.module('services.httpRequestTracker').factory('httpRequestTracker', ['$http', function($http){
-
-  var httpRequestTracker = {};
-  httpRequestTracker.hasPendingRequests = function() {
-    return $http.pendingRequests.length > 0;
-  };
-
-  return httpRequestTracker;
-}]);
+angular.module('services.httpRequestTracker', [])
+.factory('httpRequestTracker', ['$http', function($http){
+	var httpRequestTracker = {}
+	httpRequestTracker.hasPendingRequests = function() {
+		return $http.pendingRequests.length > 0
+	}
+	return httpRequestTracker
+}])
 angular.module('services.i18nNotifications', ['services.notifications', 'services.localizedMessages']);
 angular.module('services.i18nNotifications').factory('i18nNotifications', ['localizedMessages', 'notifications', function (localizedMessages, notifications) {
 
@@ -565,24 +608,13 @@ angular.module('services.notifications', []).factory('notifications', ['$rootSco
 }]);
 
 (function() {
-
-  function stateBuilderProvider($stateProvider) {
-
-    // This $get noop is because at the moment in AngularJS "providers" must provide something
-    // via a $get method.
-    // When AngularJS has "provider helpers" then this will go away!
-    this.$get = angular.noop
-	this.statesFor=function(Res){
-		var Ress   = Res+'s'
+	function stateBuilderProvider($stateProvider,securityAuthorizationProvider) {
+		this.$get = angular.noop
+		this.statesFor=function(Res){
+			var Ress   = Res+'s'
 			,resName=Ress.toLowerCase()
-		//this.$inject = [Res]
-		/*var resoFn={}
-		resoFn[resName]=	[Res,
-			function( Res){
-				return Res.all()
-		}]*/
 		
-		$stateProvider
+			$stateProvider
 			.state(resName, {
 				abstract: true,
 				url: "/"+resName,
@@ -599,43 +631,30 @@ angular.module('services.notifications', []).factory('notifications', ['$rootSco
 			.state(resName+'.create', {
 					url: '/create',
 					templateUrl: 'views/'+resName+'/edit.tpl.html',
-					controller:  Ress+'CreateCtrl'
+					controller:  Ress+'CreateCtrl',
+				    resolve: {
+	                  currentUser: securityAuthorizationProvider.requireAuthenticatedUser
+	                }
 			})
 			.state(resName+'.detail', {
 				url: '/:itemId',
 				templateUrl: 'views/'+resName+'/detail.tpl.html',
 				controller:  Ress+'DetailCtrl'
-		/*		views:{
-					'detail@':	{
-						templateUrl: 'views/'+resName+'/detail.tpl.html',
-						controller:  Ress+'DetailCtrl'
-					}	
-				}*/
 			})
 			.state(resName+'.edit', {
 				url: '/:itemId/edit',
 				templateUrl: 'views/'+resName+'/edit.tpl.html',
-				controller:  Ress+'EditCtrl'
+				controller:  Ress+'EditCtrl',
+				resolve: {
+	              currentUser: securityAuthorizationProvider.requireAuthenticatedUser
+	            }
 			})
 		}//stateFor
 
-			/*	
-			var temp={};
-			temp['"@'+resName+'"']= { 
-				templateUrl: 'views/'+resName+'/edit.tpl.html',
-				controller: Ress+'EditCtrl'
-			}
-			var editViews={url: '/:itemId/edit',views:{}}
-			angular.extend(editViews.views,temp)
-		
-			$stateProvider	
-				.state(resName+'.edit', editViews)
-	        */
-
    }//stateBuilderProvider
 
-    stateBuilderProvider.$inject = ['$stateProvider']
-    angular.module('services.stateBuilderProvider', ['ui.router'])
+    stateBuilderProvider.$inject = ['$stateProvider','securityAuthorizationProvider']
+    angular.module('services.stateBuilderProvider', ['ui.router','security.authorization'])
 		.provider('stateBuilder', stateBuilderProvider)
 })()
 
@@ -771,7 +790,9 @@ angular.module('security.login.form', ['services.localizedMessages'])
 
 // The LoginFormController provides the behaviour behind a reusable form to allow users to authenticate.
 // This controller and its template (login/form.tpl.html) are used in a modal dialog box by the security service.
-.controller('LoginFormController', ['$scope', 'security', 'localizedMessages', function($scope, security, localizedMessages) {
+.controller('LoginFormController', [
+            '$scope', 'security', 'localizedMessages',
+	function($scope,   security,   localizedMessages) {
   // The model for this form 
   $scope.user = {};
 

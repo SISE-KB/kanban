@@ -17,13 +17,17 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
     }) 
      .state('home',  {
 	  url: '/home',	
-	 // controller: 'DashboardCtrl',
-      template: '<h1>个人工作看板，正在开发......</h1>'
+	  controller: 'HomeCtrl',
+	  resolve: {
+	    myDevPrjs:securityAuthorizationProvider.getMyDevProjects
+		,myPrdMgrPrjs:securityAuthorizationProvider.getMyPrdMgrPrjs
+	  },
+      template: '<h1>个人工作看板，正在开发......</h1><span>产品代表：{{myPrdMgrPrjs}};参与开发：{{myPrdMgrPrjs}}</span>'
     }) 
     .state('upload',  {
 	  url: '/upload',	
 	  resolve: {
-	    _currentUser: securityAuthorizationProvider.requireAuthenticatedUser// null if not login
+	    currentUser: securityAuthorizationProvider.requireAuthenticatedUser// null if not login
 	  },
       templateUrl: 'views/upload.tpl.html',
       controller: 'UploadCtrl'
@@ -34,11 +38,18 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
     function ($rootScope,   $state,   $stateParams,security) {
       $rootScope.$state = $state
       $rootScope.$stateParams = $stateParams
-    
       $rootScope.isAuthenticated = security.isAuthenticated
       $rootScope.isAdmin = security.isAdmin
    }
 ])
+.controller('HomeCtrl', [
+            '$scope', 'myDevPrjs','myPrdMgrPrjs',
+  function ( $scope,   myDevPrjs,myPrdMgrPrjs) {
+	  $scope.myDevPrjs=myDevPrjs
+      $scope.myPrdMgrPrjs=myPrdMgrPrjs
+    //console.log('myDevPrjs',myDevPrjs)
+	//console.log('myPrdMgrPrjs',myPrdMgrPrjs)
+ }])
 .controller('AppCtrl', [
            '$scope', 'i18nNotifications', 'localizedMessages',
  function($scope, i18nNotifications, localizedMessages) {
@@ -49,10 +60,15 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
   $scope.$on('$stateChangeError', function(event, current, previous, rejection){
     i18nNotifications.pushForCurrentRoute('errors.state.changeError', 'error', {}, {rejection: rejection})
   })
+  $scope.$on('$stateChangeStart', 
+    function(event, toState, toParams, fromState, fromParams){ 
+        //event.preventDefault(); 
+		console.log(toState.name,toParams)
+    })
 }])
 .controller('HeaderCtrl', [
-            '$scope',  'security', 'notifications', 'httpRequestTracker',
-  function ($scope,  security,  notifications, httpRequestTracker) {
+            '$scope', 'security','httpRequestTracker',
+  function ( $scope,   security,  httpRequestTracker) {
 
   
   $scope.hasPendingRequests = function () {
@@ -61,14 +77,14 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
   $scope.home = function () {
 	  
 	  if(security.isAuthenticated()){
-		 console.log("home");
-	     $scope.$state.go('home');
+	     $scope.$state.go('home')
 	 }
 	  else{
-		 console.log("dashboard");
-         $scope.$state.go('dashboard');
+		// console.log("dashboard");
+         $scope.$state.go('dashboard')
 	 }
   }
  }])
+ 
 
 

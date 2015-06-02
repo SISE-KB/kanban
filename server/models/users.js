@@ -44,11 +44,11 @@ UserSchema.pre('save', function (next) {
 });
 
 
-
+/*
 UserSchema.statics.loadData = function (query) {
  return  this.find(query).select('name mobileNo')
  };
-
+*/
 
 
 module.exports = mongoose.model('User', UserSchema);
