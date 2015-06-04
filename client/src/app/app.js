@@ -18,11 +18,11 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
      .state('home',  {
 	  url: '/home',	
 	  controller: 'HomeCtrl',
-	  resolve: {
+	/*  resolve: {
 	    myDevPrjs:securityAuthorizationProvider.getMyDevProjects
 		,myPrdMgrPrjs:securityAuthorizationProvider.getMyPrdMgrPrjs
-	  },
-      template: '<h1>个人工作看板，正在开发......</h1><span>产品代表：{{myPrdMgrPrjs}};参与开发：{{myPrdMgrPrjs}}</span>'
+	  },*/
+      template: '<div><h1>个人工作看板，正在开发......</h1><span>产品代表：{{myPrdMgrPrjs}};参与开发：{{myDevPrjs}}</span><div>'
     }) 
     .state('upload',  {
 	  url: '/upload',	
@@ -34,21 +34,23 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
     })
    			
 }])
-.run([        '$rootScope', '$state', '$stateParams','security',
-    function ($rootScope,   $state,   $stateParams,security) {
-      $rootScope.$state = $state
-      $rootScope.$stateParams = $stateParams
-      $rootScope.isAuthenticated = security.isAuthenticated
-      $rootScope.isAdmin = security.isAdmin
+.run([           '$rootScope', '$state', '$stateParams','$log','security','globalData',
+    function ($rootScope,     $state,     $stateParams,    $log,    security,    globalData) {
+      $rootScope.$state = $state;
+      $rootScope.$stateParams = $stateParams;
+      $rootScope.isAuthenticated = security.isAuthenticated;
+      $rootScope.isAdmin = security.isAdmin;
+      $rootScope.$on('user:authenticated', function(event,user){
+		  $log.info('user:authenticated',user);
+		  globalData.setCurrentUser(user);
+	 });	  
    }
 ])
 .controller('HomeCtrl', [
-            '$scope', 'myDevPrjs','myPrdMgrPrjs',
-  function ( $scope,   myDevPrjs,myPrdMgrPrjs) {
-	  $scope.myDevPrjs=myDevPrjs
-      $scope.myPrdMgrPrjs=myPrdMgrPrjs
-    //console.log('myDevPrjs',myDevPrjs)
-	//console.log('myPrdMgrPrjs',myPrdMgrPrjs)
+            '$scope','globalData',
+  function ( $scope,  globalData) {
+	  $scope.myDevPrjs=globalData.devPrjs;
+      $scope.myPrdMgrPrjs=globalData.mgrPrjs;
  }])
 .controller('AppCtrl', [
            '$scope', 'i18nNotifications', 'localizedMessages',

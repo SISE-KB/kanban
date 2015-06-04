@@ -17,7 +17,7 @@ angular.module('security.authorization', ['security.service'])
     function($http,  security,   queue,               SERVER_CFG) {
     var service = {
 	  getMyPrdMgrPrjs: function() {
-		var userId= !security.currentUser ? 'NONE':security.currentUser.id;
+		var userId= !security.currentUser ? '':security.currentUser.id;
 		var req= SERVER_CFG.URL+'/api/projects/mgrby';
 		console.log("myPrdMgrPrjs",req);
 		var p=$http.post(req,{userId:userId}).then(function(response) {
@@ -28,7 +28,7 @@ angular.module('security.authorization', ['security.service'])
 			  
       },
 	  getMyDevProjects: function() {
-		var userId= !security.currentUser ? 'NONE':security.currentUser.id;
+		var userId= !security.currentUser ? '':security.currentUser.id;
 		var req= SERVER_CFG.URL+'/api/projects/devby';
 		console.log("getMyDevProjects",req);
 		var p=$http.post(req,{userId:userId}).then(function(response) {

@@ -174,7 +174,7 @@ angular.module('security.authorization', ['security.service'])
     function($http,  security,   queue,               SERVER_CFG) {
     var service = {
 	  getMyPrdMgrPrjs: function() {
-		var userId= !security.currentUser ? 'NONE':security.currentUser.id;
+		var userId= !security.currentUser ? '':security.currentUser.id;
 		var req= SERVER_CFG.URL+'/api/projects/mgrby';
 		console.log("myPrdMgrPrjs",req);
 		var p=$http.post(req,{userId:userId}).then(function(response) {
@@ -185,7 +185,7 @@ angular.module('security.authorization', ['security.service'])
 			  
       },
 	  getMyDevProjects: function() {
-		var userId= !security.currentUser ? 'NONE':security.currentUser.id;
+		var userId= !security.currentUser ? '':security.currentUser.id;
 		var req= SERVER_CFG.URL+'/api/projects/devby';
 		console.log("getMyDevProjects",req);
 		var p=$http.post(req,{userId:userId}).then(function(response) {
@@ -341,6 +341,7 @@ function($http, $q, $state, queue, $modal,$rootScope) {
   // Redirect to the given url (defaults to '/')
   function redirect(state) {
     state = state || 'dashboard';
+    console.log("redirect to:",state);
     $state.go(state);
   }
 
@@ -348,7 +349,7 @@ function($http, $q, $state, queue, $modal,$rootScope) {
   var loginDialog = null;
   function openLoginDialog() {
     if ( loginDialog ) {
-        return;//throw new Error('Trying to open a dialog that is already open!');
+        throw new Error('Trying to open a dialog that is already open!');
     }
     loginDialog = $modal.open({ templateUrl:'views/security/login/form.tpl.html', controller: 'LoginFormController'});
     loginDialog.result.then(onLoginDialogClose);
@@ -377,20 +378,7 @@ function($http, $q, $state, queue, $modal,$rootScope) {
 
   // The public API of the service
   var service = {
-      getMyProjects: function() {
-	    
-		var userId= !security.currentUser ? 'NONE':security.currentUser.id;
-		var req= SERVER_CFG.URL+'/api/projects/foruser';
-		console.log("getMyProjects",req);
-		var p=$http.post(req,{userId:userId});
-		p.then(function(response) {
-		    console.log("/api/projects/foruser",response.data);
-            return response.data;
-        });
-        return p;
-			  
-      },
-    // Get the first reason for needing a login
+       // Get the first reason for needing a login
     getLoginReason: function() {
       return queue.retryReason();
     },
@@ -413,7 +401,8 @@ function($http, $q, $state, queue, $modal,$rootScope) {
 		console.log("/login-->",service.currentUser);
         if ( service.isAuthenticated() ) {
           closeLoginDialog(true);
-          //$rootScope.currentUser=service.currentUser;
+          $rootScope.$broadcast('user:authenticated', service.currentUser);
+   
         }
         return service.isAuthenticated();
       });
@@ -785,7 +774,6 @@ function($parse, $stateParams,   $state) {
   };
 }]);
 
-angular.module('security.login', ['security.login.form', 'security.login.toolbar']);
 angular.module('security.login.form', ['services.localizedMessages'])
 
 // The LoginFormController provides the behaviour behind a reusable form to allow users to authenticate.
@@ -834,6 +822,7 @@ angular.module('security.login.form', ['services.localizedMessages'])
   };
 }]);
 
+angular.module('security.login', ['security.login.form', 'security.login.toolbar']);
 angular.module('security.login.toolbar', [])
 
 // The loginToolbar directive is a reusable widget that can show login or logout buttons

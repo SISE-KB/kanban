@@ -18,11 +18,11 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
      .state('home',  {
 	  url: '/home',	
 	  controller: 'HomeCtrl',
-	  resolve: {
+	/*  resolve: {
 	    myDevPrjs:securityAuthorizationProvider.getMyDevProjects
 		,myPrdMgrPrjs:securityAuthorizationProvider.getMyPrdMgrPrjs
-	  },
-      template: '<h1>个人工作看板，正在开发......</h1><span>产品代表：{{myPrdMgrPrjs}};参与开发：{{myPrdMgrPrjs}}</span>'
+	  },*/
+      template: '<div><h1>个人工作看板，正在开发......</h1><span>产品代表：{{myPrdMgrPrjs}};参与开发：{{devPrjs}}</span><div>'
     }) 
     .state('upload',  {
 	  url: '/upload',	
@@ -34,21 +34,23 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
     })
    			
 }])
-.run([        '$rootScope', '$state', '$stateParams','security',
-    function ($rootScope,   $state,   $stateParams,security) {
-      $rootScope.$state = $state
-      $rootScope.$stateParams = $stateParams
-      $rootScope.isAuthenticated = security.isAuthenticated
-      $rootScope.isAdmin = security.isAdmin
+.run([           '$rootScope', '$state', '$stateParams','$log','security','globalData',
+    function ($rootScope,     $state,     $stateParams,    $log,    security,    globalData) {
+      $rootScope.$state = $state;
+      $rootScope.$stateParams = $stateParams;
+      $rootScope.isAuthenticated = security.isAuthenticated;
+      $rootScope.isAdmin = security.isAdmin;
+      $rootScope.$on('user:authenticated', function(event,user){
+		  $log.info('user:authenticated',user);
+		  globalData.setCurrentUser(user);
+	 });	  
    }
 ])
 .controller('HomeCtrl', [
-            '$scope', 'myDevPrjs','myPrdMgrPrjs',
-  function ( $scope,   myDevPrjs,myPrdMgrPrjs) {
-	  $scope.myDevPrjs=myDevPrjs
-      $scope.myPrdMgrPrjs=myPrdMgrPrjs
-    //console.log('myDevPrjs',myDevPrjs)
-	//console.log('myPrdMgrPrjs',myPrdMgrPrjs)
+            '$scope','globalData',
+  function ( $scope,  globalData) {
+	  $scope.myDevPrjs=globalData.devPrjs;
+      $scope.myPrdMgrPrjs=globalData.mgrPrjs;
  }])
 .controller('AppCtrl', [
            '$scope', 'i18nNotifications', 'localizedMessages',
@@ -240,6 +242,39 @@ angular.module('app').constant('I18N.MESSAGES', {
   'login.error.invalidCredentials': "登录失败，请检查输入是否正确！",
   'login.error.serverError': "服务端错误： {{exception}}."
 });
+
+angular.module('app').factory('globalData', [
+  	              '$http', '$q','$log','SERVER_CFG', 
+    function ($http,   $q,    $log,    SERVER_CFG) {
+		
+        var apiUrl = SERVER_CFG.URL+'/api/';
+        var gData={};
+        gData.mgrPrjs=[];
+         gData.devPrjs=[];
+        gData.setCurrentUser=function(user){
+		     gData.currentUser=user;
+		     if(!user) {
+				     gData.mgrPrjs=[];
+                     gData.devPrjs=[];
+			 }else{
+				  var userId=user.id;
+		          var req= apiUrl+'projects/mgrby';
+		          $log.debug("post :",req);
+		         $http.post(req,{userId:userId}).then(function(response) {
+		               $log.info("/api/projects/mgrby",response.data);
+                       gData.mgrPrjs=response.data;
+                  });
+                 req= apiUrl+'projects/devby';
+                 $log.debug("post :",req);
+                  $http.post(req,{userId:userId}).then(function(response) {
+		               $log.info("/api/projects/devby",response.data);
+                       gData.devPrjs=response.data;
+                  });
+             }     
+		};
+        return gData;
+     }
+  ]);
 
 angular.module('controllers',[
  'controllers.messages'
@@ -593,6 +628,84 @@ function ($http,$scope,Project) {
   ]
 }])
 
+angular.module('controllers.projects', ['ui.router','ngMessages'
+, 'services.i18nNotifications'
+, 'resources.projects'
+, 'resources.users'
+])  
+.controller('ProjectsMainCtrl',   [
+               'crudContrllersHelp','$scope', '$state', '$stateParams', '$http','Project','SERVER_CFG',
+	function ( crudContrllersHelp,$scope,   $state,   $stateParams,    $http, Project,SERVER_CFG) {
+ 		/*User.query({isActive:true,isAdmin:false},{strict:true}).then(function(ds){
+			$scope.users =ds
+		})*/
+			var baseURL= SERVER_CFG.URL+'/api/'
+		  	$http.post(baseURL+'users/load',{})//只加载主要资料
+		  	.then(function(resp){
+				  var data=resp.data
+				  console.log('users/load--',data)
+				  $scope.users =data
+          })
+		crudContrllersHelp.initMain('Project','name',$scope,   $state,   $stateParams)     
+	}
+])
+.controller('ProjectsListCtrl',   [
+                'security','crudContrllersHelp','$rootScope','$scope', '$state', '$stateParams', 'i18nNotifications', 
+	function ( security,crudContrllersHelp,$rootScope, $scope,   $state,   $stateParams,    i18nNotifications) {
+		crudContrllersHelp.initList('Project','name',$scope,   $state,   $stateParams)
+		$scope.backlogs=function (item) {
+			$state.go('backlogs-list', {projectId: item.$id()})
+		}
+		$scope.issues=function (item) {
+			$rootScope.exchangeData={targetType:'项目',target: item.name
+				                            ,projectId:item.$id(),backlogId:null}
+			$state.go('issues.create')
+		}
+		$scope.isProductMgr=function(item) {
+		    if(!security.currentUser) return false;
+		    var mgrId=security.currentUser.id;
+			//console.log(mgrId,item.productOwner)
+			return item.productOwner==mgrId
+		}
+		$scope.isDevMgr=function(item) {
+		    if(!security.currentUser) return false;
+		    var mgrId=security.currentUser.id;
+			//console.log(mgrId,item.procMaster)
+			return item.procMaster==mgrId
+		}
+
+	}
+])
+.controller('ProjectsDetailCtrl',   [
+                'crudContrllersHelp','$scope','$stateParams', '$state',
+	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
+		crudContrllersHelp.initDetail('Project','name',$scope,   $state,   $stateParams)
+
+
+	}
+])
+
+.controller('ProjectsCreateCtrl',   [
+                '$scope', 'Project',
+	function (  $scope,   Project) {
+		$scope.item = new Project()
+		$scope.item.iterationDuration=4
+		$scope.item.isSample=false
+		$scope.item.state='TODO'
+		$scope.isNew=true
+
+	}
+])
+
+.controller('ProjectsEditCtrl',   [
+                '$scope', '$stateParams', '$state',
+	function (  $scope,   $stateParams,   $state) {
+		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.isNew=false
+
+	}
+])
+
 angular.module('resources.backlogs', ['mongoResourceHttp'])
 
 .factory('Backlog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
@@ -720,84 +833,6 @@ angular.module('resources.users').factory('User', ['$mongoResourceHttp', functio
 
   return userResource;
 }]);
-
-angular.module('controllers.projects', ['ui.router','ngMessages'
-, 'services.i18nNotifications'
-, 'resources.projects'
-, 'resources.users'
-])  
-.controller('ProjectsMainCtrl',   [
-               'crudContrllersHelp','$scope', '$state', '$stateParams', '$http','Project','SERVER_CFG',
-	function ( crudContrllersHelp,$scope,   $state,   $stateParams,    $http, Project,SERVER_CFG) {
- 		/*User.query({isActive:true,isAdmin:false},{strict:true}).then(function(ds){
-			$scope.users =ds
-		})*/
-			var baseURL= SERVER_CFG.URL+'/api/'
-		  	$http.post(baseURL+'users/load',{})//只加载主要资料
-		  	.then(function(resp){
-				  var data=resp.data
-				  console.log('users/load--',data)
-				  $scope.users =data
-          })
-		crudContrllersHelp.initMain('Project','name',$scope,   $state,   $stateParams)     
-	}
-])
-.controller('ProjectsListCtrl',   [
-                'security','crudContrllersHelp','$rootScope','$scope', '$state', '$stateParams', 'i18nNotifications', 
-	function ( security,crudContrllersHelp,$rootScope, $scope,   $state,   $stateParams,    i18nNotifications) {
-		crudContrllersHelp.initList('Project','name',$scope,   $state,   $stateParams)
-		$scope.backlogs=function (item) {
-			$state.go('backlogs-list', {projectId: item.$id()})
-		}
-		$scope.issues=function (item) {
-			$rootScope.exchangeData={targetType:'项目',target: item.name
-				                            ,projectId:item.$id(),backlogId:null}
-			$state.go('issues.create')
-		}
-		$scope.isProductMgr=function(item) {
-		    if(!security.currentUser) return false;
-		    var mgrId=security.currentUser.id;
-			//console.log(mgrId,item.productOwner)
-			return item.productOwner==mgrId
-		}
-		$scope.isDevMgr=function(item) {
-		    if(!security.currentUser) return false;
-		    var mgrId=security.currentUser.id;
-			//console.log(mgrId,item.procMaster)
-			return item.procMaster==mgrId
-		}
-
-	}
-])
-.controller('ProjectsDetailCtrl',   [
-                'crudContrllersHelp','$scope','$stateParams', '$state',
-	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
-		crudContrllersHelp.initDetail('Project','name',$scope,   $state,   $stateParams)
-
-
-	}
-])
-
-.controller('ProjectsCreateCtrl',   [
-                '$scope', 'Project',
-	function (  $scope,   Project) {
-		$scope.item = new Project()
-		$scope.item.iterationDuration=4
-		$scope.item.isSample=false
-		$scope.item.state='TODO'
-		$scope.isNew=true
-
-	}
-])
-
-.controller('ProjectsEditCtrl',   [
-                '$scope', '$stateParams', '$state',
-	function (  $scope,   $stateParams,   $state) {
-		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.isNew=false
-
-	}
-])
 
 angular.module('controllers.users', ['ui.router','ngMessages'
 , 'services.i18nNotifications'

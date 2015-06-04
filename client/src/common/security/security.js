@@ -12,6 +12,7 @@ function($http, $q, $state, queue, $modal,$rootScope) {
   // Redirect to the given url (defaults to '/')
   function redirect(state) {
     state = state || 'dashboard';
+    console.log("redirect to:",state);
     $state.go(state);
   }
 
@@ -19,7 +20,7 @@ function($http, $q, $state, queue, $modal,$rootScope) {
   var loginDialog = null;
   function openLoginDialog() {
     if ( loginDialog ) {
-        return;//throw new Error('Trying to open a dialog that is already open!');
+        throw new Error('Trying to open a dialog that is already open!');
     }
     loginDialog = $modal.open({ templateUrl:'views/security/login/form.tpl.html', controller: 'LoginFormController'});
     loginDialog.result.then(onLoginDialogClose);
@@ -48,20 +49,7 @@ function($http, $q, $state, queue, $modal,$rootScope) {
 
   // The public API of the service
   var service = {
-      getMyProjects: function() {
-	    
-		var userId= !security.currentUser ? 'NONE':security.currentUser.id;
-		var req= SERVER_CFG.URL+'/api/projects/foruser';
-		console.log("getMyProjects",req);
-		var p=$http.post(req,{userId:userId});
-		p.then(function(response) {
-		    console.log("/api/projects/foruser",response.data);
-            return response.data;
-        });
-        return p;
-			  
-      },
-    // Get the first reason for needing a login
+       // Get the first reason for needing a login
     getLoginReason: function() {
       return queue.retryReason();
     },
@@ -84,7 +72,8 @@ function($http, $q, $state, queue, $modal,$rootScope) {
 		console.log("/login-->",service.currentUser);
         if ( service.isAuthenticated() ) {
           closeLoginDialog(true);
-          //$rootScope.currentUser=service.currentUser;
+          $rootScope.$broadcast('user:authenticated', service.currentUser);
+   
         }
         return service.isAuthenticated();
       });
