@@ -3,6 +3,7 @@ angular.module('controllers',[
 ,'controllers.users'
 ,'controllers.projects'
 ,'controllers.backlogs'
+,'controllers.sprints'
 ,'controllers.issues'
 ,'controllers.dashboard'
 ])

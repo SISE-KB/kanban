@@ -1,11 +1,11 @@
 <table class="table table-bordered table-condensed table-striped table-hover">
     <thead>
     <tr>
-        <th>Name</th>
-        <th>Start date</th>
-        <th>End date</th>
-        <th>Status</th>
-        <th>Tools</th>
+        <th>版本名称</th>
+        <th>开始日期</th>
+        <th>结束日期</th>
+        <th>预计工作量</th>
+        <th>操作</th>
     </tr>
     </thead>
     <tbody>
@@ -13,16 +13,16 @@
         <td ng-click="edit(sprint.$id())">{{sprint.name}}</td>
         <td ng-click="edit(sprint.$id())">{{sprint.start}}</td>
         <td ng-click="edit(sprint.$id())">{{sprint.end}}</td>
-        <td ng-click="edit(sprint.$id())">ACTIVE</td>
+        <td ng-click="edit(sprint.$id())">{{capacity(sprint)}}</td>
         <td>
-            <button type="button" class="btn btn-default btn-xs" ng-click="tasks(sprint)">Tasks</button>
+            <button type="button" class="btn btn-default btn-xs" ng-click="tasks()">任务情况</button>
         </td>
     </tr>
     <tr ng-show="!sprints.length">
-        <td colspan="5">No sprints defined</td>
+        <td colspan="5">还未安排开发计划</td>
     </tr>
     </tbody>
 </table>
 <div class="well">
-    <button class="btn btn-default" ng-click="new()">New sprint</button>
+    <button class="btn btn-default" ng-click="change()">修　改</button>
 </div>

@@ -1,0 +1,32 @@
+<form name="form" novalidate >
+    <div class="modal-header alert alert-info">
+        <h4>{{item.name}}－－信息维护</h4>
+    </div>
+    <div class="modal-body">
+        <label>名称</label>
+        <input type="text" name="name" ng-model="item.name" class="form-control" required autofocus>
+        <label>预计工作量{{item.capacity}}(MH)</label>
+        <br>
+        <div class="row">
+				<div class="col-md-6">
+					<label>开始日期</label>
+					 <div class="well well-sm" ng-model="item.start"> 
+						 <datepicker min="minDate" show-weeks="showWeeks" close-text="关闭"></datepicker>
+					 </div>
+				 </div>
+				 <div class="col-md-6">	 
+					<label>结束日期</label>
+					 <div class="well well-sm" ng-model="item.end"> 
+							 <datepicker min="minDate" show-weeks="showWeeks" close-text="关闭"></datepicker>
+					 </div>
+                 </div>
+          </div>        
+    </div> 
+    <div class="modal-footer">
+        <button class="btn btn-primary login" ng-click="save()" ng-disabled='form.$invalid'>保　存</button>
+
+    </div>
+</form>
+
+
+

@@ -1,0 +1,19 @@
+
+<form name="form" novalidate >
+    <div class="modal-header alert alert-info">
+        <h4>任务信息维护</h4>
+    </div>
+    <div class="modal-body">
+        <label>名称</label>
+        <input type="text" ng-model="task.name" class="form-control" required autofocus>
+        <label>预计(hs)</label>
+        <input type="number" ng-model="task.estimation" class="form-control">
+        <label>剩余(hs)</label>
+        <input type="number" ng-model="task.remaining" class="form-control">
+     </div> 
+    <div class="modal-footer">
+        <button class="btn btn-primary login" ng-click="save" ng-disabled='form.$invalid'>保　存</button>
+
+    </div>
+</form>
+

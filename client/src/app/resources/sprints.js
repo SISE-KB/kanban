@@ -1,9 +1,11 @@
-angular.module('resources.sprints', ['mongoResourceHttp']);
-angular.module('resources.sprints').factory('Sprint', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var Sprint = $mongoResourceHttp('sprints');
-  Sprint.forProject = function (projectId) {
-    return Sprint.query({projectId:projectId});
-  };
-  return Sprint;
+angular.module('resources.sprints', ['mongoResourceHttp'])
+.factory('Sprint', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+  var res = $mongoResourceHttp('sprints');
+  res.forProject = function (projectId,state) {
+	  var q={projectId:projectId};
+	  if(!!state) q.state=state;
+      return res.query(q,{strict:true});
+  }
+  
+  return res;
 }]);

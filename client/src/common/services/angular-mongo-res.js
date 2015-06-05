@@ -75,21 +75,14 @@ function ($http, $q,SERVER_CFG) {
             });
         };*/
        Resource.getName=function () {
-			//var rt=ress;
-			//if(!!single) rt=rt.substr(0,ress.length-1);
-			//if(!!capitalFirst) rt=rt.toUpperCase().substr(0,1)+rt.substr(1,rt.length-1);
-			return ress
+				return ress
 		};
         Resource.getById = function (id) {
             return $http.get(collectionUrl + '/' + id, {params: defaultParams}).then(resourceRespTransform);
         };
 
         Resource.getByObjectIds = function (ids) {
-           /* var qin = [];
-            angular.forEach(ids, function (id) {
-                qin.push({$oid: id});
-            });*/
-            return Resource.query({_id: {$in: ids}},{strict:true});
+                 return Resource.query({_id: {$in: ids}},{strict:true});
         };
         Resource.prototype.$id = function () {
             if (this._id && this._id.$oid) {

@@ -1,8 +1,8 @@
 angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngDroplet'
 ,'ngSanitize',  'ui.select'
  ,'hc.marked', 'ui.bootstrap','ng-sortable'
-,'services.i18nNotifications', 'services.httpRequestTracker','services.stateBuilderProvider',
-,'directives.crud', 'security'
+,'services.i18nNotifications', 'services.httpRequestTracker','services.stateBuilderProvider'
+,'directives.crud', 'security','filters'
 ,'resources','controllers'
 ])
 .config(['$stateProvider','$urlRouterProvider', 'securityAuthorizationProvider',
@@ -11,24 +11,20 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
  // $locationProvider.html5Mode(true);     
   $stateProvider
     .state('dashboard',  {
-	  url: '/',	
-	  controller: 'DashboardCtrl',
-      templateUrl: 'views/dashboard/index.tpl.html'
+	      url: '/',	
+	      controller: 'DashboardCtrl',
+          templateUrl: 'views/dashboard/index.tpl.html'
     }) 
-     .state('home',  {
-	  url: '/home',	
-	  controller: 'HomeCtrl',
-	/*  resolve: {
-	    myDevPrjs:securityAuthorizationProvider.getMyDevProjects
-		,myPrdMgrPrjs:securityAuthorizationProvider.getMyPrdMgrPrjs
-	  },*/
-      template: '<div><h1>个人工作看板，正在开发......</h1><span>产品代表：{{myPrdMgrPrjs}};参与开发：{{devPrjs}}</span><div>'
+    .state('home',  {
+	     url: '/home',	
+	    controller: 'HomeCtrl',
+        template: '<div><h1>个人工作看板，正在开发......</h1><span>产品代表：{{myPrdMgrPrjs}};参与开发：{{myDevPrjs}}</span><div>'
     }) 
     .state('upload',  {
-	  url: '/upload',	
-	  resolve: {
-	    currentUser: securityAuthorizationProvider.requireAuthenticatedUser// null if not login
-	  },
+	    url: '/upload',	
+	    resolve: {
+	       currentUser: securityAuthorizationProvider.requireAuthenticatedUser// null if not login
+	    },
       templateUrl: 'views/upload.tpl.html',
       controller: 'UploadCtrl'
     })
@@ -65,7 +61,7 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
   $scope.$on('$stateChangeStart', 
     function(event, toState, toParams, fromState, fromParams){ 
         //event.preventDefault(); 
-		console.log(toState.name,toParams)
+		//console.log(toState.name,toParams)
     })
 }])
 .controller('HeaderCtrl', [
@@ -82,8 +78,7 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
 	     $scope.$state.go('home')
 	 }
 	  else{
-		// console.log("dashboard");
-         $scope.$state.go('dashboard')
+		    $scope.$state.go('dashboard')
 	 }
   }
  }])
@@ -251,6 +246,26 @@ angular.module('app').factory('globalData', [
         var gData={};
         gData.mgrPrjs=[];
          gData.devPrjs=[];
+         	
+          gData.sendApiRequest=function(req,args){
+			   args=!args?{}:args;
+			   $log.debug(req,args);
+			   return $http.post(apiUrl+req ,args )
+		  	                   .then(function(resp){
+				                     var data=resp.data;
+	 			                     $log.debug('return data:',data);
+				                     return data;
+				               });     
+       	  } ;
+       	  
+       	 gData.toResourcesArray = function (Res,data) {
+			   var rt=[];
+			   if(data&&data.length>0){
+				   for(var i=0;i<data.length;i++)
+					   rt.push(new Res(data[i]));
+				}	   
+               return rt;
+         };
         gData.setCurrentUser=function(user){
 		     gData.currentUser=user;
 		     if(!user) {
@@ -281,6 +296,7 @@ angular.module('controllers',[
 ,'controllers.users'
 ,'controllers.projects'
 ,'controllers.backlogs'
+,'controllers.sprints'
 ,'controllers.issues'
 ,'controllers.dashboard'
 ])
@@ -470,33 +486,26 @@ angular.module('controllers.issues',
 ])  
 
 .controller('IssuesMainCtrl',   [
-               'crudContrllersHelp','$rootScope','$scope','$state',   '$stateParams',  'Project','User',
-	function ( crudContrllersHelp,$rootScope,$scope,   $state,   $stateParams,   Project,User) {
+               'crudContrllersHelp','$scope','$state',   '$stateParams',  '$log','Project','User','globalData',
+	function ( crudContrllersHelp,$scope,   $state,   $stateParams,  $log, Project,User,globalData) {
 	   crudContrllersHelp.initMain('Issue','name',$scope,   $state,   $stateParams)
-       if(!$rootScope.exchangeData){
-		   //User.query({isActive:true,isAdmin:false},{strict:true}).then(function(ds){
-			 $scope.users =[]
-		  //})
+       if(!globalData.exchangeData){
+				 $scope.users =[];
 	   }else{
-		   Project.getById($rootScope.exchangeData.projectId).then(function(prj){
-			  // console.log(prj)
-			  // var members=[ ]
-			 //  for(var i=0;i<prj.teamMembers.length;i++)
-			 //     members.push(''+prj.teamMembers[i])
-			  
-		      // console.log(members)   
-			   User.getByObjectIds(prj.teamMembers).then(function(ds){
-				    $scope.users=ds
-				  //   console.log(ds)   
-				})
-		   })
+		   Project.getById(globalData.exchangeData.projectId).then(function(prj){
+			     $log.debug('IssuesMainCtrl look for prj',prj);
+				  User.getByObjectIds(prj.teamMembers).then(function(ds){
+					    $scope.users= ds;
+					    $log.debug('IssuesMainCtrl the prj members:',ds);
+				  });
+		   });
 		}   
 	   $scope.checkDate= function(item){
-			var now = new Date()
+			var now = new Date();
 			if(!item.regDate)
-				item.regDate=now
+				item.regDate=now;
 			if(!item.closeDate)
-				item.closeDate= now.setDate(now.getDate()+14)
+				item.closeDate= now.setDate(now.getDate()+14);
 		}
 
 	}
@@ -515,18 +524,18 @@ angular.module('controllers.issues',
 ])
 
 .controller('IssuesCreateCtrl',   [
-                '$rootScope','$scope', 'Issue','$stateParams',
-	function ( $rootScope, $scope,   Issue ,$stateParams) {
-		$scope.item = new Issue()
-		$scope.isNew=true
-		$scope.checkDate($scope.item)
-		if(!!$rootScope.exchangeData){
-		   $scope.item.targetType=$rootScope.exchangeData.targetType
-		   $scope.item.target=$rootScope.exchangeData.target
-		   $scope.item.projectId=$rootScope.exchangeData.projectId
-	       $scope.item.backlogId=$rootScope.exchangeData.backlogId
-		   $scope.item.state='TODO'
-		   $rootScope.exchangeData=null
+                    '$scope', '$stateParams','Issue','globalData',
+	function ( $scope,   $stateParams,    Issue ,globalData) {
+		$scope.item = new Issue();
+		$scope.isNew=true;
+		$scope.checkDate($scope.item);
+		if(!!globalData.exchangeData){
+		   $scope.item.targetType=globalData.exchangeData.targetType;
+		   $scope.item.target=globalData.exchangeData.target;
+		   $scope.item.projectId=globalData.exchangeData.projectId;
+	       $scope.item.backlogId=globalData.exchangeData.backlogId;
+		   $scope.item.state='TODO';
+		   globalData.exchangeData=null;
 		}  
 	}
 ])
@@ -634,44 +643,38 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 , 'resources.users'
 ])  
 .controller('ProjectsMainCtrl',   [
-               'crudContrllersHelp','$scope', '$state', '$stateParams', '$http','Project','SERVER_CFG',
-	function ( crudContrllersHelp,$scope,   $state,   $stateParams,    $http, Project,SERVER_CFG) {
- 		/*User.query({isActive:true,isAdmin:false},{strict:true}).then(function(ds){
-			$scope.users =ds
-		})*/
-			var baseURL= SERVER_CFG.URL+'/api/'
-		  	$http.post(baseURL+'users/load',{})//只加载主要资料
-		  	.then(function(resp){
-				  var data=resp.data
-				  console.log('users/load--',data)
-				  $scope.users =data
-          })
-		crudContrllersHelp.initMain('Project','name',$scope,   $state,   $stateParams)     
+               'crudContrllersHelp','$scope', '$state', '$stateParams', 'globalData',
+	function ( crudContrllersHelp,$scope,   $state,   $stateParams,  globalData) {
+         $scope.users=[]
+         globalData.sendApiRequest('users/load')
+         .then(function(data){
+			 $scope.users=data;
+		}) ;
+		 crudContrllersHelp.initMain('Project','name',$scope,   $state,   $stateParams)     
 	}
 ])
 .controller('ProjectsListCtrl',   [
-                'security','crudContrllersHelp','$rootScope','$scope', '$state', '$stateParams', 'i18nNotifications', 
-	function ( security,crudContrllersHelp,$rootScope, $scope,   $state,   $stateParams,    i18nNotifications) {
-		crudContrllersHelp.initList('Project','name',$scope,   $state,   $stateParams)
-		$scope.backlogs=function (item) {
-			$state.go('backlogs-list', {projectId: item.$id()})
+                'crudContrllersHelp',  '$scope', '$state', '$stateParams', 'globalData',
+	function ( crudContrllersHelp, $scope,     $state,     $stateParams,     globalData) {
+		crudContrllersHelp.initList('Project','name',$scope,   $state,   $stateParams);
+			$scope.backlogs=function (item) {
+			$state.go('backlogs', {projectId: item.$id()})
+		}
+		$scope.sprints=function (item) {
+			$state.go('sprints', {projectId: item.$id()})
 		}
 		$scope.issues=function (item) {
-			$rootScope.exchangeData={targetType:'项目',target: item.name
+			globalData.exchangeData={targetType:'项目',target: item.name
 				                            ,projectId:item.$id(),backlogId:null}
 			$state.go('issues.create')
 		}
 		$scope.isProductMgr=function(item) {
-		    if(!security.currentUser) return false;
-		    var mgrId=security.currentUser.id;
-			//console.log(mgrId,item.productOwner)
-			return item.productOwner==mgrId
+		    if(!globalData.currentUser) return false;
+			return item.productOwner==globalData.currentUser.id
 		}
 		$scope.isDevMgr=function(item) {
-		    if(!security.currentUser) return false;
-		    var mgrId=security.currentUser.id;
-			//console.log(mgrId,item.procMaster)
-			return item.procMaster==mgrId
+			if(!globalData.currentUser) return false;
+			return item.procMaster==globalData.currentUser.id
 		}
 
 	}
@@ -707,15 +710,21 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 ])
 
 angular.module('resources.backlogs', ['mongoResourceHttp'])
-
 .factory('Backlog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
   var res = $mongoResourceHttp('backlogs');
 
-  res.forProject = function (projectId) {
-      return res.query({projectId:projectId},{strict:true});
+  res.forProject = function (projectId,state) {
+	  var q={projectId:projectId};
+	  if(!!state) q.state=state;
+      return res.query(q,{strict:true});
+  };
+  res.forSprint= function (sprintId,state) {
+	  var q={sprintId:sprintId};
+	  if(!!state) q.state=state;
+      return res.query(q,{strict:true});
   }
-
-  return res
+  
+  return res;
 }])
 
 angular.module('resources.issues', ['mongoResourceHttp'])
@@ -787,40 +796,35 @@ angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', f
   return Project;
 }]);
 
-angular.module('resources.sprints', ['mongoResourceHttp']);
-angular.module('resources.sprints').factory('Sprint', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var Sprint = $mongoResourceHttp('sprints');
-  Sprint.forProject = function (projectId) {
-    return Sprint.query({projectId:projectId});
-  };
-  return Sprint;
+angular.module('resources.sprints', ['mongoResourceHttp'])
+.factory('Sprint', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+  var res = $mongoResourceHttp('sprints');
+  res.forProject = function (projectId,state) {
+	  var q={projectId:projectId};
+	  if(!!state) q.state=state;
+      return res.query(q,{strict:true});
+  }
+  
+  return res;
 }]);
 
 angular.module('resources.tasks', ['mongoResourceHttp']);
 angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', function ($mongoResourceHttp) {
 
-  var Task = $mongoResourceHttp('tasks');
+  var res = $mongoResourceHttp('tasks');
 
-  Task.statesEnum = ['TODO', 'IN_DEV', 'BLOCKED', 'IN_TEST', 'DONE'];
+  //res.statesEnum = ['TODO', 'IN_DEV', 'BLOCKED', 'IN_TEST', 'DONE'];
 
-  Task.forProductBacklogItem = function (productBacklogItem) {
-    return Task.query({productBacklogItem:productBacklogItem});
-  };
-
-  Task.forSprint = function (sprintId) {
-    return Task.query({sprintId:sprintId});
-  };
-
-  Task.forUser = function (userId) {
-    return Task.query({userId:userId});
-  };
-
-  Task.forProject = function (projectId) {
+  res.forSprint= function (sprintId,state) {
+	  var q={sprintId:sprintId};
+	  if(!!state) q.state=state;
+      return res.query(q,{strict:true});
+  }
+  res.forProject = function (projectId) {
     return Task.query({projectId:projectId});
   };
 
-  return Task;
+  return res;
 }]);
 
 angular.module('resources.users', ['mongoResourceHttp']);
@@ -975,106 +979,349 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
 ]) 
  .config(['$stateProvider', 
  function($stateProvider){
-	var projectId = ['$stateParams', function($stateParams) {
-      return $stateParams.projectId
-    }]
-    
-  	$stateProvider
-		.state('backlogs-list', {
-				url: "backlogs/:projectId",
-				templateUrl: 'views/projects/backlogs/list.tpl.html',
-				resolve: {
-					 backlogs : ['$stateParams', 'Backlog', 
-					    function($stateParams, Backlog){
-                           return Backlog.forProject($stateParams.projectId)
-                        }]
-		        },
+	$stateProvider
+		.state('backlogs', {
+				url: "/backlogs/:projectId",
+				templateUrl: 'views/projects/backlogs/index.tpl.html',
 				controller: 'BacklogsListCtrl'
 		})
-		.state('backlogs-create', {
-				url: 'backlogs/create/:projectId',
+		/*.state('backlogs-edit', {
+				url: '/backlogs/:backlogId/:projectId',
 				templateUrl: 'views/projects/backlogs/edit.tpl.html',
-				controller:  'BacklogsCreateCtrl'
-		})
+				controller:  'BacklogsEditCtrl'
+		})*/
  }])
 
  .controller('BacklogsListCtrl', [
-            'security','$scope', '$state','$stateParams','backlogs','Project',
-    function(security,$scope,   $state,  $stateParams,backlogs,Project){
-      $scope.doneItems = backlogs;
-	  var mgrId=security.currentUser.id;
-	  console.log(mgrId);
-      Project.forProductMgr(mgrId).then(function(data){
-	    console.log(data);
-		$scope.myPrjs=data;
-	  });
-					  
-      $scope.create = function () {
-		 $state.go('backlogs-create', 
-		  {projectId:$stateParams.projectId}
-		  )
-	  };
+              '$scope', '$log','$modal','Backlog','globalData',
+    function($scope,     $log, $modal , Backlog,  globalData){
+		var projectId = $scope.$stateParams.projectId;
+		//$scope.projectId=projectId;
+        globalData.sendApiRequest("backlogs/stats",{projectId:projectId})
+       .then(function(data){
+		     $log.debug(data);
+		     $scope.todoItems = globalData.toResourcesArray(Backlog,data.TODO ); 
+		     $scope.doingItems = globalData.toResourcesArray(Backlog,data.DOING );
+		     $scope.doneItems = globalData.toResourcesArray(Backlog,data.DONE);
+		     $scope.okItems =globalData.toResourcesArray(Backlog,data.OK);
+		 });
+	 	
+	 	$scope.myPrjs=globalData.mgrPrjs;
+	    var dialog=null;
 	    
-		$scope.doingItems = [];
-		$scope.todoItems = []; 
-		$scope.okItems = [];
-		 
-        $scope.todoConfig = {
-		    animation: 150,
-            group: {name:'todo',put: false},
-			 onRemove:function(data){
-			   console.log("onRemove--",data.model,data.oldIndex) 
-			}
-        };
-		$scope.doingConfig = {
-			animation: 150,
-             group: {name:'doing', put: false},
-			 onAdd:function(data){
-			   data.model.state="DOING";
-			}
+	    function onDialogClose(success) {
+			   $log.debug('onDialogClose',success);
+			    dialog = null;
+			    if(success&&$scope.item) {
+			        $log.debug('UPDTATE:',$scope.item);
+			        $scope.item.$update();
+		         }
+		        return success;
+	    }
+
+
+  
+	    $scope.edit = function (item) {
+			 $scope.item=item;
+			 $log.debug('edit:',$scope.item);
+			
+			//$scope.$state.go('backlogs-edit',  {backlogId:item._id,projectId:projectId})
+			 dialog = $modal.open({ templateUrl:'views/projects/backlogs/edit.tpl.html'
+					                    , controller: 'BacklogsEditCtrl'});
+             dialog.result.then(onDialogClose);
+              globalData.exchange=[dialog,item];
 		};
-		$scope.doneConfig = {
-			animation: 150,
-            group: {name:'done',put: false},
-			onAdd:function(data){
-			   data.model.state="DONE";
-			   console.log("onAdd--",data.model,data.newIndex) 
-			}
-		};
-		$scope.okConfig = {
-			animation: 150,
-            group: {name:'ok',put: ['done']},
-			onAdd:function(data){
-			   data.model.state="OK";
-			   console.log("onAdd--",data.model,data.newIndex) 
-			}
-		};
-		
-   
-  }])
-  .controller('TodoController',[
-             '$scope',
-	function ($scope) {
-		$scope.addTodo = function () {
-			$scope.items1.push({name:$scope.todoName,text: $scope.todoText,
-								catalog:$scope.todoCatalog,projectId :$scope.todoProjectId,
-								priority:$scope.todoPriority,estimation:$scope.todoEstimation,
-								state:'todo'});
-			$scope.todoName = '';
+
+
+		$scope.addBacklog = function () {
+			  $scope.item = new Backlog();
+			  $scope.item.state="TODO";
+              $scope.item.projectId=projectId;
+              $scope.item.name=$scope.newText;
+              $scope.item.desc=
+"# 一级标题\r\n"
++"\r\n"
++"## 二级标题\r\n"
++"\r\n"
++"`红色提醒`\r\n"
++"\r\n"
++"**Code**:\r\n"
++"\r\n"
++"```js\r\n"
++"var express = require('express')\r\n"
++"var multer  = require('multer')\r\n"
++"\r\n"
++"var app = express()\r\n"
++"app.use(multer({ dest: './uploads/'}))\r\n"
++"```\r\n"
++"\r\n"
++"[详细参考](http://www.ituring.com.cn/article/775)."
+                    
+              $scope.item.$save();
+              $scope.todoItems.push($scope.item);
 		}
-	}
-  ])
-  .controller('BacklogsCreateCtrl', [
-             '$scope',  'Backlog',  'i18nNotifications','$state','$stateParams',
-    function($scope,   Backlog,    i18nNotifications,$state,$stateParams){
-      $scope.item = new Backlog()
-      $scope.item.projectId=$stateParams.projectId
-      $scope.onSave = function (item) {
-			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item.name})
-			$state.go('backlogs-list', $stateParams) 
-	  }
-	  $scope.onError = function() {
+			
+		$scope.updateState = function (item) {
+			globalData.sendApiRequest("backlogs/update",{id:item._id,state:item.state});
+		};
+	
+		var makeConfig =function(state) {
+			return {
+				animation: 150,
+				group: {name : state,put: ['TODO','DOING','DONE','OK']},
+				onAdd: function(item){
+					$log.debug("onAdd--",item.model.name);
+					item.model.state=state;
+					$scope.updateState(item.model);
+				}	
+			};
+        };
+        $scope.todoConfig=makeConfig('TODO');
+        $scope.doingConfig=makeConfig('DOING');
+        $scope.doneConfig=makeConfig('DONE');  
+        $scope.okConfig=makeConfig('OK');
+  }])
+
+  .controller('BacklogsEditCtrl', [
+             '$scope', 'globalData',
+    function($scope, globalData){
+       
+       var dialog=globalData.exchange[0];
+       $scope.item=globalData.exchange[1];
+       globalData.exchange=null;
+       $scope.save=function() {
+			dialog.close(true);
+	    }	
+	
+		$scope.cancel= function() {
+           dialog.close(false);
+        };
+   /*   
+	    $scope.onSave = function (item) {
+			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item['name']});
+			$scope.$state.go('backlogs-list', $scope.$stateParams) 
+		};
+	    $scope.onError = function() {
 			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
-	  }
-   
+		}
+		$scope.onRemove = function(item) {
+			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item['name']});
+			$scope.$state.go('backlogs-list', $scope.$stateParams) 
+		};
+		$scope.remove = function(item, $index, $event) {
+			$event.stopPropagation()
+			item.$remove().then(function() {
+				$scope.onRemove(item)
+			}, function() {
+				i18nNotifications.pushForCurrentRoute('crud.user.remove.error', 'danger',  {id : item['name']});
+			});
+		};*/
+	   
+  }])
+
+angular.module('controllers.sprints', ['ui.router','ngMessages'
+, 'services.i18nNotifications'
+, 'resources.projects'
+, 'resources.sprints'
+, 'resources.backlogs'
+, 'resources.tasks'
+]) 
+ .config(['$stateProvider', 
+ function($stateProvider){
+	var projectId = ['$stateParams', function($stateParams) {
+      return $stateParams.projectId
+    }]
+	
+    
+  	$stateProvider
+		.state('sprints', {
+				url: "/sprints/:projectId",
+				templateUrl: 'views/projects/sprints/index.tpl.html',
+				controller: 'SprintsCtrl'
+				
+		})
+		.state('sprints.view', {
+				url: '/view',
+				templateUrl: 'views/projects/sprints/view.tpl.html'
+		})
+	  .state('sprints.edit', {
+				url: '/edit/:sprintId',//sprints/:projectId
+				templateUrl: 'views/projects/sprints/edit.tpl.html',
+				controller:  'SprintsEditCtrl'
+		})
+
+		.state('sprints.tasks', {
+				url: '/tasks',
+				templateUrl: 'views/projects/sprints/tasks.tpl.html',
+				controller: 'TasksCtrl'
+		})	
+		.state('sprints.tasks.edit', {
+				url: '/edit',
+				 views: {
+                   '@sprints': {
+				         templateUrl: 'views/projects/sprints/task-edit.tpl.html'
+				      }
+				 }      
+
+		});	
+	
+ }])
+
+ .controller('SprintsCtrl', [
+              '$scope', '$log','Sprint','Backlog','globalData',
+    function($scope,  $log, Sprint,  Backlog,globalData){
+		var projectId = $scope.$stateParams.projectId;
+		 Backlog.forProject(projectId,'TODO')
+		  .then(function(data){
+			  $scope.todoBacklogs =data;
+			  $log.debug("TODO Backlogs",data);
+		  });
+         Sprint.forProject(projectId)
+         .then(function(data){
+			 $scope.sprints =data;
+			 data.forEach(function(item){
+				 $scope.currentSprint=item;
+				  Backlog.forSprint(item._id).then(function(ds){
+					   item.items=ds;
+					  // $log.debug(item);
+				  });
+				
+			 });
+			 
+		});	 
+		
+  
+		$scope.changeCurSprint=function(sprint){
+			  $scope.currentSprint=sprint;
+		}
+		$scope.changeBacklogState=function(data,state){
+			 data.state=state;
+			 var args={id: data._id,state: data.state,sprintId: data.sprintId};
+			 globalData.sendApiRequest("backlogs/update",args);
+			   
+		}
+       $scope.todoConfig = {
+		    animation: 150,
+            group: {name:'todo',put: ['doing']},
+            onAdd:function(item){
+			   item.model.sprintId=null;
+			   $scope.changeBacklogState(item.model,'TODO');
+			}
+	    };
+		$scope.doingConfig = {
+			animation: 300,
+             group: {name:'doing', put: ['todo','doing']},
+			 onAdd:function(item){
+			   item.model.sprintId=!$scope.currentSprint?null:$scope.currentSprint._id;
+			   $scope.changeBacklogState(item.model,'DOING');
+			   
+			}
+		};
+	
+		
+		    
+		$scope.addSprint = function () {
+		    var item=new Sprint();
+		    item.name= $scope.newText;
+		    item.state='TODO';
+		    item.projectId=projectId;
+		    item.$save().then(function(data){
+			    $log.debug('save Sprint:',data);
+			    $scope.currentSprint=data;
+			     data.items=[]
+			     $scope.sprints.push(data);
+			},function(err){
+				 $log.debug('save err:',err);
+			});
+		   
+			$scope.newText = '';
+		};
+    
+		 $scope.showBacklog= function (item) {
+			 $scope.curBacklog=item;
+			 $log.debug("showBacklog",item);
+			 $scope.$state.go('sprints.view',  $scope.$stateParams);
+		 }
+		  $scope.showTasks= function (sprint) {
+			  globalData.exchange=[ projectId,sprint._id];
+			   $scope.$state.go('sprints.tasks',  $scope.$stateParams);
+			 
+			
+		 }
+	    $scope.edit = function (item) {
+			globalData.exchange=item;
+			$scope.currentSprint=item;
+			$scope.$state.go('sprints.edit', {projectId:projectId,sprintId:item._id});
+			
+	   };
+	
+	
+  }])
+  .controller('TasksCtrl', [
+             '$scope', '$log',  'Task','globalData',
+    function($scope,  $log,     Task,  globalData){
+		//$log.debug(globalData.exchange);
+		var projectId=globalData.exchange[0];
+		var sprintId=globalData.exchange[1];
+		
+		Task.forSprint(sprintId).then(function(ds){
+			   $scope.tasks=ds;
+		       $log.debug('load tasks',ds);
+		 });
+		
+
+      	$scope.edit = function (task) {
+			$scope.task=task;
+			$log.debug('cur task',$scope.task);
+			$scope.$state.go('sprints.tasks.edit',  $scope.$stateParams);
+	    };
+	    $scope.add = function () {
+		    var item=new Task();
+		    item.name= $scope.taskText;
+		    item.state='TODO';
+		    item.projectId=projectId;
+		    item.sprintId=sprintId;
+		    item.$save();
+		    $scope.tasks.push(item);
+		    $log.debug('save Task:',item);
+		    
+		};
+		$scope.save = function (task) {
+	       task.$update();
+	       $scope.$state.go('sprints.tasks',  $scope.$stateParams);
+	    }   
+	    $scope.remove = function (task, index, event) {
+			event.stopPropagation();
+			$scope.tasks.splice(index,1);
+			task.$remove();
+		}  
+  }])
+ .controller('SprintsEditCtrl', [
+             '$scope', '$log',  'Sprint','i18nNotifications','globalData',
+    function($scope,  $log,     Sprint,    i18nNotifications,globalData){
+      $scope.item=globalData.exchange;
+      //globalData.exchange=null;
+      $log.debug($scope.item);
+      var projectId = $scope.$stateParams.projectId;
+      
+      var  sum=function() {
+			var count = 0;
+			angular.forEach($scope.item.items, function (todo) {
+					count += !todo.estimation?0:todo.estimation;
+					$log.debug(todo);
+			});
+			$log.debug(count);
+			return count;
+	   };
+		
+        $scope.item.capacity= sum();
+		
+
+		$scope.save = function() {
+			var item=$scope.item;
+			item.$update();
+			i18nNotifications.pushForCurrentRoute('crud.save.success', 'success', {id : item['name']});
+			$scope.$state.go('sprints',{projectId:projectId}); 
+		};
+	   
   }])

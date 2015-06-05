@@ -1,0 +1,37 @@
+<div class="well">
+    <h4>迭代开发信息维护</h4>
+    <hr>
+    <form name="form" crud-edit="item">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text"  ng-model="item.name" class="form-control" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label>Capacity</label>
+                    <input type="number"" ng-model="sprint.capacity" class="form-control" >
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Start date</label>
+                   	  <div class="well well-sm" ng-model="item.start"> 
+						 <datepicker min="minDate" show-weeks="showWeeks" close-text="关闭"></datepicker>
+					  </div>
+                </div>
+                <div class="form-group">
+                    <label>End date</label>
+                     <div class="well well-sm" ng-model="item.end"> 
+						 <datepicker min="minDate" show-weeks="showWeeks" close-text="关闭"></datepicker>
+					  </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+    
+        <div>
+            <crud-buttons></crud-buttons>
+        </div>
+    </form>
+</div>

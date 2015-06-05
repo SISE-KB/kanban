@@ -3,7 +3,7 @@
     <div class="well well-small">
       <ul class="nav nav-list">
           <li ng-repeat="item in myPrjs" ui-sref-active="active">
-             <a ui-sref="backlogs-list({projectId:item._id})">{{item.name}}</a>
+             <a ui-sref="backlogs({projectId:item._id})">{{item.name}}</a>
          </li>
       </ul>
     </div>

@@ -1,0 +1,29 @@
+<div>
+            <crud-buttons></crud-buttons>
+</div>
+<br>
+<form name="form" crud-edit="item">
+    <table class="table">
+      <tr>
+        <td>预计工作量</td>
+        <td>开始日期</td>
+        <td>结束日期</td>
+      </tr>
+      <tr>
+        <td>{{capacity(item)}}</td>
+        <td><p class="input-group">
+            <input type="date" class="form-control" datepicker-popup ng-model="sprint.start" is-open="opened" min-date="minDate" max-date="'2015-06-22'" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close"/>
+          </p></td>
+        <td><p class="input-group">
+            <input type="date" class="form-control" datepicker-popup ng-model="sprint.end" is-open="opened" min-date="minDate" max-date="'2015-06-22'" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close"/>
+          </p></td>
+      </tr>
+    </table>
+    <div ng-repeat="b in item.items" >
+		 < strong>{{b.name}}</strong>  <p>工作量:{{b.estimation}}</p><br>
+         <label>预览</label>
+		<div  marked="b.desc"></div>
+    </div>
+  </div>
+ </form>
+

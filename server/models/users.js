@@ -4,11 +4,11 @@ var mongoose = require('mongoose'),
     passportLocalMongoose = require('passport-local-mongoose'),
     Schema = mongoose.Schema,
     ObjectId = Schema.ObjectId;
-//var hooker = require('hooker');      
+   
 
 var UserSchema = new Schema({
-  name : String,	
-  mobileNo : String,
+  name : { type: String,	     index: true},
+  mobileNo : { type: String, index: true},
   image : String,
   skills : [String],
   password:String,

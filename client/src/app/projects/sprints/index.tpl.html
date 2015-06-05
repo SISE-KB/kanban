@@ -1,0 +1,34 @@
+
+<div  class="container well"> <strong >未安排交付件列表--{{todoBacklogs.length}}</strong>
+  <div class="tileList" ng-sortable="todoConfig">
+    <div  ng-repeat="item in todoBacklogs"  class="col-md-3"> 
+		  <span class="badge col-md-2">{{item.priority}}</span> 
+		  <span>{{item.name}}</span> 
+	</div>
+  </div>
+</div>
+<!--阶段安排-->
+
+<div id="sprintList"  class="container" >
+<form ng-submit="addSprint()" novalidate>
+  <input type="text" ng-model="newText" 
+	  placeholder="增加新的版本">
+</form>
+<ul class="unstyled col-md-4">
+  <li ng-repeat="sprint in sprints | orderBy:'name'">
+    <button class="btn btn-default" ng-click="changeCurSprint(sprint);isCollapsed=!isCollapsed;">{{sprint.name}}</button>
+    <button class="btn btn-default" ng-click="edit(sprint)">修改</button>
+    <button class="btn btn-default" ng-click="showTasks(sprint)">Tasks</button>
+    <div collapse="isCollapsed" class="well">
+      <div ng-sortable="doingConfig" class="tileList layer tile">
+        <div ng-repeat="item in sprint.items" style="margin-top: 10px"> <a ng-click="showBacklog(item)">{{item.name}}</a>
+          <button class="btn btn-sm btn-info" ng-click="changeBacklogState(item,'DONE')" ng-hide="item.state=='DONE'">申请验收</button>
+        </div>
+      </div>
+    </div>
+  </li>
+</ul>
+ <div ui-view class="col-md-8 slide"></div>
+
+</div>
+

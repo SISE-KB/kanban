@@ -1,6 +1,6 @@
 <form name="form" novalidate class="login-form">
     <div class="modal-header">
-        <h4>Sign in</h4>
+        <h4>输入帐号与密码登录系统</h4>
     </div>
     <div class="modal-body">
         <div class="alert alert-warning" ng-show="authReason">
@@ -9,7 +9,7 @@
         <div class="alert alert-danger" ng-show="authError">
             {{authError}}
         </div>
-        <div class="alert alert-info">请输登录资料</div>
+        <div class="alert alert-info">请输入登录资料</div>
         <label>手机号</label>
         <input name="mobileNo" type="text" ng-model="user.mobileNo" required autofocus>
         <label>密码</label>

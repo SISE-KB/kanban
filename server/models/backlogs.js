@@ -6,10 +6,10 @@ var mongoose = require('mongoose'),
 
 
 var BacklogSchema = new Schema({
-   name: String
+   name: String 
   ,desc : String
   ,note : String
-  ,catalog:[String]
+  ,catalog: String
   ,projectId: ObjectId
   ,priority : Number
   ,estimation : Number

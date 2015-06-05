@@ -1,8 +1,8 @@
 angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngDroplet'
 ,'ngSanitize',  'ui.select'
  ,'hc.marked', 'ui.bootstrap','ng-sortable'
-,'services.i18nNotifications', 'services.httpRequestTracker','services.stateBuilderProvider',
-,'directives.crud', 'security'
+,'services.i18nNotifications', 'services.httpRequestTracker','services.stateBuilderProvider'
+,'directives.crud', 'security','filters'
 ,'resources','controllers'
 ])
 .config(['$stateProvider','$urlRouterProvider', 'securityAuthorizationProvider',
@@ -11,24 +11,20 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
  // $locationProvider.html5Mode(true);     
   $stateProvider
     .state('dashboard',  {
-	  url: '/',	
-	  controller: 'DashboardCtrl',
-      templateUrl: 'views/dashboard/index.tpl.html'
+	      url: '/',	
+	      controller: 'DashboardCtrl',
+          templateUrl: 'views/dashboard/index.tpl.html'
     }) 
-     .state('home',  {
-	  url: '/home',	
-	  controller: 'HomeCtrl',
-	/*  resolve: {
-	    myDevPrjs:securityAuthorizationProvider.getMyDevProjects
-		,myPrdMgrPrjs:securityAuthorizationProvider.getMyPrdMgrPrjs
-	  },*/
-      template: '<div><h1>个人工作看板，正在开发......</h1><span>产品代表：{{myPrdMgrPrjs}};参与开发：{{myDevPrjs}}</span><div>'
+    .state('home',  {
+	     url: '/home',	
+	    controller: 'HomeCtrl',
+        template: '<div><h1>个人工作看板，正在开发......</h1><span>产品代表：{{myPrdMgrPrjs}};参与开发：{{myDevPrjs}}</span><div>'
     }) 
     .state('upload',  {
-	  url: '/upload',	
-	  resolve: {
-	    currentUser: securityAuthorizationProvider.requireAuthenticatedUser// null if not login
-	  },
+	    url: '/upload',	
+	    resolve: {
+	       currentUser: securityAuthorizationProvider.requireAuthenticatedUser// null if not login
+	    },
       templateUrl: 'views/upload.tpl.html',
       controller: 'UploadCtrl'
     })
@@ -65,7 +61,7 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
   $scope.$on('$stateChangeStart', 
     function(event, toState, toParams, fromState, fromParams){ 
         //event.preventDefault(); 
-		console.log(toState.name,toParams)
+		//console.log(toState.name,toParams)
     })
 }])
 .controller('HeaderCtrl', [
@@ -82,8 +78,7 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
 	     $scope.$state.go('home')
 	 }
 	  else{
-		// console.log("dashboard");
-         $scope.$state.go('dashboard')
+		    $scope.$state.go('dashboard')
 	 }
   }
  }])

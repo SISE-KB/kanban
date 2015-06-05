@@ -6,106 +6,142 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
 ]) 
  .config(['$stateProvider', 
  function($stateProvider){
-	var projectId = ['$stateParams', function($stateParams) {
-      return $stateParams.projectId
-    }]
-    
-  	$stateProvider
-		.state('backlogs-list', {
-				url: "backlogs/:projectId",
-				templateUrl: 'views/projects/backlogs/list.tpl.html',
-				resolve: {
-					 backlogs : ['$stateParams', 'Backlog', 
-					    function($stateParams, Backlog){
-                           return Backlog.forProject($stateParams.projectId)
-                        }]
-		        },
+	$stateProvider
+		.state('backlogs', {
+				url: "/backlogs/:projectId",
+				templateUrl: 'views/projects/backlogs/index.tpl.html',
 				controller: 'BacklogsListCtrl'
 		})
-		.state('backlogs-create', {
-				url: 'backlogs/create/:projectId',
+		/*.state('backlogs-edit', {
+				url: '/backlogs/:backlogId/:projectId',
 				templateUrl: 'views/projects/backlogs/edit.tpl.html',
-				controller:  'BacklogsCreateCtrl'
-		})
+				controller:  'BacklogsEditCtrl'
+		})*/
  }])
 
  .controller('BacklogsListCtrl', [
-            'security','$scope', '$state','$stateParams','backlogs','Project',
-    function(security,$scope,   $state,  $stateParams,backlogs,Project){
-      $scope.doneItems = backlogs;
-	  var mgrId=security.currentUser.id;
-	  console.log(mgrId);
-      Project.forProductMgr(mgrId).then(function(data){
-	    console.log(data);
-		$scope.myPrjs=data;
-	  });
-					  
-      $scope.create = function () {
-		 $state.go('backlogs-create', 
-		  {projectId:$stateParams.projectId}
-		  )
-	  };
+              '$scope', '$log','$modal','Backlog','globalData',
+    function($scope,     $log, $modal , Backlog,  globalData){
+		var projectId = $scope.$stateParams.projectId;
+		//$scope.projectId=projectId;
+        globalData.sendApiRequest("backlogs/stats",{projectId:projectId})
+       .then(function(data){
+		     $log.debug(data);
+		     $scope.todoItems = globalData.toResourcesArray(Backlog,data.TODO ); 
+		     $scope.doingItems = globalData.toResourcesArray(Backlog,data.DOING );
+		     $scope.doneItems = globalData.toResourcesArray(Backlog,data.DONE);
+		     $scope.okItems =globalData.toResourcesArray(Backlog,data.OK);
+		 });
+	 	
+	 	$scope.myPrjs=globalData.mgrPrjs;
+	    var dialog=null;
 	    
-		$scope.doingItems = [];
-		$scope.todoItems = []; 
-		$scope.okItems = [];
-		 
-        $scope.todoConfig = {
-		    animation: 150,
-            group: {name:'todo',put: false},
-			 onRemove:function(data){
-			   console.log("onRemove--",data.model,data.oldIndex) 
-			}
-        };
-		$scope.doingConfig = {
-			animation: 150,
-             group: {name:'doing', put: false},
-			 onAdd:function(data){
-			   data.model.state="DOING";
-			}
+	    function onDialogClose(success) {
+			   $log.debug('onDialogClose',success);
+			    dialog = null;
+			    if(success&&$scope.item) {
+			        $log.debug('UPDTATE:',$scope.item);
+			        $scope.item.$update();
+		         }
+		        return success;
+	    }
+
+
+  
+	    $scope.edit = function (item) {
+			 $scope.item=item;
+			 $log.debug('edit:',$scope.item);
+			
+			//$scope.$state.go('backlogs-edit',  {backlogId:item._id,projectId:projectId})
+			 dialog = $modal.open({ templateUrl:'views/projects/backlogs/edit.tpl.html'
+					                    , controller: 'BacklogsEditCtrl'});
+             dialog.result.then(onDialogClose);
+              globalData.exchange=[dialog,item];
 		};
-		$scope.doneConfig = {
-			animation: 150,
-            group: {name:'done',put: false},
-			onAdd:function(data){
-			   data.model.state="DONE";
-			   console.log("onAdd--",data.model,data.newIndex) 
-			}
-		};
-		$scope.okConfig = {
-			animation: 150,
-            group: {name:'ok',put: ['done']},
-			onAdd:function(data){
-			   data.model.state="OK";
-			   console.log("onAdd--",data.model,data.newIndex) 
-			}
-		};
-		
-   
-  }])
-  .controller('TodoController',[
-             '$scope',
-	function ($scope) {
-		$scope.addTodo = function () {
-			$scope.items1.push({name:$scope.todoName,text: $scope.todoText,
-								catalog:$scope.todoCatalog,projectId :$scope.todoProjectId,
-								priority:$scope.todoPriority,estimation:$scope.todoEstimation,
-								state:'todo'});
-			$scope.todoName = '';
+
+
+		$scope.addBacklog = function () {
+			  $scope.item = new Backlog();
+			  $scope.item.state="TODO";
+              $scope.item.projectId=projectId;
+              $scope.item.name=$scope.newText;
+              $scope.item.desc=
+"# 一级标题\r\n"
++"\r\n"
++"## 二级标题\r\n"
++"\r\n"
++"`红色提醒`\r\n"
++"\r\n"
++"**Code**:\r\n"
++"\r\n"
++"```js\r\n"
++"var express = require('express')\r\n"
++"var multer  = require('multer')\r\n"
++"\r\n"
++"var app = express()\r\n"
++"app.use(multer({ dest: './uploads/'}))\r\n"
++"```\r\n"
++"\r\n"
++"[详细参考](http://www.ituring.com.cn/article/775)."
+                    
+              $scope.item.$save();
+              $scope.todoItems.push($scope.item);
 		}
-	}
-  ])
-  .controller('BacklogsCreateCtrl', [
-             '$scope',  'Backlog',  'i18nNotifications','$state','$stateParams',
-    function($scope,   Backlog,    i18nNotifications,$state,$stateParams){
-      $scope.item = new Backlog()
-      $scope.item.projectId=$stateParams.projectId
-      $scope.onSave = function (item) {
-			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item.name})
-			$state.go('backlogs-list', $stateParams) 
-	  }
-	  $scope.onError = function() {
+			
+		$scope.updateState = function (item) {
+			globalData.sendApiRequest("backlogs/update",{id:item._id,state:item.state});
+		};
+	
+		var makeConfig =function(state) {
+			return {
+				animation: 150,
+				group: {name : state,put: ['TODO','DOING','DONE','OK']},
+				onAdd: function(item){
+					$log.debug("onAdd--",item.model.name);
+					item.model.state=state;
+					$scope.updateState(item.model);
+				}	
+			};
+        };
+        $scope.todoConfig=makeConfig('TODO');
+        $scope.doingConfig=makeConfig('DOING');
+        $scope.doneConfig=makeConfig('DONE');  
+        $scope.okConfig=makeConfig('OK');
+  }])
+
+  .controller('BacklogsEditCtrl', [
+             '$scope', 'globalData',
+    function($scope, globalData){
+       
+       var dialog=globalData.exchange[0];
+       $scope.item=globalData.exchange[1];
+       globalData.exchange=null;
+       $scope.save=function() {
+			dialog.close(true);
+	    }	
+	
+		$scope.cancel= function() {
+           dialog.close(false);
+        };
+   /*   
+	    $scope.onSave = function (item) {
+			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item['name']});
+			$scope.$state.go('backlogs-list', $scope.$stateParams) 
+		};
+	    $scope.onError = function() {
 			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
-	  }
-   
+		}
+		$scope.onRemove = function(item) {
+			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item['name']});
+			$scope.$state.go('backlogs-list', $scope.$stateParams) 
+		};
+		$scope.remove = function(item, $index, $event) {
+			$event.stopPropagation()
+			item.$remove().then(function() {
+				$scope.onRemove(item)
+			}, function() {
+				i18nNotifications.pushForCurrentRoute('crud.user.remove.error', 'danger',  {id : item['name']});
+			});
+		};*/
+	   
   }])

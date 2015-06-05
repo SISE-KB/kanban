@@ -1,0 +1,30 @@
+<div class="well">
+	 <form ng-submit="add()" novalidate>
+     <input type="text" ng-model="taskText"
+	     placeholder="增加新的任务">
+    </form>
+ </div>
+<table class="table table-bordered table-condensed table-striped table-hover">
+    <thead>
+    <tr>
+        <th class="col-md-6">名称</th>
+        <th class="col-md-2">预计</th>
+        <th class="col-md-2">剩余</th>
+         <th class="col-md-2">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="task in tasks" ng-click="edit(task)">
+        <td >{{task.name}}</td>
+        <td>{{task.estimation}}</td>
+        <td>{{task.remaining}}</td>
+        <td>
+		     <button class="btn btn-danger remove" ng-click="remove(task, $index, $event)">删除</button>
+        </td>
+    </tr>
+    <tr ng-show="!tasks.length">
+        <td colspan="4">还未安排任务</td>
+    </tr>
+    </tbody>
+</table>
+

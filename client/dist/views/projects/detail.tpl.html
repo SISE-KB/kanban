@@ -1,5 +1,54 @@
-<div>
-  <h4>{{item.name}}<button class="btn" ng-click="edit()" ng-show="isAdmin()">修　改</button></h4>
-    <li ui-sref-active="active"><a ui-sref="projects.list">项目列表</a></li>
-  <div  marked="item.desc"></div>
+<div class="well">
+      <h4>{{item.name}}
+        <button class="btn" ng-click="edit()" ng-show="isAdmin()">修　改</button>
+        <button class="btn" ng-click="list()">列　表</button>
+      </h4>
+      
+      <div class="row">
+            <div class="col-md-6">
+   			    <div>
+					<label>类型:</label>
+					<br>
+                {{item.tags}}
+                </div>
+				<div>
+			 		 <label>技术类型:</label>
+			 		 <br>{{item.catalog}}
+			 	</div>	   
+				<div >
+					<label>项目标签:</label>
+					<br>{{item.tags}}
+				</div>
+				<div >
+					<label>样本:</label>
+					<br>{{item.isSample?'样本':'非样本'}}
+				</div>
+			</div>
+            <div class="col-md-6">
+				<div>
+					<label>产品代表:</label>
+					<br><p ng-repeat="u in users|filter:item.productOwner">{{u.name}}&lt;{{u.mobileNo}}&gt;</p>
+				</div>
+				<div>
+					<label>流程专员:</label>
+					<br><p ng-repeat="u in users|filter:item.procMaster">{{u.name}}&lt;{{u.mobileNo}}&gt;</p>
+				</div>
+				<div >
+			 		   <label>状态:</label>
+			 		   <br>{{item.state}}
+		         </div>
+				 <div>
+                    <label>预计完成时间:</label>
+                    <br>{{item.planDate | date:'yyyy/MM/dd'}}
+  			    </div>
+		
+             </div>
+
+      </div>
+       <div class="row">
+		      <div class="col-md-10">
+				     <label>具体内容</label>
+                    <div  marked="item.desc"></div>
+               </div>
+ 	   </div>
 </div>

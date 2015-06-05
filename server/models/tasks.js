@@ -6,17 +6,7 @@ var mongoose = require('mongoose'),
 
 
 var TaskSchema = new Schema({
- /* title: String,
 
-  planEffort : Number,
-  start : Date ,
-  deadline : Date,
-  state : String,
-  owner : [{type: ObjectId, ref: 'User'} ],
-  spec : String,
-  examiner : [{type: ObjectId, ref: 'User'} ],
-  offset : Number,
-  finishDate  : Date*/
 	 name: String
 	,projectId: ObjectId
 	,backlogId: ObjectId

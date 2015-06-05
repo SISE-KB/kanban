@@ -1,4 +1,4 @@
-var debug = require('debug')('kb:api:project')
+var debug = require('debug')('kb:api:projectS')
 
  var Project=require('../models/projects')
 
@@ -7,12 +7,11 @@ exports.exec = function(req, res) {
    debug("projects API--"+sname )
    switch (sname){
             case "devby":
-			   debug('devby',req.body.userId)
+			   debug('devby',req.body.userId) //todo: state should not close
 	   		   Project.where('teamMembers').in([req.body.userId])
 			   .select('name state').then(function(data){
 	              debug(data)
 				  res.json(data)
-	             //res.json([{name:'P1'}])
 	           })
 	           break  
 			case "mgrby":

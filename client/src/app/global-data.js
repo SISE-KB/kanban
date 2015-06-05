@@ -6,6 +6,26 @@ angular.module('app').factory('globalData', [
         var gData={};
         gData.mgrPrjs=[];
          gData.devPrjs=[];
+         	
+          gData.sendApiRequest=function(req,args){
+			   args=!args?{}:args;
+			   $log.debug(req,args);
+			   return $http.post(apiUrl+req ,args )
+		  	                   .then(function(resp){
+				                     var data=resp.data;
+	 			                     $log.debug('return data:',data);
+				                     return data;
+				               });     
+       	  } ;
+       	  
+       	 gData.toResourcesArray = function (Res,data) {
+			   var rt=[];
+			   if(data&&data.length>0){
+				   for(var i=0;i<data.length;i++)
+					   rt.push(new Res(data[i]));
+				}	   
+               return rt;
+         };
         gData.setCurrentUser=function(user){
 		     gData.currentUser=user;
 		     if(!user) {
