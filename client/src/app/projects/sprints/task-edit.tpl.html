@@ -8,11 +8,17 @@
         <input type="text" ng-model="task.name" class="form-control" required autofocus>
         <label>预计(hs)</label>
         <input type="number" ng-model="task.estimation" class="form-control">
-        <label>剩余(hs)</label>
-        <input type="number" ng-model="task.remaining" class="form-control">
+		<label>负责人</label>
+		<ui-select ng-model="task.assignedUserId" close-on-select="true">
+   　　　　　　　  	<ui-select-match placeholder="请选择 ...">{{$select.selected.name}}</ui-select-match>
+    　　　　　　　		<ui-select-choices repeat="u._id as u in users | filter:$select.search">
+                        {{u.name}}&lt;{{u.mobileNo}}&gt;
+                         </ui-select-choices>
+        </ui-select>
+
      </div> 
     <div class="modal-footer">
-        <button class="btn btn-primary login" ng-click="save" ng-disabled='form.$invalid'>保　存</button>
+        <button class="btn btn-primary login" ng-click="save()" ng-disabled='form.$invalid'>保　存</button>
 
     </div>
 </form>

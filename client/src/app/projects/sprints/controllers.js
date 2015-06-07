@@ -30,17 +30,21 @@ angular.module('controllers.sprints', ['ui.router','ngMessages'
 		})
 
 		.state('sprints.tasks', {
-				url: '/tasks',
+				url: '/tasks/:sprintId',
 				templateUrl: 'views/projects/sprints/tasks.tpl.html',
 				controller: 'TasksCtrl'
 		})	
-		.state('sprints.tasks.edit', {
-				url: '/edit',
+		.state('sprints.task', {
+				url: '/task/:taskId',
+				templateUrl: 'views/projects/sprints/task-edit.tpl.html',
+				controller: 'TasksEditCtrl'
+/*
 				 views: {
-                   '@sprints': {
+                   '@sprints': { 
 				         templateUrl: 'views/projects/sprints/task-edit.tpl.html'
 				      }
-				 }      
+				      
+				 }     */ 
 
 		});	
 	
@@ -88,7 +92,7 @@ angular.module('controllers.sprints', ['ui.router','ngMessages'
 			}
 	    };
 		$scope.doingConfig = {
-			animation: 300,
+			 animation: 200,
              group: {name:'doing', put: ['todo','doing']},
 			 onAdd:function(item){
 			   item.model.sprintId=!$scope.currentSprint?null:$scope.currentSprint._id;
@@ -122,8 +126,8 @@ angular.module('controllers.sprints', ['ui.router','ngMessages'
 			 $scope.$state.go('sprints.view',  $scope.$stateParams);
 		 }
 		  $scope.showTasks= function (sprint) {
-			  globalData.exchange=[ projectId,sprint._id];
-			   $scope.$state.go('sprints.tasks',  $scope.$stateParams);
+			//  globalData.exchange=[ projectId,sprint._id];
+			 $scope.$state.go('sprints.tasks', {projectId:projectId,sprintId:sprint._id});
 			 
 			
 		 }
@@ -139,20 +143,20 @@ angular.module('controllers.sprints', ['ui.router','ngMessages'
   .controller('TasksCtrl', [
              '$scope', '$log',  'Task','globalData',
     function($scope,  $log,     Task,  globalData){
-		//$log.debug(globalData.exchange);
-		var projectId=globalData.exchange[0];
-		var sprintId=globalData.exchange[1];
-		
+		var projectId = $scope.$stateParams.projectId;
+		var sprintId= $scope.$stateParams.sprintId;
+		$log.debug(globalData.exchange);
+				
 		Task.forSprint(sprintId).then(function(ds){
-			   $scope.tasks=ds;
-		       $log.debug('load tasks',ds);
+			$scope.tasks=ds;
+		    $log.debug('load tasks',ds);
 		 });
 		
 
       	$scope.edit = function (task) {
-			$scope.task=task;
-			$log.debug('cur task',$scope.task);
-			$scope.$state.go('sprints.tasks.edit',  $scope.$stateParams);
+			globalData.exchange=task;
+			
+			$scope.$state.go('sprints.task',{projectId:projectId,taskId:task._id}); 
 	    };
 	    $scope.add = function () {
 		    var item=new Task();
@@ -165,21 +169,38 @@ angular.module('controllers.sprints', ['ui.router','ngMessages'
 		    $log.debug('save Task:',item);
 		    
 		};
-		$scope.save = function (task) {
-	       task.$update();
-	       $scope.$state.go('sprints.tasks',  $scope.$stateParams);
-	    }   
+	
 	    $scope.remove = function (task, index, event) {
 			event.stopPropagation();
 			$scope.tasks.splice(index,1);
 			task.$remove();
 		}  
   }])
+.controller('TasksEditCtrl', [
+             '$scope', '$log', 'Project','User','globalData',
+    function($scope,  $log, Project,User,globalData){
+		$scope.task=globalData.exchange;
+		 Project.getById($scope.$stateParams.projectId).then(function(prj){
+			    User.getByObjectIds(prj.teamMembers).then(function(users){
+					   // $scope.users= ds;
+					    $log.debug('load  prj members:',users);
+					    $scope.users= users;
+				  });
+		  });	
+		
+		$scope.save = function () {
+	       $scope.task.$update();
+	       var args=$scope.$stateParams;
+	       args.sprintId=$scope.task._id;
+	       $scope.$state.go('sprints.tasks', args);
+	    }   
+		
+ }])
  .controller('SprintsEditCtrl', [
              '$scope', '$log',  'Sprint','i18nNotifications','globalData',
     function($scope,  $log,     Sprint,    i18nNotifications,globalData){
       $scope.item=globalData.exchange;
-      //globalData.exchange=null;
+
       $log.debug($scope.item);
       var projectId = $scope.$stateParams.projectId;
       

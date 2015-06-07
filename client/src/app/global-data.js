@@ -5,8 +5,9 @@ angular.module('app').factory('globalData', [
         var apiUrl = SERVER_CFG.URL+'/api/';
         var gData={};
         gData.mgrPrjs=[];
-         gData.devPrjs=[];
+        gData.devPrjs=[];
          	
+       	
           gData.sendApiRequest=function(req,args){
 			   args=!args?{}:args;
 			   $log.debug(req,args);

@@ -9,20 +9,24 @@
 </div>
 <!--阶段安排-->
 
-<div id="sprintList"  class="container" >
+<div id="sprintList" >
+	<p>选定版本：{{currentSprint.name}}</p>
 <form ng-submit="addSprint()" novalidate>
   <input type="text" ng-model="newText" 
 	  placeholder="增加新的版本">
 </form>
 <ul class="unstyled col-md-4">
   <li ng-repeat="sprint in sprints | orderBy:'name'">
-    <button class="btn btn-default" ng-click="changeCurSprint(sprint);isCollapsed=!isCollapsed;">{{sprint.name}}</button>
+    <button class="btn btn-default" ng-click="isCollapsed=!isCollapsed;changeCurSprint(sprint);">{{sprint.name}}</button>
     <button class="btn btn-default" ng-click="edit(sprint)">修改</button>
     <button class="btn btn-default" ng-click="showTasks(sprint)">Tasks</button>
     <div collapse="isCollapsed" class="well">
       <div ng-sortable="doingConfig" class="tileList layer tile">
-        <div ng-repeat="item in sprint.items" style="margin-top: 10px"> <a ng-click="showBacklog(item)">{{item.name}}</a>
-          <button class="btn btn-sm btn-info" ng-click="changeBacklogState(item,'DONE')" ng-hide="item.state=='DONE'">申请验收</button>
+        <div ng-repeat="item in sprint.items" style="margin-top: 10px" 
+         ng-class="{'glyphicon glyphicon-ok green':item.state=='OK'}"> <a ng-click="showBacklog(item)">{{item.name}}</a>
+          <button class="btn btn-sm btn-info" ng-click="changeBacklogState(item,'DONE')"
+            
+           ng-show="item.state=='DOING' ">申请验收</button>
         </div>
       </div>
     </div>

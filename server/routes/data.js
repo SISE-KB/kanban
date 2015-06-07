@@ -18,7 +18,7 @@ function likeHandle(obj)
 
 dbRouter
   .route('/:collection/:id?')
-  .get(function (req, res) {
+  .get(function (req, res,next) {
 	  var id=req.params.id
 	  var cname=req.params.collection
 	  
@@ -41,7 +41,7 @@ dbRouter
 	      })
 	  }      
   })
-  .put(function (req, res) {
+  .put(function (req, res,next) {
 	  var id=req.params.id
 	  var cname=req.params.collection
 	  var m=require('../models/'+cname)
