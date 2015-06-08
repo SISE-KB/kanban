@@ -1,7 +1,51 @@
-<div>
-  <h4>{{item.name}}
-  <button class="btn" ng-click="edit()" ng-show="isAdmin()">修　改</button>
-  <button class="btn" ng-click="list()">列　表</button></h4>
-   <img ng-src="uploads/{{item.mobileNo}}/{{item.image}}"  class="img-circle" style="width:160px;height:160px">
-  <div marked="item.desc"></div>
+<div class="well">
+       <h4>{{item.name}}[手机:{{item.mobileNo}}]
+        <button class="btn" ng-click="edit()" ng-show="isAdmin()">修　改</button>
+        <button class="btn" ng-click="list()">列　表</button>
+      </h4>
+      
+      <div class="row">
+            <div class="col-md-6">
+   			    <div>
+				   <img ng-src="uploads/{{item.mobileNo}}/{{item.image}}"  class="img-circle" style="width:160px;height:160px">
+                </div>
+				<div>
+			 		 <label>技术能力:</label>
+			 		 <br>{{item.skills}}
+			 	</div>	   
+				<div >
+					<label>类型:</label>{{item.type}}
+				</div>
+			</div>
+            <div class="col-md-6">
+				<div >
+					<label>管理员？:</label>{{item.isAdmin?'是':'否'}}
+				</div>
+				<div >
+					<label>有效否？:</label>{{item.isActive?'是':'否'}}
+				</div>
+
+				<div>
+					<label>注册日期:</label>
+					<br>{{item.regDate | date:"yyyy-MM-dd"}}
+				</div>
+				<div>
+					<label>性别:</label>{{item.sex}}
+				</div>
+				<div >
+			 		<label>学号:</label>{{item.code}}
+		         </div>
+				 <div>
+                    <label>宿舍:</label>{{item.hostel}}
+  			    </div>
+		
+             </div>
+
+      </div>
+       <div class="row">
+		      <div class="col-md-10">
+				     <label>详细描述</label>
+                    <div  marked="item.desc"></div>
+               </div>
+ 	   </div>
 </div>
