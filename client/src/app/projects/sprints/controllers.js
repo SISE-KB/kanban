@@ -126,7 +126,7 @@ angular.module('controllers.sprints', ['ui.router','ngMessages'
 			 $scope.$state.go('sprints.view',  $scope.$stateParams);
 		 }
 		  $scope.showTasks= function (sprint) {
-			//  globalData.exchange=[ projectId,sprint._id];
+ 			 $scope.currentSprint=sprint;
 			 $scope.$state.go('sprints.tasks', {projectId:projectId,sprintId:sprint._id});
 			 
 			

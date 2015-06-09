@@ -75,10 +75,10 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
   $scope.home = function () {
 	  
 	  if(security.isAuthenticated()){
-	     $scope.$state.go('home')
+	     $scope.$state.go('mytasks')
 	 }
 	  else{
-		    $scope.$state.go('dashboard')
+		 $scope.$state.go('dashboard')
 	 }
   }
  }])
@@ -300,6 +300,7 @@ angular.module('controllers',[
 ,'controllers.sprints'
 ,'controllers.issues'
 ,'controllers.dashboard'
+,'controllers.mytasks'
 ])
 angular.module('resources', [
  'resources.messages'
@@ -307,6 +308,7 @@ angular.module('resources', [
 ,'resources.projects'
 ,'resources.backlogs'
 ,'resources.issues'
+,'resources.tasks'
 ])
 
 angular.module('app')
@@ -556,36 +558,6 @@ angular.module('controllers.issues',
 	}
 ])
 
-angular.module('prj-dashboard', ['ui.router','resources.projects'])
-
-.config(['$stateProvider', function ($stateProvider) {
-  $stateProvider.state('prj-dashboard', {
-    templateUrl:'views/myprojects/prj-dashboard.tpl.html',
-    controller:'ProjectDashboardCtrl',
-  })
-}])
-
-.controller('ProjectDashboardCtrl', [
-          '$http','$scope', 'Project',
-function ($http,$scope,Project) {
-	$scope.projects = [
-	 {_id:1,name:'prj1'}
-	,{_id:2,name:'prj2'}]
-	var baseURL= 'http://localhost:3000/api/'
-  $http.post(baseURL+'project/projectsForUser',{userid:'admin'})
-  .then(function(resp){
-	  console.log('api--',resp.data)
-  })
-  /*Project.all().then(function(prjs){
-	  $scope.projects = prjs
-	  console.log(prjs[0].name)
-  })*/
-  $scope.tasks = [
-      {name:'T1',estimation:2,remaining:1}
-     ,{name:'T2',estimation:6,remaining:4}
-  ]
-}])
-
 angular.module('controllers.messages', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
 , 'directives.dropdownMultiselect'
@@ -710,6 +682,89 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 	}
 ])
 
+angular.module('controllers.mytasks', ['ui.router','ui.calendar','resources.tasks'])
+
+.config(['$stateProvider', function ($stateProvider) {
+  $stateProvider.state('mytasks', {
+    templateUrl:'views/mydashboard/list.tpl.html',
+    controller:'MyDashboardCtrl',
+  })
+}])
+
+.controller('MyDashboardCtrl', 
+        ['$http','$scope','Task','globalData',
+function ($http,  $scope,  Task , globalData) {
+    $scope.projects = globalData.devPrjs;
+	Task.forUser(globalData.currentUser._id).then(function(ds){
+			$scope.tasks = ds;
+		    //$log.debug('load my tasks',ds);
+	});
+
+	$scope.uiConfig = {
+      calendar:{
+        height: 700,
+        editable: true,
+        header:{
+          left: 'prev today next',
+          center: 'title',
+          right: 'month agendaWeek agendaDay'
+        },
+		 buttonText: { //This is to add icons to the visible buttons
+                prev: "前一个",
+                next: "后一个",
+                today: '今日',
+                month: '月',
+                week: '周',
+                day: '天'
+            },
+			editable: true,
+            droppable: true, // this allows things to be dropped onto the calendar !!!
+            drop: function(date, allDay) {
+			  console.log(date,allDay);
+			},
+			eventLimit: true // allow "more" link when too many events
+			
+        //dayClick: $scope.alertEventOnClick,
+        //eventDrop: $scope.alertOnDrop,
+        //eventResize: $scope.alertOnResize
+      }
+    };
+	 var date = new Date();
+     var d = date.getDate(),
+            m = date.getMonth(),
+            y = date.getFullYear();
+	$scope.uiConfig.calendar.events= [
+			{
+                title: 'All Day Event',
+                start: new Date(y, m, 1),
+                backgroundColor: "#f56954", //red
+                borderColor: "#f56954" //red
+            }, {
+                title: 'Long Event',
+                start: new Date(y, m, d - 5),
+                end: new Date(y, m, d - 2),
+                backgroundColor: "#f39c12", //yellow
+                borderColor: "#f39c12" //yellow
+            }, {
+                title: 'Meeting',
+                start: new Date(y, m, d, 10, 30),
+                allDay: false,
+                backgroundColor: "#0073b7", //Blue
+                borderColor: "#0073b7" //Blue
+            },
+			{
+					id: 999,
+					title: 'Repeating Event',
+					start: '2015-06-08T10:00:00'
+			},
+			{
+					id: 999,
+					title: 'Repeating Event',
+					start: '2015-06-15T10:00:00'
+			}];
+	
+}])
+
 angular.module('resources.backlogs', ['mongoResourceHttp'])
 .factory('Backlog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
   var res = $mongoResourceHttp('backlogs');
@@ -814,7 +869,7 @@ angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', functio
 
   var res = $mongoResourceHttp('tasks');
 
-  //res.statesEnum = ['TODO', 'IN_DEV', 'BLOCKED', 'IN_TEST', 'DONE'];
+  //res.statesEnum = ['TODO', 'DOING', 'BLOCKED', 'TEST', 'DONE', 'OK'];
 
   res.forSprint= function (sprintId,state) {
 	  var q={sprintId:sprintId};
@@ -822,7 +877,11 @@ angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', functio
       return res.query(q,{strict:true});
   }
   res.forProject = function (projectId) {
-    return Task.query({projectId:projectId});
+    return res.query({projectId:projectId},{strict:true});
+  };
+  
+  res.forUser = function (userId) {
+    return res.query({assignedUserId:userId},{strict:true});
   };
 
   return res;
@@ -1253,7 +1312,7 @@ angular.module('controllers.sprints', ['ui.router','ngMessages'
 			 $scope.$state.go('sprints.view',  $scope.$stateParams);
 		 }
 		  $scope.showTasks= function (sprint) {
-			//  globalData.exchange=[ projectId,sprint._id];
+ 			 $scope.currentSprint=sprint;
 			 $scope.$state.go('sprints.tasks', {projectId:projectId,sprintId:sprint._id});
 			 
 			

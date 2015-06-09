@@ -39,7 +39,9 @@ gulp.task('copy-static', function () {
       gulp.src('libs/angular-marked.js'),
       gulp.src('libs/Sortable.js'),
       gulp.src('libs/ng-sortable.js'),
-      gulp.src('libs/ng-droplet.js')
+      gulp.src('libs/ng-droplet.js'),
+	  gulp.src('libs/fullcalendar.min.js'),
+	  gulp.src('libs/calendar.js')
    )
    .pipe(gulp.dest('dist')),
    merge(

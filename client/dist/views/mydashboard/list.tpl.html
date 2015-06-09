@@ -19,7 +19,6 @@
         <th class="col-md-8">Name</th>
         <th class="col-md-1">Estimation</th>
         <th class="col-md-1">Remaining</th>
-        <th class="col-md-2">Tools</th>
      </tr>
      </thead>
     <tbody>
@@ -27,8 +26,6 @@
         <td>{{task.name}}</td>
         <td>{{task.estimation}}</td>
         <td>{{task.remaining}}</td>
-        <td>add|Delete</td>
-        <td></td>
     </tr>
     <tr ng-show="!tasks.length">
         <td colspan="4">没有任务分贝给你！</td>
@@ -37,6 +34,7 @@
    </table>
   
   </div>
+  <div ui-calendar="uiConfig.calendar" ng-model="eventSources"></div>
 </div>
 
 

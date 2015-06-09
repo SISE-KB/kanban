@@ -6,6 +6,7 @@ angular.module('controllers',[
 ,'controllers.sprints'
 ,'controllers.issues'
 ,'controllers.dashboard'
+,'controllers.mytasks'
 ])
 angular.module('resources', [
  'resources.messages'
@@ -13,6 +14,7 @@ angular.module('resources', [
 ,'resources.projects'
 ,'resources.backlogs'
 ,'resources.issues'
+,'resources.tasks'
 ])
 
 angular.module('app')

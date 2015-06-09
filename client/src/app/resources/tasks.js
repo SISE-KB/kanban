@@ -3,7 +3,7 @@ angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', functio
 
   var res = $mongoResourceHttp('tasks');
 
-  //res.statesEnum = ['TODO', 'IN_DEV', 'BLOCKED', 'IN_TEST', 'DONE'];
+  //res.statesEnum = ['TODO', 'DOING', 'BLOCKED', 'TEST', 'DONE', 'OK'];
 
   res.forSprint= function (sprintId,state) {
 	  var q={sprintId:sprintId};
@@ -11,7 +11,11 @@ angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', functio
       return res.query(q,{strict:true});
   }
   res.forProject = function (projectId) {
-    return Task.query({projectId:projectId});
+    return res.query({projectId:projectId},{strict:true});
+  };
+  
+  res.forUser = function (userId) {
+    return res.query({assignedUserId:userId},{strict:true});
   };
 
   return res;

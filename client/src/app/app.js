@@ -75,10 +75,10 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
   $scope.home = function () {
 	  
 	  if(security.isAuthenticated()){
-	     $scope.$state.go('home')
+	     $scope.$state.go('mytasks')
 	 }
 	  else{
-		    $scope.$state.go('dashboard')
+		 $scope.$state.go('dashboard')
 	 }
   }
  }])

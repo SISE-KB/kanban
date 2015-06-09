@@ -47,14 +47,16 @@ dbRouter
 	  var m=require('../models/'+cname)
 	  if(!!id) {
 		  debug('UPDATE',req.body);
+		 // delete req.body._id;
     	 var q=m.findById(id).lean(false);
-		q.exec(function(err,doc){
+		 q.exec(function(err,doc){
 			  if(err) throw err;
 			  for( var p in req.body)
 				  doc[p]=req.body[p];
 			  doc.save();
+			  debug(doc);
 			  res.json(req.body);
-	      });
+	     });
 		  
 	  }else {
 		res.json({err:'invalid id'})
