@@ -19,10 +19,15 @@
                     <input type="text"  name="name" ng-model="item.name" class="form-control">
                      <br>
                 </div>
-                <div class="form-group">
-                    <label>头像文件名</label>
-                    <input type="text"  name="name" ng-model="item.image" class="form-control">
-                     <br>
+				<div>
+				<img ng-src="uploads/{{item.mobileNo}}/{{item.image}}"  class="img-circle" style="width:160px;height:160px">
+				</div>
+                <div class="form-group" ng-if="!isNew">
+				     <label>头像文件名</label>
+					 <div>
+				       <dropdown-select ng-model="item.image" options="imgs"></dropdown-select>
+			         </div>
+   	                 <br>
                 </div>
                 <div class="form-group">
                     <label>密码</label>

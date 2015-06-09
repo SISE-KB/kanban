@@ -1,6 +1,6 @@
 angular.module('controllers.users', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
-, 'directives.dropdownMultiselect'
+, 'directives.dropdownSelect'
 , 'resources.users'])  
 .controller('UsersMainCtrl',   [
                'crudContrllersHelp','$scope', '$state', '$stateParams', 
@@ -34,11 +34,11 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 .controller('UsersCreateCtrl',   [
                 '$scope', 'User',
 	function (  $scope,   User) {
-		$scope.item = new User()
-		$scope.item.isActive=true
-		$scope.item.isAdmin=false
-		$scope.isNew=true
-		$scope.checkDate($scope.item)
+		$scope.item = new User();
+		$scope.item.isActive=true;
+		$scope.item.isAdmin=false;
+		$scope.isNew=true;
+		$scope.checkDate($scope.item);
 		$scope.item.desc=
 "expressjs/multer [![NPM version](https://badge.fury.io/js/multer.svg)](https://badge.fury.io/js/multer)\r\n"
 +"\r\n"
@@ -63,16 +63,21 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 +"```\r\n"
 +"\r\n"
 +"\r\n"
-+"**IMPORTANT**: Multer will not process any form which is not `multipart/form-data`."
++"**IMPORTANT**: Multer will not process any form which is not `multipart/form-data`.";
 	}
 ])
 
 .controller('UsersEditCtrl',   [
-                '$scope', '$stateParams', '$state',
-	function (  $scope,   $stateParams,   $state) {
-		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.checkDate($scope.item)
+                '$scope', '$http','SERVER_CFG', 
+	function (  $scope,$http,SERVER_CFG ) {
+		$scope.item = $scope.findById( $scope.$stateParams.itemId);
+		$scope.checkDate($scope.item);
+		var url = SERVER_CFG.URL+'/images/'+$scope.item.mobileNo;
 		$scope.isNew=false
+		$http.get(url).then(function(reps){
+		   $scope.imgs=reps.data;
+		   //console.log($scope.imgs);
+		});
 	
 	}
-])
+]);

@@ -19,11 +19,12 @@ exports.addRoutes = function(app, config) {
     // Just send the index.html for other files to support HTML5Mode
     res.sendFile('favicon.ico', { root: config.server.distFolder });
      });
-     /*
-	app.get('/images', function(req, res) {
-		var files=fs.readdirSync(uploadDir);
+     
+	app.get('/images/:userMobileNo', function(req, res) {
+		var userMobileNo=req.params.userMobileNo
+		var files=fs.readdirSync(uploadDir+'/'+userMobileNo);
 		res.json(files);
-	})*/
+	})
 
    app.post('/upload/:userMobileNo', function(request, response) {
         var count = request.files.file.length;
