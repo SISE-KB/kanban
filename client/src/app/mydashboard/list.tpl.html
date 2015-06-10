@@ -1,17 +1,36 @@
 <div class="row">
  <div class="col-md-3">
-	<h4>我的项目</h4> 
+	<!--<h4>我的项目</h4> 
     <div class="well well-small">
       <ul class="nav nav-list">
         <li ng-repeat="prj in projects" ui-sref-active="active">
            <span>{{prj.name}}</span> 
         </li>
       </ul>
+    </div>-->
+
+    <div  style="text-align: center;">
+            <ul >
+              <li   ng-repeat="image in images">
+                  <div ><img ng-src="{{image.thumb}}"/></div>
+                   <p>
+					   <div class="btn btn-droppable" data-drop="true" ng-model='list1' 
+					   jqyoui-droppable="{index: {{$index}}, onDrop:'dropCallback',onOver: 'overCallback', onOut: 'outCallback'}">
+                      <div class="btn btn-info btn-draggable" ng-show="list1[$index].title" 
+                        data-drag="{{list1[$index].drag}}" 
+                        data-jqyoui-options="{revert: 'invalid'}" 
+                        ng-model="list1" 
+                        jqyoui-draggable="{index: {{$index}},placeholder:true,animate:true}">{{list1[$index].title}}</div>
+                   </div></p>
+                 </div>
+              </li>
+            </ul>
     </div>
-  </div>
+ </div>
 
   <!-- Our unnamed main ui-view for this template -->
   <div class="col-md-9 ">
+	  <!--
 	  <h4>我的任务</h4>
      <table class="table table-bordered table-condensed table-striped table-hover">
      <thead>
@@ -31,10 +50,12 @@
         <td colspan="4">没有任务分贝给你！</td>
     </tr>
     </tbody>
-   </table>
-  
+   </table>-->
+
+     <div ui-calendar="uiConfig.calendar" ng-model="eventSources"></div>
   </div>
-  <div ui-calendar="uiConfig.calendar" ng-model="eventSources"></div>
+
+
 </div>
 
 

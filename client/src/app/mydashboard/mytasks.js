@@ -10,6 +10,45 @@ angular.module('controllers.mytasks', ['ui.router','ui.calendar','resources.task
 .controller('MyDashboardCtrl', 
         ['$http','$scope','Task','globalData',
 function ($http,  $scope,  Task , globalData) {
+        $scope.images = [{'thumb': 'img/1.jpg'},{'thumb': 'img/2.jpg'},{'thumb': 'img/3.jpg'},{'thumb': 'img/4.jpg'}];
+        $scope.list1 = [];
+        angular.forEach($scope.images, function(val, key) {
+          $scope.list1.push({});
+        });
+        $scope.list2 = [
+          { 'title': 'Item 1', 'drag': true },
+          { 'title': 'Item 2', 'drag': true },
+          { 'title': 'Item 3', 'drag': true },
+          { 'title': 'Item 4', 'drag': true }
+        ];
+
+        $scope.startCallback = function(event, ui, title) {
+          console.log('You started draggin: ' + title.title);
+          $scope.draggedTitle = title.title;
+        };
+
+        $scope.stopCallback = function(event, ui) {
+          console.log('Why did you stop draggin me?');
+        };
+
+        $scope.dragCallback = function(event, ui) {
+          console.log('hey, look I`m flying');
+        };
+
+        $scope.dropCallback = function(event, ui) {
+          console.log('hey, you dumped me :-(' , $scope.draggedTitle);
+        };
+
+        $scope.overCallback = function(event, ui) {
+          console.log('Look, I`m over you');
+        };
+
+        $scope.outCallback = function(event, ui) {
+          console.log('I`m not, hehe');
+        };
+
+      
+      
     $scope.projects = globalData.devPrjs;
 	Task.forUser(globalData.currentUser._id).then(function(ds){
 			$scope.tasks = ds;

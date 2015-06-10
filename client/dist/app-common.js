@@ -904,7 +904,6 @@ function($parse, $stateParams,   $state) {
   };
 }]);
 
-angular.module('security.login', ['security.login.form', 'security.login.toolbar']);
 angular.module('security.login.form', ['services.localizedMessages'])
 
 // The LoginFormController provides the behaviour behind a reusable form to allow users to authenticate.
@@ -953,6 +952,7 @@ angular.module('security.login.form', ['services.localizedMessages'])
   };
 }]);
 
+angular.module('security.login', ['security.login.form', 'security.login.toolbar']);
 angular.module('security.login.toolbar', [])
 
 // The loginToolbar directive is a reusable widget that can show login or logout buttons
