@@ -20,19 +20,19 @@ exports.addRoutes = function(app, config) {
     res.sendFile('favicon.ico', { root: config.server.distFolder });
      });
      
-	app.get('/images/:userMobileNo', function(req, res) {
-		var userMobileNo=req.params.userMobileNo
-		var files=fs.readdirSync(uploadDir+'/'+userMobileNo);
+	app.get('/images/:userCode', function(req, res) {
+		var userCode=req.params.userCode
+		var files=fs.readdirSync(uploadDir+'/'+userCode);
 		res.json(files);
 	})
 
-   app.post('/upload/:userMobileNo', function(request, response) {
+   app.post('/upload/:userCode', function(request, response) {
         var count = request.files.file.length;
-        var userMobileNo=request.params.userMobileNo
+        var userCode=request.params.userCode
 		var files=[];
 
-		if(!fs.existsSync(uploadDir+'/'+userMobileNo)){//不存在就创建一个
-            fs.mkdirSync(uploadDir+'/'+userMobileNo, 0755);
+		if(!fs.existsSync(uploadDir+'/'+userCode)){//不存在就创建一个
+            fs.mkdirSync(uploadDir+'/'+userCode, 0755);
         }
 		if(!count) {
 			 var fn=request.files.file.name;
@@ -40,14 +40,14 @@ exports.addRoutes = function(app, config) {
 			 console.log(oldFn,fn);
 			 files.push(oldFn);
 			 fs.renameSync(uploadDir+'/'+fn,
-			                  uploadDir+'/'+userMobileNo+'/'+oldFn);
+			                  uploadDir+'/'+userCode+'/'+oldFn);
 		}	                  
 		else for(var i=0;i<count;i++){
 			 var fn=request.files.file[i].name;
 			 var oldFn=request.files.file[i].originalname;
 		     files.push(oldFn);
 		     fs.renameSync(uploadDir+'/'+fn,
-			                  uploadDir+'/'+userMobileNo+'/'+oldFn);
+			                  uploadDir+'/'+userCode+'/'+oldFn);
 		}
 		
         response.status(200).send(JSON.stringify({ success: true, fileCount: count,names:files }));

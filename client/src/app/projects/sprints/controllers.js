@@ -164,9 +164,12 @@ angular.module('controllers.sprints', ['ui.router','ngMessages'
 		    item.state='TODO';
 		    item.projectId=projectId;
 		    item.sprintId=sprintId;
-		    item.$save();
-		    $scope.tasks.push(item);
-		    $log.debug('save Task:',item);
+		    item.$save().then(function(data){
+			  $scope.tasks.push(data); 
+			  $log.debug('save Task:',data);
+			});
+		    
+		   
 		    
 		};
 	
@@ -179,20 +182,30 @@ angular.module('controllers.sprints', ['ui.router','ngMessages'
 .controller('TasksEditCtrl', [
              '$scope', '$log', 'Project','User','globalData',
     function($scope,  $log, Project,User,globalData){
-		$scope.task=globalData.exchange;
+	   // var tasks=globalData.exchange[0];
+		 $scope.task=globalData.exchange;
+		 if(!$scope.task) $log.debug('not ID',$scope.task);
 		 Project.getById($scope.$stateParams.projectId).then(function(prj){
-			    User.getByObjectIds(prj.teamMembers).then(function(users){
-					   // $scope.users= ds;
-					    $log.debug('load  prj members:',users);
-					    $scope.users= users;
-				  });
+			User.getByObjectIds(prj.teamMembers).then(function(users){
+				$log.debug('load  prj members:',users);
+				$scope.users= users;
+			});
 		  });	
 		
 		$scope.save = function () {
-	       $scope.task.$update();
-	       var args=$scope.$stateParams;
-	       args.sprintId=$scope.task._id;
-	       $scope.$state.go('sprints.tasks', args);
+		  // $log.debug('before save:',$scope.task);
+	       $scope.task.$update()
+		   .then(function(data){
+		       $scope.task=data;
+			  // $log.debug('after save:',data);
+			  var args={projectId:$scope.$stateParams.projectId};
+	          args.sprintId=$scope.task.sprintId;
+			 // globalData.removeItemFromArray(tasks,$scope.task);
+			 // tasks.push(data);
+	          $scope.$state.go('sprints.tasks', args);
+		   });
+		   
+	      
 	    }   
 		
  }])

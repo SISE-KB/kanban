@@ -16,22 +16,18 @@
 			 		 <br>{{item.catalog}}
 			 	</div>	   
 				<div >
-					<label>项目标签:</label>
+					<label>搜索关键字:</label>
 					<br>{{item.tags}}
-				</div>
-				<div >
-					<label>样本:</label>
-					<br>{{item.isSample?'样本':'非样本'}}
 				</div>
 			</div>
             <div class="col-md-6">
 				<div>
 					<label>产品代表:</label>
-					<br><p ng-repeat="u in users|filter:item.productOwner">{{u.name}}&lt;{{u.mobileNo}}&gt;</p>
+					<br><p ng-repeat="u in users|filter:item.productOwnerId">{{u.name}}&lt;{{u.mobileNo}}&gt;</p>
 				</div>
 				<div>
-					<label>流程专员:</label>
-					<br><p ng-repeat="u in users|filter:item.procMaster">{{u.name}}&lt;{{u.mobileNo}}&gt;</p>
+					<label>开发组长:</label>
+					<br><p ng-repeat="u in users|filter:item.devMasterId">{{u.name}}&lt;{{u.mobileNo}}&gt;</p>
 				</div>
 				<div >
 			 		   <label>状态:</label>

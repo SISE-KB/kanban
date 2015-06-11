@@ -22,7 +22,7 @@
 			<div class="tileList" ng-sortable="todoConfig">
 					<div ng-repeat="item in todoItems"  >
 						<h4><span class="label label--info" >
-							<a ng-click="edit(item)">({{item.estimation}}mh)-{{item.name|trim:18}}</a>
+							<a ng-click="edit(item)">({{item.priority}})-{{item.name|trim:18}}</a>
 						</span></h4>
 						 
 					</div>
@@ -33,7 +33,7 @@
 				<div  class="tileList" ng-sortable="doingConfig">
 					<div   ng-repeat="item in doingItems" >
 						<h4><span class="label label-warning">
-							<a ng-click="edit(item)">({{item.estimation}}mh)-{{item.name|trim:18}}</a>
+							<a ng-click="edit(item)">({{item.priority}})-{{item.name|trim:18}}</a>
 						</span></h4>
 					</div>
 				</div>
@@ -43,7 +43,7 @@
 				<div class="tileList" ng-sortable="doneConfig">
 					<div  ng-repeat="item in doneItems" >
 						<h4><span class="label label-success">
-							<a ng-click="edit(item)">({{item.estimation}}mh)-{{item.name|trim:18}}</a>
+							<a ng-click="edit(item)">({{item.priority}})-{{item.name|trim:18}}</a>
 						</span></h4>
 					</div>
 				</div>
@@ -53,7 +53,7 @@
 				<div class="tileList" ng-sortable="okConfig">
 					<div  ng-repeat="item in okItems" class="col-md-6">
 						<h3><span class="label label-success">
-							<a ng-click="edit(item)">({{item.estimation}}mh)-{{item.name|trim:18}}</a>
+							<a ng-click="edit(item)">({{item.priority}})-{{item.name|trim:20}}</a>
 						</span></h3>
 					</div>
 				</div>

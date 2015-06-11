@@ -15,7 +15,7 @@ function ($scope, $timeout,currentUser) {
         $scope.$on('$dropletReady', function whenDropletReady() {
             $scope.interface.allowedExtensions(['png', 'jpg', 'gif','ppt', 'doc', 'docx']);
            // console.log($scope.currentUser);
-            $scope.interface.setRequestUrl('upload'+'/'+currentUser.mobileNo);
+            $scope.interface.setRequestUrl('upload'+'/'+currentUser.code);
             $scope.interface.defineHTTPSuccess([/2.{2}/]);
             $scope.interface.useArray(false);
         });

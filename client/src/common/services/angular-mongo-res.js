@@ -56,7 +56,7 @@ function ($http, $q,SERVER_CFG) {
         Resource.all = function (options, successcb, errorcb) {
             return Resource.query({}, options || {});
         };
-
+/*
         Resource.count = function (queryJson) {
             return $http.get(collectionUrl, {
                 params: angular.extend({}, defaultParams, preparyQueryParam(queryJson), {c: true})
@@ -64,7 +64,7 @@ function ($http, $q,SERVER_CFG) {
                 return response.data;
             });
         };
-/*
+
         Resource.distinct = function (field, queryJson) {
             return $http.post(dbUrl + '/runCommand', angular.extend({}, queryJson || {}, {
                 distinct: collectionName,
@@ -85,11 +85,8 @@ function ($http, $q,SERVER_CFG) {
                  return Resource.query({_id: {$in: ids}},{strict:true});
         };
         Resource.prototype.$id = function () {
-            if (this._id && this._id.$oid) {
-                return this._id.$oid;
-            } else if (this._id) {
-                return this._id;
-            }
+           return this._id;
+            
         };
  
 
@@ -98,16 +95,20 @@ function ($http, $q,SERVER_CFG) {
         };
 
         Resource.prototype.$update = function () {
-            return  $http.put(collectionUrl + "/" + this.$id(), angular.extend({}, this, {_id: undefined}), {params: defaultParams})
+		  /*  if(!this._id) {
+			   console.log("update by null id!");
+			   return this;
+			}*/
+            return  $http.put(collectionUrl + "/" + this._id, angular.extend({}, this), {params: defaultParams})
                 .then(resourceRespTransform);
         };
 
         Resource.prototype.$saveOrUpdate = function () {
-            return this.$id() ? this.$update() : this.$save();
+            return this._id ? this.$update() : this.$save();
         };
 
         Resource.prototype.$remove = function () {
-            return $http['delete'](collectionUrl + "/" + this.$id(), {params: defaultParams}).then(resourceRespTransform);
+            return $http['delete'](collectionUrl + "/" + this._id, {params: defaultParams}).then(resourceRespTransform);
         };
 
 

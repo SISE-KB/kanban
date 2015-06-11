@@ -4,39 +4,32 @@ angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', f
   var Project = $mongoResourceHttp('projects');
 
   Project.forProductMgr = function(userId) {
-    //return Project.query({}, successcb, errorcb);
-	return Project.query({productOwner:userId},{strict:true});
+	return Project.query({productOwnerId:userId},{strict:true});
   };
 
   Project.prototype.isProductOwner = function (userId) {
-    return this.productOwner === userId;
+    return this.productOwnerId === userId;
   };
-  Project.prototype.canActAsProductOwner = function (userId) {
-    return !this.isScrumMaster(userId) && !this.isDevTeamMember(userId);
+
+  Project.prototype.isDevMaster = function (userId) {
+    return this.devMasterId === userId;
   };
-  Project.prototype.isScrumMaster = function (userId) {
-    return this.processMaster === userId;
-  };
-  Project.prototype.canActAsScrumMaster = function (userId) {
-    return !this.isProductOwner(userId);
-  };
+
   Project.prototype.isDevTeamMember = function (userId) {
     return this.teamMembers.indexOf(userId) >= 0;
   };
-  Project.prototype.canActAsDevTeamMember = function (userId) {
-    return !this.isProductOwner(userId);
-  };
+
 
   Project.prototype.getRoles = function (userId) {
     var roles = [];
     if (this.isProductOwner(userId)) {
-      roles.push('PO');
+      roles.push('产品经理');
     } else {
-      if (this.isScrumMaster(userId)){
-        roles.push('SM');
+      if (this.isDevMaster(userId)){
+        roles.push('开发组长');
       }
       if (this.isDevTeamMember(userId)){
-        roles.push('DEV');
+        roles.push('开发成员');
       }
     }
     return roles;

@@ -46,8 +46,9 @@ dbRouter
 	  var cname=req.params.collection
 	  var m=require('../models/'+cname)
 	  if(!!id) {
-		  debug('UPDATE',req.body);
-		 // delete req.body._id;
+		  debug('UPDATE',id);
+		  debug(req.body);
+		  delete req.body._id;
     	 var q=m.findById(id).lean(false);
 		 q.exec(function(err,doc){
 			  if(err) throw err;

@@ -8,7 +8,7 @@ angular.module('controllers.issues',
 .controller('IssuesMainCtrl',   [
                'crudContrllersHelp','$scope','$state',   '$stateParams',  '$log','Project','User','globalData',
 	function ( crudContrllersHelp,$scope,   $state,   $stateParams,  $log, Project,User,globalData) {
-	   crudContrllersHelp.initMain('Issue','name',$scope,   $state,   $stateParams)
+	   crudContrllersHelp.initMain('Issue','name','name',$scope);
        if(!globalData.exchangeData){
 				 $scope.users =[];
 	   }else{
@@ -33,13 +33,13 @@ angular.module('controllers.issues',
 .controller('IssuesListCtrl',   [
                  'crudContrllersHelp','$scope', '$state', '$stateParams', 
 	function ( crudContrllersHelp, $scope,   $state,   $stateParams) {
-		crudContrllersHelp.initList('Issue','name',$scope,   $state,   $stateParams)
+		crudContrllersHelp.initList('Issue','name','name',$scope);
 	}
 ])
 .controller('IssuesDetailCtrl',   [
                  'crudContrllersHelp','$scope','$stateParams', '$state',
 	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
-		crudContrllersHelp.initDetail('Issue','name',$scope,   $state,   $stateParams)
+		crudContrllersHelp.initDetail('Issue','name','name',$scope);
 	}
 ])
 

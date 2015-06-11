@@ -28,7 +28,7 @@ angular.module('controllers.users')
     }
   }
 })
-.directive('uniqueMobileNo', [
+.directive('uniqueCode', [
             "$http","SERVER_CFG",
  function ($http,SERVER_CFG) {
   return {
@@ -39,11 +39,11 @@ angular.module('controllers.users')
       ctrl.$parsers.push(function (viewValue) {
         if (viewValue) {
 		  	var baseURL= SERVER_CFG.URL+'/api/'
-		  	$http.post(baseURL+'users/uniqueMobileNo',{mobileNo:viewValue})
+		  	$http.post(baseURL+'users/uniqueCode',{code:viewValue})
 		  	.then(function(resp){
-				  var uniqueMobileNo=resp.data.uniqueMobileNo
-				 //console.log('users/uniqueMobileNo--',uniqueMobileNo)
-				 ctrl.$setValidity('uniqueMobileNo', uniqueMobileNo )
+				 var result=resp.data.uniqueCode
+				 console.log('users/uniqueCode--',result)
+				 ctrl.$setValidity('uniqueCode', result )
           })
           return viewValue
         }

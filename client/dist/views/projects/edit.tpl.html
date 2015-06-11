@@ -25,7 +25,7 @@
 					</div>
 					<div class="form-group">
 						<label>产品经理</label>
-						<ui-select ng-model="item.productOwner" close-on-select="true">
+						<ui-select ng-model="item.productOwnerId" close-on-select="true">
    　　　　　　　　　  	<ui-select-match placeholder="请选择 ...">{{$select.selected.name}}</ui-select-match>
     　　　　　　　　　		<ui-select-choices repeat="u._id as u in users | filter:$select.search">
                         {{u.name}}&lt;{{u.mobileNo}}&gt;
@@ -35,7 +35,7 @@
 				    </div>
 				   	<div class="form-group">
 						<label>开发组长</label>
-						<ui-select ng-model="item.procMaster" close-on-select="true">
+						<ui-select ng-model="item.devMasterId" close-on-select="true">
    　　　　　　　　　  	<ui-select-match placeholder="请选择 ...">{{$select.selected.name}}</ui-select-match>
     　　　　　　　　　		<ui-select-choices repeat="u._id as u in users | filter:$select.search">
                         {{u.name}}&lt;{{u.mobileNo}}&gt;
@@ -56,11 +56,7 @@
                         </ui-select>
                         <br>
 				    </div>
-					<div class="from-group" ng-if="!isNew">
-					  <label>是否样本？</label>
-					  <input type="checkbox" ng-model="item.isSample">
-					  <br>
-					</div>
+	
 					<div class="form-group">
 					  <label>迭代时间间隔(默认4周)</label>
 					  <input type="number" class="form-control" ng-model="item.iterationDuration">

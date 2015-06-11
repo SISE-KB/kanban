@@ -14,8 +14,10 @@ angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', functio
     return res.query({projectId:projectId},{strict:true});
   };
   
-  res.forUser = function (userId) {
-    return res.query({assignedUserId:userId},{strict:true});
+  res.forUser = function (userId,state) {
+      var q={assignedUserId:userId};
+	  if(!!state) q.state=state;
+      return res.query(q,{strict:true});
   };
 
   return res;

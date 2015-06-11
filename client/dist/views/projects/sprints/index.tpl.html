@@ -1,8 +1,8 @@
 
-<div  class="container well"> <strong >未安排交付件列表--{{todoBacklogs.length}}</strong>
+<div  class="well"> <strong >未安排交付件列表--{{todoBacklogs.length}}</strong>
   <div class="tileList" ng-sortable="todoConfig">
     <div  ng-repeat="item in todoBacklogs"  class="col-md-3"> 
-		  <span class="badge col-md-2">{{item.priority}}</span> 
+		  <span class="badge col-md-1">{{item.priority}}</span> 
 		  <span>{{item.name}}</span> 
 	</div>
   </div>

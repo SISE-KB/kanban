@@ -2,8 +2,9 @@ angular.module('app')
 .factory('crudContrllersHelp', [
           '$injector',
 function ($injector) {
- var initMain = function (ResName,searchField,$scope,   $state,   $stateParams) {
-
+ var initMain = function (ResName,searchField,notifyField,$scope) {
+       var   $state=$scope.$state,  
+   	         $stateParams=$scope.$stateParams;
 		var Res = $injector.get(ResName);
 		var i18nNotifications = $injector.get('i18nNotifications');
 
@@ -47,7 +48,7 @@ function ($injector) {
 				$scope.visited.shift()
 		}
 		$scope.onSave = function (item) {
-			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item[searchField]})
+			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item[notifyField]})
 			//console.log($state.current.name)
 			var idx=$state.current.name.indexOf('create')
 			//console.log(idx)
@@ -60,14 +61,17 @@ function ($injector) {
 			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
 		}
 		$scope.onRemove = function(item) {
-			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item[searchField]})
+			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item[notifyField]})
 			$scope.removeFromArray($scope._data,item)
 			$scope.removeFromArray($scope.visited,item)
 			$state.go(ressName+'.list', $stateParams) 
 		}
 	
   }
-var initList = function (ResName,nameField,$scope,   $state,   $stateParams) {
+var initList = function (ResName,searchField,notifyField,$scope) {
+       var   $state=$scope.$state,  
+   	         $stateParams=$scope.$stateParams;
+			 
 		var i18nNotifications = $injector.get('i18nNotifications')
 		var Res = $injector.get(ResName)
 
@@ -101,7 +105,7 @@ var initList = function (ResName,nameField,$scope,   $state,   $stateParams) {
 			item.$remove().then(function() {
 				$scope.onRemove(item)
 			}, function() {
-				i18nNotifications.pushForCurrentRoute('crud.user.remove.error', 'danger', {id : item[nameField]})
+				i18nNotifications.pushForCurrentRoute('crud.user.remove.error', 'danger', {id : item[notifyField]})
 			})
 		}
 		var ressName=Res.getName(false,false)
@@ -116,7 +120,9 @@ var initList = function (ResName,nameField,$scope,   $state,   $stateParams) {
 		}
 		
 }
-var initDetail = function (ResName,nameField,$scope,   $state,   $stateParams) {
+var initDetail = function (ResName,searchField,notifyField,$scope) {
+        var   $state=$scope.$state,  
+   	         $stateParams=$scope.$stateParams;
 		var i18nNotifications = $injector.get('i18nNotifications')
 		var Res = $injector.get(ResName)
 		$scope.item = $scope.findById( $stateParams.itemId)

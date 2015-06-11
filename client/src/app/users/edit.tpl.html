@@ -3,32 +3,45 @@
         <legend>修改信息</legend>
         <div class="row">
             <div class="col-md-6">
-                <div class="form-group"  >
-                    <label>手机号</label>
-                    <input type="text" ng-disabled="!isNew" name="mobileNo" class="form-control" ng-model="item.mobileNo" required ng-minlength="3" ng-maxlength="12" unique-mobile-no autofocus>
-          			 <ng-messages for="form.mobileNo.$error" multiple  style="color:red;">
+			    <div class="form-group" ng-if="isNew"  >
+                    <label>帐号(学生用学号，老师用工号)</label>
+                    <input type="text" name="code" class="form-control" ng-model="item.code" required ng-minlength="3" ng-maxlength="10" unique-code autofocus>
+          			 <ng-messages for="form.code.$error" style="color:red;">
 					   <ng-message when="required">必须输入！</ng-message>
+					   <ng-message when="uniqueCode">该号已被占用，请重新输入！</ng-message>
 					   <ng-message when="minlength">不能少于3个字符</ng-message>
-					   <ng-message when="maxlength">不能多于12个字符</ng-message>
-					   <ng-message when="uniqueMobileNo">该号已被占用，请重新输入！</ng-message>
-					</ng-messages>
+					   <ng-message when="maxlength">不能多于10个字符</ng-message>
+					 </ng-messages>
 					 <br>
                 </div>
-                <div class="form-group">
-                    <label>昵称</label>
+				<div class="form-group">
+                    <label>姓名</label>
                     <input type="text"  name="name" ng-model="item.name" class="form-control">
                      <br>
                 </div>
-				<div>
-				<img ng-src="uploads/{{item.mobileNo}}/{{item.image}}"  class="img-circle" style="width:160px;height:160px">
+                <div class="form-group"  >
+                    <label>手机号</label>
+                    <input type="text" name="mobileNo" class="form-control" ng-model="item.mobileNo" required ng-minlength="6" ng-maxlength="12" autofocus>
+          			 <ng-messages for="form.mobileNo.$error" multiple  style="color:red;">
+					   <ng-message when="required">必须输入！</ng-message>
+					   <ng-message when="minlength">不能少于6个数字</ng-message>
+					   <ng-message when="maxlength">不能多于12个数字</ng-message>
+					</ng-messages>
+					 <br>
+                </div>
+
+				<div ng-if="!isNew">
+				  <img ng-src="uploads/{{item.code}}/{{item.image}}"  class="img-circle" style="width:160px;height:160px">
 				</div>
-                <div class="form-group" ng-if="!isNew">
-				     <label>头像文件名</label>
+			    <div class="form-group" ng-if="!isNew">
+				     <label>头像文件</label>
 					 <div>
 				       <dropdown-select ng-model="item.image" options="imgs"></dropdown-select>
 			         </div>
    	                 <br>
                 </div>
+	
+				
                 <div class="form-group">
                     <label>密码</label>
                      <input type="password"  name="password" ng-model="item.password" class="form-control"　required>
@@ -36,7 +49,7 @@
 					    <ng-message when="required">必须输入！</ng-message>
 					  </ng-messages>  
                 </div>
-                <div class="form-group" ng-if="!!isNew" >
+                <div class="form-group" ng-if="isNew" >
                     <label>密码确认</label>
                      <input type="password"  name="passwordRepeat" ng-model="password" class="form-control"　required validate-equals="item.password">
                       <ng-messages for="form.passwordRepeat.$error" multiple style="color:red;">
@@ -45,7 +58,7 @@
 					  </ng-messages>  
 					  <br>　              　　　　　
                 </div>
-              <!--<dropdown-multiselect ng-model="item.skills" options="availableSkills"></dropdown-multiselect>-->
+            
 				<div class="form-group">
 						<label>技能</label>
 						<ui-select multiple ng-model="item.skills" close-on-select="false">
@@ -59,17 +72,29 @@
 	
            </div>
            <div class="col-md-6">
-			    <div class="form-group" ng-if="!isNew">
+		   		<div class="form-group" ng-if="!isNew">
+				     <label>性别</label>
+					 <label class="btn btn-info" ng-model="item.sex" btn-radio="'M'">男</label>
+					 <label class="btn btn-info" ng-model="item.sex" btn-radio="'F'">女</label>
+	                 <br>
+                </div>
+				 <div class="form-group" ng-if="!isNew">
+				     <label>宿舍</label>
+					 <input type="text"  name="name" ng-model="item.hostel" class="form-control">
+   	                 <br>
+                </div>
+			    <div class="form-group">
                     <label>类型</label>
-                    <input type="text" name="type" ng-model="item.type" class="form-control" >
+   					<label class="btn btn-info" ng-model="item.type" btn-radio="'T'">老师</label>
+					<label class="btn btn-info" ng-model="item.type" btn-radio="'S'">学生</label>
                      <br>
                 </div>
-                <div class="form-group" ng-if="!isNew">
+                <div class="form-group">
                     <label>是管理员？</label>
                     <input type="checkbox" ng-model="item.isAdmin">
                      <br>
                  </div>
-                 <div class="form-group" ng-if="!isNew">
+                 <div class="form-group">
                     <label>是否有效？</label>
                     <input type="checkbox" ng-model="item.isActive">
                     <br>

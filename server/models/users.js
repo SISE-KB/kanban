@@ -7,23 +7,24 @@ var mongoose = require('mongoose'),
    
 
 var UserSchema = new Schema({
-  name : { type: String,	     index: true},
-  mobileNo : { type: String, index: true},
-  image : String,
-  skills : [String],
-  password:String,
-  isAdmin:{type: Boolean,default: false},
-  type : String,
-  isActive :  {type: Boolean,default: true},
-  regDate :  { type: Date, default: Date.now },
-  sex : String,
-  code : String,
-  hostel : String,
-  desc : String
+	code : { type: String,  index: true},
+	password: String,
+	name : String,
+	mobileNo : { type: String, index: true},
+	type : String,
+	isAdmin:{type: Boolean,default: false},
+	isActive :  {type: Boolean,default: true},
+	regDate :  { type: Date, default: Date.now },
+
+	image : String,
+	skills : [String],
+	sex : String,
+	hostel : String,
+	desc : String
 });
 
 UserSchema.plugin(passportLocalMongoose,{
-	usernameField :'mobileNo',
+	usernameField :'code',
 	hashField:'password',
 	saltlen:8,
 	keylen:32
@@ -42,13 +43,5 @@ UserSchema.pre('save', function (next) {
       next();
 	}	
 });
-
-
-/*
-UserSchema.statics.loadData = function (query) {
- return  this.find(query).select('name mobileNo')
- };
-*/
-
 
 module.exports = mongoose.model('User', UserSchema);

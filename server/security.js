@@ -7,6 +7,7 @@ var filterUser = function(user) {
     return {
       user : {
         id: user._id,
+		code:user.code,
         mobileNo: user.mobileNo,
         name: user.name,
         isAdmin: user.isAdmin
@@ -42,7 +43,7 @@ var security = {
     }
   },
   register: function(req, res, next) {
-    Account.register(new Account({ mobileNo: req.body.mobileNo,
+    Account.register(new Account({ code: req.body.code,
 	  name: req.body.name
 	  }), req.body.password, function(err) {
       if (err) { 
@@ -54,19 +55,7 @@ var security = {
   },
   sendCurrentUser: function(req, res, next) {
       var data=filterUser(req.user);
-	  if(!!data.user){
-	    //Project.find({productOwner:'556bcc1d2f4c7ab41c91b982'}).select('name')
-		Project.find({teamMembers:{$in:[data.id]}}).select('name')
-	    .then(function(ids){
-	      // console.log(ids);
-		   data.user.dev_prjs=ids;
-		   res.json(data);
-		   console.log('sendCurrentUser:',data);
-	    })
-	 }else{
-	      res.json(data);
-		  console.log('sendCurrentUser:',data);
-	 }
+	  res.json(data);
   },
   login: function(req, res, next) {
     function authenticationFailed(err, user, info){

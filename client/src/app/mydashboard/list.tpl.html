@@ -1,102 +1,74 @@
+<style>
+#external-events {
+		float: left;
+		width: 86%;
+		padding: 0 10px;
+		border: 1px solid #ccc;
+		background: #eee;
+		text-align: left;
+	}
+		
+	#external-events h4 {
+		font-size: 16px;
+		margin-top: 0;
+		padding-top: 1em;
+	}
+		
+	#external-events .fc-event {
+		margin: 10px 0;
+		cursor: pointer;
+	}
+		
+	#external-events p {
+		margin: 1.5em 0;
+		font-size: 11px;
+		color: #666;
+	}
+		
+	#external-events p input {
+		margin: 0;
+		vertical-align: middle;
+	}
+</style>
 <div class="row">
  <div class="col-md-3">
-	<!--<h4>我的项目</h4> 
-    <div class="well well-small">
-      <ul class="nav nav-list">
-        <li ng-repeat="prj in projects" ui-sref-active="active">
-           <span>{{prj.name}}</span> 
-        </li>
-      </ul>
-    </div>-->
-      <div class="box-header">
-         <h4 class="box-title">Draggable Events</h4>
-      </div>
-      <div class="box-body">
-                                <!-- the events -->
-                                <div id='external-events'>
-                                    <div class='external-event bg-green'>Lunch</div>
-                                    <div class='external-event bg-red'>Go home</div>
-                                    <div class='external-event bg-aqua'>Do homework</div>
-                                    <div class='external-event bg-yellow'>Work on UI design</div>
-                                    <div class='external-event bg-navy'>Sleep tight</div>
-                                    <p>
-                                        <input type='checkbox' id='drop-remove' />
-                                        <label for='drop-remove'>remove after drop</label>
-                                    </p>
-                                </div>
+     <div class="col-md-12">
+	     <h4>我的任务</h4>
+         <div id='external-events'>
+	       <div ng-repeat="task in tasks" class='fc-event' ng-dblclick="removeTask(task)">{{task.name}}</div>
+         </div>
      </div>
-	 <div class="box-header">
-       <h3 class="box-title">Create Event</h3>
-     </div>
-     <div class="box-body">
-                                <div class="btn-group" style="width: 100%; margin-bottom: 10px;">
-                                    <button type="button" id="color-chooser-btn" class="btn btn-danger btn-block btn-sm dropdown-toggle" data-toggle="dropdown">Color
-                                        <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu" dropdown id="color-chooser">
-                                        <li><a class="text-green" href="#"><i class="fa fa-square"></i> Green</a>
-                                        </li>
-                                        <li><a class="text-blue" href="#"><i class="fa fa-square"></i> Blue</a>
-                                        </li>
-                                        <li><a class="text-navy" href="#"><i class="fa fa-square"></i> Navy</a>
-                                        </li>
-                                        <li><a class="text-yellow" href="#"><i class="fa fa-square"></i> Yellow</a>
-                                        </li>
-                                        <li><a class="text-orange" href="#"><i class="fa fa-square"></i> Orange</a>
-                                        </li>
-                                        <li><a class="text-aqua" href="#"><i class="fa fa-square"></i> Aqua</a>
-                                        </li>
-                                        <li><a class="text-red" href="#"><i class="fa fa-square"></i> Red</a>
-                                        </li>
-                                        <li><a class="text-fuchsia" href="#"><i class="fa fa-square"></i> Fuchsia</a>
-                                        </li>
-                                        <li><a class="text-purple" href="#"><i class="fa fa-square"></i> Purple</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <!-- /btn-group -->
-                                <div class="input-group">
-                                    <input id="new-event" type="text" class="form-control" placeholder="Event Title">
-                                    <div class="input-group-btn">
-                                        <button id="add-new-event" type="button" class="btn btn-default btn-flat">Add</button>
-                                    </div>
-                                    <!-- /btn-group -->
-                                </div>
-                                <!-- /input-group -->
+     <div class="col-md-12">
+	    <h3 class="box-title">Create Event</h3>
+	    <div class="btn-group" dropdown>
+          <button type="button" class="btn" id="color-chooser-btn">Color</button>
+          <button type="button" class="btn dropdown-toggle" dropdown-toggle>
+            <span class="caret"></span>
+           <!-- <span class="sr-only">Split button!</span>-->
+          </button>
+          <ul   id="color-chooser" class="dropdown-menu" role="menu" >
+             <li><div style="background-color:green;" >Green</div></li>
+             <li class="divider"></li>
+             <li><div style="background-color:yellow;" >Yellow</div></li>
+          </ul>
+        </div>
+         <div class="input-group">
+              <input id="new-event" type="text" class="form-control" placeholder="Event Title">
+              <div class="input-group-btn">
+                  <button id="add-new-event" type="button" class="btn btn-default btn-flat">Add</button>
+              </div>
+         </div>
+
      </div>
  </div>
 
-  <!-- Our unnamed main ui-view for this template -->
-  <div class="col-md-9 ">
+ <div class="col-md-9 ">
   	   <div class="box box-primary">
            <div class="box-body no-padding">
-                                <!-- THE CALENDAR -->
-              <div id="calendar"></div>
+               <div id="calendar"></div>
            </div>
-                            <!-- /.box-body -->
        </div>
-                        <!-- /. box -->
-	  <!--
-	  <h4>我的任务</h4>
-     <table class="table table-bordered table-condensed table-striped table-hover">
-     <thead>
-      <tr>
-        <th class="col-md-8">Name</th>
-        <th class="col-md-1">Estimation</th>
-        <th class="col-md-1">Remaining</th>
-     </tr>
-     </thead>
-    <tbody>
-    <tr ng-repeat="task in tasks">
-        <td>{{task.name}}</td>
-        <td>{{task.estimation}}</td>
-        <td>{{task.remaining}}</td>
-    </tr>
-    <tr ng-show="!tasks.length">
-        <td colspan="4">没有任务分贝给你！</td>
-    </tr>
-    </tbody>
-   </table>-->
+
 <!--
      <div ui-calendar="uiConfig.calendar" ng-model="eventSources"></div>-->
 

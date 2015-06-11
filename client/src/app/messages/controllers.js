@@ -6,7 +6,7 @@ angular.module('controllers.messages', ['ui.router','ngMessages'
                 'crudContrllersHelp','$scope', '$state', '$stateParams','Message',
 	function ( crudContrllersHelp,  $scope,    $state,    $stateParams,  Message) {
 
-		crudContrllersHelp.initMain('Message','title',$scope,   $state,   $stateParams)
+		crudContrllersHelp.initMain('Message','title','title',$scope);
 		
 		$scope.availableTags=["娱乐","科技"]
 			
@@ -23,13 +23,13 @@ angular.module('controllers.messages', ['ui.router','ngMessages'
 .controller('MessagesListCtrl',   [
                 'crudContrllersHelp','$scope', '$state', '$stateParams', 
 	function (  crudContrllersHelp,$scope,   $state,   $stateParams) {
-		crudContrllersHelp.initList('Message','title',$scope,   $state,   $stateParams)
+		crudContrllersHelp.initList('Message','title','title',$scope);
 	}
 ])
 .controller('MessagesDetailCtrl',   [
                 'crudContrllersHelp','$scope','$stateParams', '$state',
 	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
-		crudContrllersHelp.initDetail('Message','title',$scope,   $state,   $stateParams)
+		crudContrllersHelp.initDetail('Message','title','title',$scope);
 	}
 ])
 

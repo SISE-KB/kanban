@@ -4,10 +4,20 @@
         <h4>任务信息维护</h4>
     </div>
     <div class="modal-body">
+		<label>状态</label>
+		<div class="btn-group">
+			<label class="btn btn-primary" ng-model="task.state" btn-radio="'TODO'">计划</label>
+			<label class="btn btn-primary" ng-model="task.state" btn-radio="'DOING'">开发中</label>
+			<label class="btn btn-primary" ng-model="task.state" btn-radio="'DONE'">完成</label>
+		</div>
+		<br>
         <label>名称</label>
         <input type="text" ng-model="task.name" class="form-control" required autofocus>
-        <label>预计(hs)</label>
+        <label>预计(单位:人时)</label>
         <input type="number" ng-model="task.estimation" class="form-control">
+		<label>剩余(单位:人时)</label>
+        <input type="number" ng-model="task.remaining" class="form-control">
+
 		<label>负责人</label>
 		<ui-select ng-model="task.assignedUserId" close-on-select="true">
    　　　　　　　  	<ui-select-match placeholder="请选择 ...">{{$select.selected.name}}</ui-select-match>
@@ -15,6 +25,12 @@
                         {{u.name}}&lt;{{u.mobileNo}}&gt;
                          </ui-select-choices>
         </ui-select>
+		<label>预计完成日期</label>
+		<div class="well well-sm" ng-model="task.deadline"> 
+				 <datepicker min="minDate" show-weeks="showWeeks" close-text="关闭"></datepicker>
+		</div>
+		<label>具体描述</label>
+		<textarea rows="10" ng-model="task.spec" class="form-control"></textarea>
 
      </div> 
     <div class="modal-footer">

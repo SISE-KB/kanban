@@ -20,10 +20,10 @@ var makeFn=function(ds){
 	return fns	  
 }	
 var makeData=function(done) {
-  var admin= {model:"User",	 data:{  name: '管理员',mobileNo:'114',skills:['S1','S2'],password: '114',
-	             catalog :['老师','管理员'],isActive: true,isAdmin: true}}
-  var dev={model:"User",	 data:{  name: 'demo',mobileNo:'139666',skills:['S1','S3'],password: '1234',
-	            catalog :['学生'],isActive: true,code:'2014001',sex:'M',isAdmin:false}}
+  var admin= {model:"User",	 data:{  name: '管理员',code:'114',password: '114',mobileNo:'114',
+	             type :'T',isActive: true,isAdmin: true}}
+  var dev={model:"User",	 data:{  name: 'demo',code:'test',password: '1234',mobileNo:'139666',
+	            type :'S',isActive: true,code:'2014001',isAdmin:false}}
   var prj={model:"Project",	 data:{  name: '神庙逃亡',catalog:'Unity 2D',tags: 'Run'}}            	             	
   var ds=[ admin ,dev ,prj]
   for(var i=1;i<=100;i++)
@@ -34,8 +34,8 @@ var makeData=function(done) {
 		   var admin=results[0]
 		   , dev=results[1]
 		   , prj=results[2]
-		   prj.productOwner=admin._id
-		   prj.scrumMaster=dev._id
+		   prj.productOwnerId=admin._id
+		   prj.devMasterId=dev._id
 		   prj.teamMembers.push(dev._id)
 		   prj.save(function(err,prj){
 		      done()

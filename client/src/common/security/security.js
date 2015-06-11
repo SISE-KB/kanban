@@ -60,13 +60,13 @@ function($http, $q, $state, queue, $modal,$rootScope) {
     },
 
     // Attempt to authenticate a user by the given email and password
-    login: function(mobileNo, password) {
+    login: function(code, password) {
 	  /*if(!queue.hasMore()){
 	      var securityAuthorization=$$inject.get('securityAuthorization');
 	      queue.pushRetryFn('unauthenticated-client', 
 		    securityAuthorization.requireAuthenticatedUser);
 	  }*/  
-      var request = $http.post('/login', {mobileNo: mobileNo, password: password});
+      var request = $http.post('/login', {code: code, password: password});
       return request.then(function(response) {
         service.currentUser = response.data.user;
 		console.log("/login-->",service.currentUser);

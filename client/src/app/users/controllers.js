@@ -1,18 +1,18 @@
 angular.module('controllers.users', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
-, 'directives.dropdownSelect'
+,'directives.dropdownSelect'
 , 'resources.users'])  
 .controller('UsersMainCtrl',   [
                'crudContrllersHelp','$scope', '$state', '$stateParams', 
 	function ( crudContrllersHelp,$scope,   $state,   $stateParams) {
 		
-		crudContrllersHelp.initMain('User','name',$scope,   $state,   $stateParams)
-		$scope.availableSkills=['协调','后端编码','前端编码','2D做图','3D建模','文档写作','测试']
+		crudContrllersHelp.initMain('User','code','name',$scope);
+		$scope.availableSkills=['协调','后端编码','前端编码','2D做图','3D建模','文档写作','测试'];
 
-		$scope.checkDate= function(item){
-			var now = new Date(Date.now())
+		$scope.checkData= function(item){
+			var now = new Date();
 			if(!item.regDate)
-				item.regDate=now
+				item.regDate=now;
 		}
 
 	}
@@ -20,14 +20,14 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 .controller('UsersListCtrl',   [
                 'crudContrllersHelp','$scope', '$state', '$stateParams',
 	function ( crudContrllersHelp, $scope,   $state,   $stateParams) {
-		crudContrllersHelp.initList('User','name',$scope,   $state,   $stateParams)
+		crudContrllersHelp.initList('User','code','name',$scope);
 	}
 	
 ])
 .controller('UsersDetailCtrl',   [
                'crudContrllersHelp', '$scope','$stateParams', '$state',
 	function ( crudContrllersHelp,$scope,  $stateParams,    $state) {
-		crudContrllersHelp.initDetail('User','name',$scope,   $state,   $stateParams)
+		crudContrllersHelp.initDetail('User','code','name',$scope);
 		
 	}
 ])
@@ -38,21 +38,15 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 		$scope.item.isActive=true;
 		$scope.item.isAdmin=false;
 		$scope.isNew=true;
-		$scope.checkDate($scope.item);
+		$scope.checkData($scope.item);
 		$scope.item.desc=
-"expressjs/multer [![NPM version](https://badge.fury.io/js/multer.svg)](https://badge.fury.io/js/multer)\r\n"
+"# 一级标题\r\n"
 +"\r\n"
-+"Multer is a node.js middleware for handling `multipart/form-data`.\r\n"
++"## 二级标题\r\n"
 +"\r\n"
-+"It is written on top of [busboy](https://github.com/mscdex/busboy) for maximum efficiency.\r\n"
++"`红色提醒`\r\n"
 +"\r\n"
-+"## API\r\n"
-+"\r\n"
-+"#### Installation\r\n"
-+"\r\n"
-+"`$ npm install multer`\r\n"
-+"\r\n"
-+"#### Usage\r\n"
++"**Code**:\r\n"
 +"\r\n"
 +"```js\r\n"
 +"var express = require('express')\r\n"
@@ -62,8 +56,7 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 +"app.use(multer({ dest: './uploads/'}))\r\n"
 +"```\r\n"
 +"\r\n"
-+"\r\n"
-+"**IMPORTANT**: Multer will not process any form which is not `multipart/form-data`.";
++"[详细参考](http://www.ituring.com.cn/article/775).";
 	}
 ])
 
@@ -71,8 +64,8 @@ angular.module('controllers.users', ['ui.router','ngMessages'
                 '$scope', '$http','SERVER_CFG', 
 	function (  $scope,$http,SERVER_CFG ) {
 		$scope.item = $scope.findById( $scope.$stateParams.itemId);
-		$scope.checkDate($scope.item);
-		var url = SERVER_CFG.URL+'/images/'+$scope.item.mobileNo;
+		$scope.checkData($scope.item);
+		var url = SERVER_CFG.URL+'/images/'+$scope.item.code;
 		$scope.isNew=false
 		$http.get(url).then(function(reps){
 		   $scope.imgs=reps.data;

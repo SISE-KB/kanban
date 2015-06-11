@@ -155,17 +155,6 @@ angular.module('directives.dropdownSelect', [])
 
 });
 
-angular.module('filters', [])
-.filter('trim', function($filter){
-	var limitToFilter =$filter('limitTo');
-	return function(input, limit) {
-		if (input.length > limit) {
-			return limitToFilter(input, limit-3) + '...';
-         }
-        return input;
-    };
-});
-
 angular.module('security.authorization', ['security.service'])
 .provider('securityAuthorization', {
   requireAdminUser: ['securityAuthorization', function(securityAuthorization) {
@@ -400,13 +389,13 @@ function($http, $q, $state, queue, $modal,$rootScope) {
     },
 
     // Attempt to authenticate a user by the given email and password
-    login: function(mobileNo, password) {
+    login: function(code, password) {
 	  /*if(!queue.hasMore()){
 	      var securityAuthorization=$$inject.get('securityAuthorization');
 	      queue.pushRetryFn('unauthenticated-client', 
 		    securityAuthorization.requireAuthenticatedUser);
 	  }*/  
-      var request = $http.post('/login', {mobileNo: mobileNo, password: password});
+      var request = $http.post('/login', {code: code, password: password});
       return request.then(function(response) {
         service.currentUser = response.data.user;
 		console.log("/login-->",service.currentUser);
@@ -463,6 +452,17 @@ function($http, $q, $state, queue, $modal,$rootScope) {
 
   return service;
 }]);
+
+angular.module('filters', [])
+.filter('trim', function($filter){
+	var limitToFilter =$filter('limitTo');
+	return function(input, limit) {
+		if (input.length > limit) {
+			return limitToFilter(input, limit-3) + '...';
+         }
+        return input;
+    };
+});
 
 angular.module('mongoResourceHttp', [])
 .factory('$mongoResourceHttp', [
@@ -522,7 +522,7 @@ function ($http, $q,SERVER_CFG) {
         Resource.all = function (options, successcb, errorcb) {
             return Resource.query({}, options || {});
         };
-
+/*
         Resource.count = function (queryJson) {
             return $http.get(collectionUrl, {
                 params: angular.extend({}, defaultParams, preparyQueryParam(queryJson), {c: true})
@@ -530,7 +530,7 @@ function ($http, $q,SERVER_CFG) {
                 return response.data;
             });
         };
-/*
+
         Resource.distinct = function (field, queryJson) {
             return $http.post(dbUrl + '/runCommand', angular.extend({}, queryJson || {}, {
                 distinct: collectionName,
@@ -551,11 +551,8 @@ function ($http, $q,SERVER_CFG) {
                  return Resource.query({_id: {$in: ids}},{strict:true});
         };
         Resource.prototype.$id = function () {
-            if (this._id && this._id.$oid) {
-                return this._id.$oid;
-            } else if (this._id) {
-                return this._id;
-            }
+           return this._id;
+            
         };
  
 
@@ -564,16 +561,20 @@ function ($http, $q,SERVER_CFG) {
         };
 
         Resource.prototype.$update = function () {
-            return  $http.put(collectionUrl + "/" + this.$id(), angular.extend({}, this, {_id: undefined}), {params: defaultParams})
+		  /*  if(!this._id) {
+			   console.log("update by null id!");
+			   return this;
+			}*/
+            return  $http.put(collectionUrl + "/" + this._id, angular.extend({}, this), {params: defaultParams})
                 .then(resourceRespTransform);
         };
 
         Resource.prototype.$saveOrUpdate = function () {
-            return this.$id() ? this.$update() : this.$save();
+            return this._id ? this.$update() : this.$save();
         };
 
         Resource.prototype.$remove = function () {
-            return $http['delete'](collectionUrl + "/" + this.$id(), {params: defaultParams}).then(resourceRespTransform);
+            return $http['delete'](collectionUrl + "/" + this._id, {params: defaultParams}).then(resourceRespTransform);
         };
 
 
@@ -933,7 +934,7 @@ angular.module('security.login.form', ['services.localizedMessages'])
     $scope.authError = null;
 
     // Try to login
-    security.login($scope.user.mobileNo, $scope.user.password).then(function(loggedIn) {
+    security.login($scope.user.code, $scope.user.password).then(function(loggedIn) {
       if ( !loggedIn ) {
         // If we get here then the login failed due to bad credentials
         $scope.authError = localizedMessages.get('login.error.invalidCredentials');

@@ -15,6 +15,7 @@ angular.module('resources', [
 ,'resources.backlogs'
 ,'resources.issues'
 ,'resources.tasks'
+,'resources.myevents'
 ])
 
 angular.module('app')

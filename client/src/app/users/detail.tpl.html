@@ -1,5 +1,5 @@
 <div class="well">
-       <h4>{{item.name}}[手机:{{item.mobileNo}}]
+       <h4>{{item.name}}[帐号:{{item.code}}]
         <button class="btn" ng-click="edit()" ng-show="isAdmin()">修　改</button>
         <button class="btn" ng-click="list()">列　表</button>
       </h4>
@@ -7,8 +7,11 @@
       <div class="row">
             <div class="col-md-6">
    			    <div>
-				   <img ng-src="uploads/{{item.mobileNo}}/{{item.image}}"  class="img-circle" style="width:160px;height:160px">
+				   <img ng-src="uploads/{{item.code}}/{{item.image}}"  class="img-circle" style="width:160px;height:160px">
                 </div>
+				<div >
+			 		<label>手机:</label>{{item.mobileNo}}
+		         </div>
 				<div>
 			 		 <label>技术能力:</label>
 			 		 <br>{{item.skills}}
@@ -32,9 +35,7 @@
 				<div>
 					<label>性别:</label>{{item.sex}}
 				</div>
-				<div >
-			 		<label>学号:</label>{{item.code}}
-		         </div>
+
 				 <div>
                     <label>宿舍:</label>{{item.hostel}}
   			    </div>

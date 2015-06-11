@@ -11,13 +11,13 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
          .then(function(data){
 			 $scope.users=data;
 		}) ;
-		 crudContrllersHelp.initMain('Project','name',$scope,   $state,   $stateParams)     
+		 crudContrllersHelp.initMain('Project','tags','name',$scope);     
 	}
 ])
 .controller('ProjectsListCtrl',   [
                 'crudContrllersHelp',  '$scope', '$state', '$stateParams', 'globalData',
 	function ( crudContrllersHelp, $scope,     $state,     $stateParams,     globalData) {
-		crudContrllersHelp.initList('Project','name',$scope,   $state,   $stateParams);
+		crudContrllersHelp.initList('Project','tags','name',$scope);   
 			$scope.backlogs=function (item) {
 			$state.go('backlogs', {projectId: item.$id()})
 		}
@@ -31,11 +31,11 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 		}
 		$scope.isProductMgr=function(item) {
 		    if(!globalData.currentUser) return false;
-			return item.productOwner==globalData.currentUser.id
+			return item.productOwnerId==globalData.currentUser.id
 		}
 		$scope.isDevMgr=function(item) {
 			if(!globalData.currentUser) return false;
-			return item.procMaster==globalData.currentUser.id
+			return item.devMasterId==globalData.currentUser.id
 		}
 
 	}
@@ -43,7 +43,7 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 .controller('ProjectsDetailCtrl',   [
                 'crudContrllersHelp','$scope','$stateParams', '$state',
 	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
-		crudContrllersHelp.initDetail('Project','name',$scope,   $state,   $stateParams)
+		crudContrllersHelp.initDetail('Project','tags','name',$scope);
 
 
 	}
@@ -52,11 +52,28 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 .controller('ProjectsCreateCtrl',   [
                 '$scope', 'Project',
 	function (  $scope,   Project) {
-		$scope.item = new Project()
-		$scope.item.iterationDuration=4
-		$scope.item.isSample=false
-		$scope.item.state='TODO'
-		$scope.isNew=true
+		$scope.item = new Project();
+		$scope.item.iterationDuration=4;
+		$scope.item.state='TODO';
+		$scope.isNew=true;
+		$scope.item.desc=
+"# 一级标题\r\n"
++"\r\n"
++"## 二级标题\r\n"
++"\r\n"
++"`红色提醒`\r\n"
++"\r\n"
++"**Code**:\r\n"
++"\r\n"
++"```js\r\n"
++"var express = require('express')\r\n"
++"var multer  = require('multer')\r\n"
++"\r\n"
++"var app = express()\r\n"
++"app.use(multer({ dest: './uploads/'}))\r\n"
++"```\r\n"
++"\r\n"
++"[详细参考](http://www.ituring.com.cn/article/775).";
 
 	}
 ])
