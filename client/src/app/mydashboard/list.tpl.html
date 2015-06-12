@@ -1,65 +1,44 @@
 <style>
-#external-events {
+.external-events {
 		float: left;
-		width: 86%;
+		width:90%;
 		padding: 0 10px;
 		border: 1px solid #ccc;
 		background: #eee;
 		text-align: left;
 	}
+
 		
-	#external-events h4 {
-		font-size: 16px;
-		margin-top: 0;
-		padding-top: 1em;
-	}
-		
-	#external-events .fc-event {
+	.external-events .fc-event {
 		margin: 10px 0;
 		cursor: pointer;
 	}
 		
-	#external-events p {
-		margin: 1.5em 0;
-		font-size: 11px;
-		color: #666;
+	.external-events .myevent {
+		background: #000;
+		color: #f66;
 	}
-		
-	#external-events p input {
-		margin: 0;
-		vertical-align: middle;
-	}
+
 </style>
 <div class="row">
  <div class="col-md-3">
      <div class="col-md-12">
-	     <h4>我的任务</h4>
-         <div id='external-events'>
-	       <div ng-repeat="task in tasks" class='fc-event' ng-dblclick="removeTask(task)">{{task.name}}</div>
+	     <h4>项目任务</h4>
+         <div class='external-events'>
+	       <div ng-repeat="task in tasks" class='fc-event'>{{task.name}}</div>
          </div>
      </div>
      <div class="col-md-12">
-	    <h3 class="box-title">Create Event</h3>
-	    <div class="btn-group" dropdown>
-          <button type="button" class="btn" id="color-chooser-btn">Color</button>
-          <button type="button" class="btn dropdown-toggle" dropdown-toggle>
-            <span class="caret"></span>
-           <!-- <span class="sr-only">Split button!</span>-->
-          </button>
-          <ul   id="color-chooser" class="dropdown-menu" role="menu" >
-             <li><div style="background-color:green;" >Green</div></li>
-             <li class="divider"></li>
-             <li><div style="background-color:yellow;" >Yellow</div></li>
-          </ul>
-        </div>
-         <div class="input-group">
-              <input id="new-event" type="text" class="form-control" placeholder="Event Title">
-              <div class="input-group-btn">
-                  <button id="add-new-event" type="button" class="btn btn-default btn-flat">Add</button>
-              </div>
-         </div>
+         <h4>个人事情</h4>
+		
+			   <form ng-submit="addMyEvent()">
+			　　   <input type="text" ng-model="newText" size="15"  placeholder="增加自己的事情">
+			  </form>
+			  <div class='external-events'>
+	             <div ng-repeat="task in mytasks" class='fc-event myevent' ">{{task.title}}</div>
+           </div>
 
-     </div>
+    </div>
  </div>
 
  <div class="col-md-9 ">
@@ -73,7 +52,7 @@
      <div ui-calendar="uiConfig.calendar" ng-model="eventSources"></div>-->
 
 
-  </div>
+</div>
 
 
 </div>

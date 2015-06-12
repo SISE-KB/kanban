@@ -588,28 +588,35 @@ angular.module('controllers.mytasks', ['ui.router','ui.calendar','resources.task
 .controller('MyDashboardCtrl', 
         ['$http','$scope','$timeout','Task','MyEvent','globalData',
 function ($http,  $scope, $timeout,   Task , MyEvent, globalData) {
+$scope.mytasks=[];
+$scope.addMyEvent=function(){
+	$scope.mytasks.push({
+		title:$scope.newText
 
+    });
+	$timeout(ini_events, 2000);
+}
     function ini_events() {
-	  var ele=$('#external-events div.fc-event');
-            ele.each(function() {
+	  var ele=$('.external-events div.fc-event');
+      ele.each(function() {
                 var eventObject = {
-				   // backgroundColor:$scope.currColor,
                     title: $.trim($(this).text()) // use the element's text as the event title
+                   
                 };
-
-                // store the Event Object in the DOM element so we can get to it later
+                var cls=$(this).attr('class');
+                console.log(cls);
+                if(cls.indexOf("my")>=0) eventObject.type="me";
+              // store the Event Object in the DOM element so we can get to it later
                 $(this).data('eventObject', eventObject);
-
                 // make the event draggable using jQuery UI
                 $(this).draggable({
                     zIndex: 1070,
                     revert: true, // will cause the event to go back to its
                     revertDuration: 0 //  original position after the drag
                 });
-
-            });
-        }
-       
+      });
+   }
+      
       
       
     $scope.projects = globalData.devPrjs;
@@ -618,70 +625,86 @@ function ($http,  $scope, $timeout,   Task , MyEvent, globalData) {
 			$timeout(ini_events, 2000);
 
 	});
+	function alertOnResize(e){
+	  console.log(e);
+	 }
 
-     function mock(start,end){
-	 console.log(start);
+     function mock(start,end,timezone, callback){
+	// console.log(start);
 	 var now=new Date();
       var d = now.getDate(),
       m = now.getMonth(),
       y = now.getFullYear(); 
      var	 es= [{
-                title: 'All Day Event',
+                title: 'All Day Event2',
                 start: new Date(y, m, 1)
-                //backgroundColor: "#f56954",  borderColor: "#f56954" 
             }, {
-                title: 'Long Event',
+                title: 'Long Event2',
                 start: new Date(y, m, d - 3),
                 end: new Date(y, m, d - 2)
-               // backgroundColor: "#f39c12", //yellow
 
             }, {
-                title: 'Meeting',
+				id: 9999,
+                title: 'Meeting2',
                 start: new Date(y, m, d, 10, 30),
-                allDay: false
-                //backgroundColor: "#0073b7", 
-
+                allDay: true
             }];
 			
-		for(var i=0;i<es.length;i++){
-          var  obj=new MyEvent(events[i]);
+	/*	for(var i=0;i<es.length;i++){
+          var  obj=new MyEvent(es[i]);
 		  obj.$save();
-		}	
+		}*/
+		return 	callback(es);
 
 }
 
+
 	$('#calendar').fullCalendar({
+		 lang: 'zh-cn',
+		
+eventSources: [{events:mock,
+	   color: 'black',    // an option!
+    textColor: 'yellow'  // an option!
+},
+  {
+            url: '/db/myevents', // use the `url` property
+              color: 'green',    // an option!
+    textColor: 'red'  // an option!
+      }
+    ],
             header: {
                 left: 'prev,next today',
                 center: 'title',
                 right: 'month,agendaWeek,agendaDay'
             },
-            buttonText: { //This is to add icons to the visible buttons
-                prev: "《",
-                next: "》",
-                today: 'today',
-                month: '月',
-                week: '周',
-                day: '日'
-            },
+      
 			editable: true,
             droppable: true, // this allows things to be dropped onto the calendar !!!
             eventLimit: true,
+            eventResize: alertOnResize,
+            eventDrop: function(event, delta, revertFunc,jsEvent) {
+	
+               //    alert(event.title + event.allDay + event.start.format()+ event.end.format());
+                   console.log(event);
+                  
+
+            },
             drop: function(date, allDay) { // this function is called when something is dropped
                 var originalEventObject = $(this).data('eventObject');
                 var copiedEventObject = $.extend({}, originalEventObject);
-
-                // assign it the date that was reported
+                if(copiedEventObject.type&&"me"===copiedEventObject.type){
+					delete copiedEventObject.type;
+					copiedEventObject.color="black";
+					copiedEventObject.textColor="yellow";
+				}else{
+				  copiedEventObject.color="green";
+				  copiedEventObject.textColor="black";
+			  }
                 copiedEventObject.start = date;
-                copiedEventObject.allDay = true;
-				copiedEventObject.textColor="#000";
-                //copiedEventObject.backgroundColor = $(this).css("background-color");
-                //copiedEventObject.borderColor = $(this).css("border-color");
-
-                // render the event on the calendar
+          
                 // the last `true` argument determines if the event "sticks" (http://arshaw.com/fullcalendar/docs/event_rendering/renderEvent/)
-                $('#calendar').fullCalendar('renderEvent', copiedEventObject, false);
-				mock(date,date);
+                $('#calendar').fullCalendar('renderEvent', copiedEventObject, true);
+	
 
             }
 		});	
@@ -773,6 +796,95 @@ angular.module('controllers.messages', ['ui.router','ngMessages'
 		$scope.item = $scope.findById( $stateParams.itemId)
 		$scope.item.tags=$scope.item.tags||[]
 		$scope.checkDate($scope.item)
+	}
+])
+
+angular.module('controllers.projects', ['ui.router','ngMessages'
+, 'services.i18nNotifications'
+, 'resources.projects'
+, 'resources.users'
+])  
+.controller('ProjectsMainCtrl',   [
+               'crudContrllersHelp','$scope', '$state', '$stateParams', 'globalData',
+	function ( crudContrllersHelp,$scope,   $state,   $stateParams,  globalData) {
+         $scope.users=[]
+         globalData.sendApiRequest('users/load')
+         .then(function(data){
+			 $scope.users=data;
+		}) ;
+		 crudContrllersHelp.initMain('Project','tags','name',$scope);     
+	}
+])
+.controller('ProjectsListCtrl',   [
+                'crudContrllersHelp',  '$scope', '$state', '$stateParams', 'globalData',
+	function ( crudContrllersHelp, $scope,     $state,     $stateParams,     globalData) {
+		crudContrllersHelp.initList('Project','tags','name',$scope);   
+			$scope.backlogs=function (item) {
+			$state.go('backlogs', {projectId: item.$id()})
+		}
+		$scope.sprints=function (item) {
+			$state.go('sprints', {projectId: item.$id()})
+		}
+		$scope.issues=function (item) {
+			globalData.exchangeData={targetType:'项目',target: item.name
+				                            ,projectId:item.$id(),backlogId:null}
+			$state.go('issues.create')
+		}
+		$scope.isProductMgr=function(item) {
+		    if(!globalData.currentUser) return false;
+			return item.productOwnerId==globalData.currentUser.id
+		}
+		$scope.isDevMgr=function(item) {
+			if(!globalData.currentUser) return false;
+			return item.devMasterId==globalData.currentUser.id
+		}
+
+	}
+])
+.controller('ProjectsDetailCtrl',   [
+                'crudContrllersHelp','$scope','$stateParams', '$state',
+	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
+		crudContrllersHelp.initDetail('Project','tags','name',$scope);
+
+
+	}
+])
+
+.controller('ProjectsCreateCtrl',   [
+                '$scope', 'Project',
+	function (  $scope,   Project) {
+		$scope.item = new Project();
+		$scope.item.iterationDuration=4;
+		$scope.item.state='TODO';
+		$scope.isNew=true;
+		$scope.item.desc=
+"# 一级标题\r\n"
++"\r\n"
++"## 二级标题\r\n"
++"\r\n"
++"`红色提醒`\r\n"
++"\r\n"
++"**Code**:\r\n"
++"\r\n"
++"```js\r\n"
++"var express = require('express')\r\n"
++"var multer  = require('multer')\r\n"
++"\r\n"
++"var app = express()\r\n"
++"app.use(multer({ dest: './uploads/'}))\r\n"
++"```\r\n"
++"\r\n"
++"[详细参考](http://www.ituring.com.cn/article/775).";
+
+	}
+])
+
+.controller('ProjectsEditCtrl',   [
+                '$scope', '$stateParams', '$state',
+	function (  $scope,   $stateParams,   $state) {
+		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.isNew=false
+
 	}
 ])
 
@@ -916,95 +1028,6 @@ angular.module('resources.users').factory('User', ['$mongoResourceHttp', functio
 
   return res;
 }]);
-
-angular.module('controllers.projects', ['ui.router','ngMessages'
-, 'services.i18nNotifications'
-, 'resources.projects'
-, 'resources.users'
-])  
-.controller('ProjectsMainCtrl',   [
-               'crudContrllersHelp','$scope', '$state', '$stateParams', 'globalData',
-	function ( crudContrllersHelp,$scope,   $state,   $stateParams,  globalData) {
-         $scope.users=[]
-         globalData.sendApiRequest('users/load')
-         .then(function(data){
-			 $scope.users=data;
-		}) ;
-		 crudContrllersHelp.initMain('Project','tags','name',$scope);     
-	}
-])
-.controller('ProjectsListCtrl',   [
-                'crudContrllersHelp',  '$scope', '$state', '$stateParams', 'globalData',
-	function ( crudContrllersHelp, $scope,     $state,     $stateParams,     globalData) {
-		crudContrllersHelp.initList('Project','tags','name',$scope);   
-			$scope.backlogs=function (item) {
-			$state.go('backlogs', {projectId: item.$id()})
-		}
-		$scope.sprints=function (item) {
-			$state.go('sprints', {projectId: item.$id()})
-		}
-		$scope.issues=function (item) {
-			globalData.exchangeData={targetType:'项目',target: item.name
-				                            ,projectId:item.$id(),backlogId:null}
-			$state.go('issues.create')
-		}
-		$scope.isProductMgr=function(item) {
-		    if(!globalData.currentUser) return false;
-			return item.productOwnerId==globalData.currentUser.id
-		}
-		$scope.isDevMgr=function(item) {
-			if(!globalData.currentUser) return false;
-			return item.devMasterId==globalData.currentUser.id
-		}
-
-	}
-])
-.controller('ProjectsDetailCtrl',   [
-                'crudContrllersHelp','$scope','$stateParams', '$state',
-	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
-		crudContrllersHelp.initDetail('Project','tags','name',$scope);
-
-
-	}
-])
-
-.controller('ProjectsCreateCtrl',   [
-                '$scope', 'Project',
-	function (  $scope,   Project) {
-		$scope.item = new Project();
-		$scope.item.iterationDuration=4;
-		$scope.item.state='TODO';
-		$scope.isNew=true;
-		$scope.item.desc=
-"# 一级标题\r\n"
-+"\r\n"
-+"## 二级标题\r\n"
-+"\r\n"
-+"`红色提醒`\r\n"
-+"\r\n"
-+"**Code**:\r\n"
-+"\r\n"
-+"```js\r\n"
-+"var express = require('express')\r\n"
-+"var multer  = require('multer')\r\n"
-+"\r\n"
-+"var app = express()\r\n"
-+"app.use(multer({ dest: './uploads/'}))\r\n"
-+"```\r\n"
-+"\r\n"
-+"[详细参考](http://www.ituring.com.cn/article/775).";
-
-	}
-])
-
-.controller('ProjectsEditCtrl',   [
-                '$scope', '$stateParams', '$state',
-	function (  $scope,   $stateParams,   $state) {
-		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.isNew=false
-
-	}
-])
 
 angular.module('controllers.users', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
