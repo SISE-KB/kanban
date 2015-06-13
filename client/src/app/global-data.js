@@ -40,6 +40,7 @@ angular.module('app').factory('globalData',
         
 		gData.setCurrentUser=function(user){
 		     gData.currentUser=user;
+		      $log.debug('setCurrentUser:',gData.currentUser);
 		     if(!user) {
 				     gData.mgrPrjs=[];
                      gData.devPrjs=[];

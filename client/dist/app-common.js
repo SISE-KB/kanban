@@ -171,20 +171,20 @@ angular.module('security.authorization', ['security.service'])
   requireAdminUser: ['securityAuthorization', function(securityAuthorization) {
     return securityAuthorization.requireAdminUser()
   }],
-   getMyDevProjects: ['securityAuthorization', function(securityAuthorization) {
+ /*  getMyDevProjects: ['securityAuthorization', function(securityAuthorization) {
      return securityAuthorization.getMyDevProjects()
    }],
    getMyPrdMgrPrjs: ['securityAuthorization', function(securityAuthorization) {
      return securityAuthorization.getMyPrdMgrPrjs()
-   }],
+   }],*/
   requireAuthenticatedUser: ['securityAuthorization', function(securityAuthorization) {
     return securityAuthorization.requireAuthenticatedUser()
   }],
 
-  $get: [  '$http', 'security', 'securityRetryQueue','SERVER_CFG',
-    function($http,  security,   queue,               SERVER_CFG) {
+  $get: [  '$http', 'security', 'securityRetryQueue','SERVER_CFG','globalData',
+    function($http,  security,   queue,               SERVER_CFG,globalData) {
     var service = {
-	  getMyPrdMgrPrjs: function() {
+	/*  getMyPrdMgrPrjs: function() {
 		var userId= !security.currentUser ? '':security.currentUser.id;
 		var req= SERVER_CFG.URL+'/api/projects/mgrby';
 		console.log("myPrdMgrPrjs",req);
@@ -205,7 +205,7 @@ angular.module('security.authorization', ['security.service'])
         });
         return p;
 			  
-      },
+      },*/
       requireAuthenticatedUser: function() {
         var promise = security.requestCurrentUser().then(function(userInfo) {
 			console.log('requireAuthenticatedUser： return：',userInfo)
@@ -213,7 +213,8 @@ angular.module('security.authorization', ['security.service'])
 		     console.log('unauthenticated-client！ push requireAuthenticatedUser again' )
             return queue.pushRetryFn('unauthenticated-client', service.requireAuthenticatedUser)
           } else{
-		    return security.currentUser
+			globalData.setCurrentUser(security.currentUser);  
+		    return security.currentUser;
 		  }
         });
         return promise
@@ -227,6 +228,7 @@ angular.module('security.authorization', ['security.service'])
           if ( !security.isAdmin() ) {
             return queue.pushRetryFn('unauthorized-client', service.requireAdminUser)
           }else{
+			  globalData.setCurrentUser(security.currentUser);  
 		    return security.currentUser
 		  }
         });
@@ -346,8 +348,8 @@ angular.module('security.service', [
 ])
 
 .factory('security', [
-       '$http', '$q', '$state', 'securityRetryQueue', '$modal', '$rootScope',
-function($http, $q, $state, queue, $modal,$rootScope) {
+       '$http', '$q', '$state', 'securityRetryQueue', '$modal', '$rootScope','$injector',
+function($http, $q, $state, queue, $modal,$rootScope,$injector) {
 
   // Redirect to the given url (defaults to '/')
   function redirect(state) {
@@ -401,14 +403,15 @@ function($http, $q, $state, queue, $modal,$rootScope) {
 
     // Attempt to authenticate a user by the given email and password
     login: function(code, password) {
-	  /*if(!queue.hasMore()){
-	      var securityAuthorization=$$inject.get('securityAuthorization');
+	/*  if(!queue.hasMore()){
+	      var securityAuthorization=$injector.get('securityAuthorization');
 	      queue.pushRetryFn('unauthenticated-client', 
 		    securityAuthorization.requireAuthenticatedUser);
-	  }*/  
+	  }*/
       var request = $http.post('/login', {code: code, password: password});
       return request.then(function(response) {
         service.currentUser = response.data.user;
+       // globalData.setCurrentUser(service.currentUser);
 		console.log("/login-->",service.currentUser);
         if ( service.isAuthenticated() ) {
           closeLoginDialog(true);

@@ -1,4 +1,4 @@
-angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngDroplet'
+angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngDroplet','ngDragDrop'
 ,'ngSanitize',  'ui.select'
  ,'hc.marked', 'ui.bootstrap','ng-sortable'
 ,'services.i18nNotifications', 'services.httpRequestTracker','services.stateBuilderProvider'
@@ -286,6 +286,7 @@ angular.module('app').factory('globalData',
         
 		gData.setCurrentUser=function(user){
 		     gData.currentUser=user;
+		      $log.debug('setCurrentUser:',gData.currentUser);
 		     if(!user) {
 				     gData.mgrPrjs=[];
                      gData.devPrjs=[];
@@ -576,177 +577,6 @@ angular.module('controllers.issues',
 	}
 ])
 
-angular.module('controllers.mytasks', ['ui.router','ui.calendar','resources.tasks','resources.myevents'])
-
-.config(['$stateProvider', function ($stateProvider) {
-  $stateProvider.state('mytasks', {
-    templateUrl:'views/mydashboard/list.tpl.html',
-    controller:'MyDashboardCtrl',
-  })
-}])
-
-.controller('MyDashboardCtrl', 
-        ['$http','$scope','$timeout','Task','MyEvent','globalData',
-function ($http,  $scope, $timeout,   Task , MyEvent, globalData) {
-$scope.mytasks=[];
-$scope.addMyEvent=function(){
-	$scope.mytasks.push({
-		title:$scope.newText
-
-    });
-	$timeout(ini_events, 2000);
-}
-    function ini_events() {
-	  var ele=$('.external-events div.fc-event');
-      ele.each(function() {
-                var eventObject = {
-                    title: $.trim($(this).text()) // use the element's text as the event title
-                   
-                };
-                var cls=$(this).attr('class');
-                console.log(cls);
-                if(cls.indexOf("my")>=0) eventObject.type="me";
-              // store the Event Object in the DOM element so we can get to it later
-                $(this).data('eventObject', eventObject);
-                // make the event draggable using jQuery UI
-                $(this).draggable({
-                    zIndex: 1070,
-                    revert: true, // will cause the event to go back to its
-                    revertDuration: 0 //  original position after the drag
-                });
-      });
-   }
-      
-      
-      
-    $scope.projects = globalData.devPrjs;
-	Task.forUser(globalData.currentUser._id).then(function(ds){
-			$scope.tasks = ds;
-			$timeout(ini_events, 2000);
-
-	});
-	function alertOnResize(e){
-	  console.log(e);
-	 }
-
-     function mock(start,end,timezone, callback){
-	// console.log(start);
-	 var now=new Date();
-      var d = now.getDate(),
-      m = now.getMonth(),
-      y = now.getFullYear(); 
-     var	 es= [{
-                title: 'All Day Event2',
-                start: new Date(y, m, 1)
-            }, {
-                title: 'Long Event2',
-                start: new Date(y, m, d - 3),
-                end: new Date(y, m, d - 2)
-
-            }, {
-				id: 9999,
-                title: 'Meeting2',
-                start: new Date(y, m, d, 10, 30),
-                allDay: true
-            }];
-			
-	/*	for(var i=0;i<es.length;i++){
-          var  obj=new MyEvent(es[i]);
-		  obj.$save();
-		}*/
-		return 	callback(es);
-
-}
-
-
-	$('#calendar').fullCalendar({
-		 lang: 'zh-cn',
-		
-eventSources: [{events:mock,
-	   color: 'black',    // an option!
-    textColor: 'yellow'  // an option!
-},
-  {
-            url: '/db/myevents', // use the `url` property
-              color: 'green',    // an option!
-    textColor: 'red'  // an option!
-      }
-    ],
-            header: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'month,agendaWeek,agendaDay'
-            },
-      
-			editable: true,
-            droppable: true, // this allows things to be dropped onto the calendar !!!
-            eventLimit: true,
-            eventResize: alertOnResize,
-            eventDrop: function(event, delta, revertFunc,jsEvent) {
-	
-               //    alert(event.title + event.allDay + event.start.format()+ event.end.format());
-                   console.log(event);
-                  
-
-            },
-            drop: function(date, allDay) { // this function is called when something is dropped
-                var originalEventObject = $(this).data('eventObject');
-                var copiedEventObject = $.extend({}, originalEventObject);
-                if(copiedEventObject.type&&"me"===copiedEventObject.type){
-					delete copiedEventObject.type;
-					copiedEventObject.color="black";
-					copiedEventObject.textColor="yellow";
-				}else{
-				  copiedEventObject.color="green";
-				  copiedEventObject.textColor="black";
-			  }
-                copiedEventObject.start = date;
-          
-                // the last `true` argument determines if the event "sticks" (http://arshaw.com/fullcalendar/docs/event_rendering/renderEvent/)
-                $('#calendar').fullCalendar('renderEvent', copiedEventObject, true);
-	
-
-            }
-		});	
-	
-}])
-
-/*	 var date = new Date();
-    ,
-			{
-					id: 999,
-					title: 'Repeating Event',
-					start: '2015-06-08T10:00:00'
-			},
-			{
-					id: 999,
-					title: 'Repeating Event',
-					start: '2015-06-15T10:00:00'
-			}]
-	$scope.uiConfig = {
-      calendar:{
-        height: 700,
-        editable: true,
-        header:{
-          left: 'prev today next',
-          center: 'title',
-          right: 'month agendaWeek agendaDay'
-        },
-		 buttonText: { //This is to add icons to the visible buttons
-                prev: "前一个",
-                next: "后一个",
-                today: '今日',
-                month: '月',
-                week: '周',
-                day: '天'
-            },
-	
-			
-        //dayClick: $scope.alertEventOnClick,
-        //eventDrop: $scope.alertOnDrop,
-        //eventResize: $scope.alertOnResize
-*/
-
 angular.module('controllers.messages', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
 , 'directives.dropdownMultiselect'
@@ -798,6 +628,151 @@ angular.module('controllers.messages', ['ui.router','ngMessages'
 		$scope.checkDate($scope.item)
 	}
 ])
+
+angular.module('controllers.mytasks', ['ui.router','ui.calendar','resources.tasks','resources.myevents'])
+.config(['$stateProvider', function ($stateProvider) {
+  $stateProvider.state('mytasks', {
+    templateUrl:'views/mydashboard/list.tpl.html',
+    controller:'MyDashboardCtrl',
+  })
+}])
+.controller('ModalInstanceCtrl', [
+               '$scope', '$log','$modalInstance','globalData',
+    function ($scope,    $log,  $modalInstance,   globalData) {
+	$scope.item=globalData.exchange;
+	$scope.save = function () {
+
+		if($scope.item) {
+			$log.debug('UPDTATE:',$scope.item);
+			$scope.item.$update();
+		}
+		$modalInstance.close(true);
+	};
+
+	$scope.cancel = function () {
+		$modalInstance.close(false);//dismiss('cancel');
+	};
+}])
+.controller('MyDashboardCtrl', 
+        ['$http','$q','$log','$scope','$timeout','$modal','Task','MyEvent','security','globalData',
+function ($http,  $q, $log, $scope,$timeout,$modal,  Task , MyEvent, security,globalData) {
+	var curUserId=security.currentUser.id;
+    var dialog=null;
+    
+    $scope.mytasks=[];
+    
+    function onDialogClose(success) {
+		$log.debug('onDialogClose',success);
+		dialog = null;
+		return success;
+	}
+    function onResize(event){
+		event.$update();
+	}
+
+	function loadData(start,end,timezone, callback){
+		MyEvent.load(curUserId).then(function(es){
+			var rt=[];
+			for( var i=0;i<es.length;i++){
+				var e=es[i];
+				var d=new Date(e.start)
+				   ,d1=new Date(start._d)
+				   ,d2=new Date(end._d);
+				
+				d=d.getTime();d1=d1.getTime();d2=d2.getTime();
+				if(d>=d1&&d<=d2)
+				   rt.push(e);
+			}
+			callback(rt);
+		});
+	}
+	$scope.edit = function (item) {
+		globalData.exchange=item;
+		dialog = $modal.open({ templateUrl:'views/mydashboard/edit.tpl.html'
+					              , controller: 'ModalInstanceCtrl'});
+		return  dialog.result.then(onDialogClose);
+	};
+		
+	$scope.addMyEvent=function(){
+		$scope.mytasks.push({title:$scope.newText});
+	}
+
+	Task.forUser(curUserId).then(function(ds){
+			$scope.tasks = ds;
+	});
+
+	
+	$('#calendar').fullCalendar({
+		lang: 'zh-cn',
+		businessHours:{
+			start: '9:00', // a start time (10am in this example)
+			end: '18:00', // an end time (6pm in this example)
+            dow: [ 1, 2, 3, 4,5 ]
+		},
+		eventSources: [
+			{events:loadData, color: 'black',textColor: 'yellow' }
+		],
+        header: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'month,agendaWeek,agendaDay'
+        },
+      
+		editable: true,
+        droppable: true, // this allows things to be dropped onto the calendar !!!
+        eventLimit: true,
+        eventResize: onResize,
+        eventDrop: function(event, delta, revertFunc,jsEvent) {
+	        event.$update();
+        },
+        eventClick: function(event, element) {
+			$scope.edit(event).then(function(){
+				 $('#calendar').fullCalendar('updateEvent', event);
+			});
+		},
+        drop: function(date, allDay) { // this function is called when something is dropped
+     //JSON.parse( 
+            var eventObject =$(this).data('event') ;
+     
+            var cls=$(this).attr('class');
+     $log.debug(eventObject);
+           
+          //  var copiedEventObject = $.extend({}, originalEventObject);
+            eventObject.start = date;
+            if(cls.indexOf("my")>=0){
+				eventObject.color="black";
+				eventObject.textColor="yellow";
+			}else{
+				eventObject.color="blue";
+				eventObject.textColor="white";
+			 }
+               eventObject.userId=curUserId;
+              // console.log('curUserId',curUserId);
+              var  obj=new MyEvent(eventObject);
+              obj.$save(); 
+              $('#calendar').fullCalendar('renderEvent', obj, false);
+              $(this).remove();
+	  }
+   });	
+}])
+/*
+    $scope.renderCalender = function(calendar) {
+      $log.debug('renderCalender');
+      if(uiCalendarConfig.calendars[calendar]){
+        uiCalendarConfig.calendars[calendar].fullCalendar('render');
+      }
+    };
+
+    $scope.eventRender = function( event, element, view ) { 
+        element.attr({'tooltip': event.title,
+                      'tooltip-append-to-body': true});
+        $compile(element)($scope);
+    };
+    $scope. eventSources= [
+			{events:loadData, color: 'black',textColor: 'yellow' }
+	];
+	*/
+
 
 angular.module('controllers.projects', ['ui.router','ngMessages'
 , 'services.i18nNotifications'

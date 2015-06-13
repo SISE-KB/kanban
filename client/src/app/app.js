@@ -1,4 +1,4 @@
-angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngDroplet'
+angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngDroplet','ngDragDrop'
 ,'ngSanitize',  'ui.select'
  ,'hc.marked', 'ui.bootstrap','ng-sortable'
 ,'services.i18nNotifications', 'services.httpRequestTracker','services.stateBuilderProvider'

@@ -6,8 +6,8 @@ angular.module('security.service', [
 ])
 
 .factory('security', [
-       '$http', '$q', '$state', 'securityRetryQueue', '$modal', '$rootScope',
-function($http, $q, $state, queue, $modal,$rootScope) {
+       '$http', '$q', '$state', 'securityRetryQueue', '$modal', '$rootScope','$injector',
+function($http, $q, $state, queue, $modal,$rootScope,$injector) {
 
   // Redirect to the given url (defaults to '/')
   function redirect(state) {
@@ -61,14 +61,15 @@ function($http, $q, $state, queue, $modal,$rootScope) {
 
     // Attempt to authenticate a user by the given email and password
     login: function(code, password) {
-	  /*if(!queue.hasMore()){
-	      var securityAuthorization=$$inject.get('securityAuthorization');
+	/*  if(!queue.hasMore()){
+	      var securityAuthorization=$injector.get('securityAuthorization');
 	      queue.pushRetryFn('unauthenticated-client', 
 		    securityAuthorization.requireAuthenticatedUser);
-	  }*/  
+	  }*/
       var request = $http.post('/login', {code: code, password: password});
       return request.then(function(response) {
         service.currentUser = response.data.user;
+       // globalData.setCurrentUser(service.currentUser);
 		console.log("/login-->",service.currentUser);
         if ( service.isAuthenticated() ) {
           closeLoginDialog(true);
