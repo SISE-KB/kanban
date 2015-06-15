@@ -36,6 +36,7 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 	function (  $scope,   User) {
 		$scope.item = new User();
 		$scope.item.isActive=true;
+		$scope.item.type='S';
 		$scope.item.isAdmin=false;
 		$scope.isNew=true;
 		$scope.checkData($scope.item);

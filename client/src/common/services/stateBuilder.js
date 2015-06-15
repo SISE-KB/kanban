@@ -22,10 +22,7 @@
 			.state(resName+'.create', {
 					url: '/create',
 					templateUrl: 'views/'+resName+'/edit.tpl.html',
-					controller:  Ress+'CreateCtrl',
-				    resolve: {
-	                  currentUser: securityAuthorizationProvider.requireAuthenticatedUser
-	                }
+					controller:  Ress+'CreateCtrl'
 			})
 			.state(resName+'.detail', {
 				url: '/:itemId',

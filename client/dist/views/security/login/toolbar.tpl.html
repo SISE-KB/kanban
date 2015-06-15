@@ -1,7 +1,9 @@
 <ul class="nav navbar-nav navbar-right">
   <li>
       <p class="navbar-text" ng-show="isAuthenticated()">{{currentUser.name}}</p>
+	               
   </li>
+  <li ng-show="!isAuthenticated()" ui-sref-active="active"><a ui-sref="users.create">新用户注册</a></li>
   <li>
     <form class="navbar-form">
       <button ng-show="isAuthenticated()" class="btn btn-default logout" ng-click="logout()">注　销</button>
