@@ -23,7 +23,7 @@ exports.exec = function(req, res) {
 	           })
 	           break  
 	        case "load":
-	   		   Project.find(req.params.query).select('name').then(function(data){
+	   		   Project.find(req.params.query).select('name productOwnerId' ).then(function(data){
 			     debug('load',data)
 	             res.json(data)
 	           })

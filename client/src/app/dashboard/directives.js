@@ -7,7 +7,9 @@ angular.module('controllers.dashboard')
 				    mgrImage: '@',
 					prjName: '@',
 					items1: '=',
-					items2: '='
+					items2: '=',
+					items3: '=',
+					items4: '='
 				},
 				templateUrl:'templates/prj-card.html'
 	}
@@ -40,12 +42,14 @@ angular.module('controllers.dashboard')
      "<div class='well'>"
    +"  <div class='row'>"	
    +" 		<div class='col-md-3'>"	
-   +"       <img ng-src='img/{{mgrImage}}'  class='img-circle'>"
+   +"       <img ng-src='uploads/{{mgrImage}}'  class='img-circle droplet-preview'>"
    +"     </div>"
    +" 		<div class='col-md-9' style='text-align: center;'>"
    +" 		<a ui-sref='projects.list'>{{prjName}}</a><br>"
-   +"       OK:<card-list placement='bottom' list-template='templates/card-list.html' items='items1'> </card-list>"
-   +"       TODO:<card-list placement='bottom' list-template='templates/card-list.html' items='items2'> </card-list>"
+   +"       BacklogsTODO:<card-list placement='bottom' list-template='templates/card-list.html' items='items1'> </card-list>"
+   +"       BacklogsOK:<card-list placement='bottom' list-template='templates/card-list.html' items='items2'> </card-list>"
+   +"       Task:<card-list placement='bottom' list-template='templates/card-list.html' items='items3'> </card-list>"
+   +"       BUG:<card-list placement='bottom' list-template='templates/card-list.html' items='items4'> </card-list>"
    +" 		</div>"
    +"  </div>"
    +"</div>");

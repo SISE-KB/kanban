@@ -138,6 +138,17 @@ section.container section.droplet droplet ul.files li img.droplet-preview {
     border: 1px solid white;
     display: block;
 }
+img.droplet-preview {
+    max-width: 96px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 96px;
+    width: 96px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .25);
+    border: 1px solid white;
+    display: block;
+}
 section.container section.droplet droplet ul.files li div.delete {
     background-color: rgba(0, 0, 0, .25);
     width: 50px;

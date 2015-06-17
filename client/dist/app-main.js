@@ -397,54 +397,125 @@ function ($scope, $timeout,currentUser) {
 
 
 
-angular.module('controllers.dashboard', ['ui.router','ui.bootstrap'])  
+angular.module('controllers.dashboard', ['ui.router','ui.bootstrap','ngMessages',
+, 'services.i18nNotifications'
+, 'resources.projects'
+, 'resources.backlogs'
+, 'resources.users'
+, 'resources.tasks'
+, 'resources.issues'
+])  
+
 .controller('DashboardCtrl',   
-              [ '$scope', '$state', '$stateParams', 
-	function ($scope,   $state,   $stateParams) {
+              [ 'crudContrllersHelp','Project','User','Task','$log','$modal','$scope', '$state', '$stateParams','globalData','Backlog', 'Issue',
+	function ( crudContrllersHelp, Project,User,Task,$log,$modal,$scope,   $state,   $stateParams,globalData,Backlog,Issue) {
+		 $scope.projects=[]
+         globalData.sendApiRequest('projects/load')
+         .then(function(data){
+			 $scope.projects=data;
+			  data.forEach(function(item){
+			      User.getById(item.productOwnerId).then(function(user){
+					   $log.debug('user',user);
+					   item.mgrImage=user.code+'/'+user.image;
+					   $log.debug('item.mgrImage',item.mgrImage);
+				  });
+				  Backlog.forProject(item._id,'TODO').then(function(ds){
+					   item.todoItems=ds;
+					   $log.debug(item);
+				  });
+				  Backlog.forProject(item._id,'OK').then(function(ds){
+					   item.okItems=ds;
+					   $log.debug(item);
+				  });
+				  Task.forProject(item._id).then(function(ds){
+			           item.tasks=ds;
+		           $log.debug('load tasks',ds);
+		             });
+				  Issue.forProject(item._id).then(function(ds){
+			           item.issues=ds;
+		           $log.debug('load issues',ds);
+		             });
+			  });
+		});
+			 
+		/* 
 		$scope.data=[
 		{ prjName: '神庙逃亡'
 		  ,prdMgrImage:'1.jpg'
-		  ,backlogsOk:	[
-		      {name:'backlog1', effort:9}
+		  ,backlogsTODO:	[
+		      {name:'backlog1',effort:9}
              ,{name:'backlog2',effort:9}
              ,{name:'backlog3',effort:12}
+		  ]  
+		  ,backlogsOK:	[
+		      {name:'backlog23', effort:9}
+             ,{name:'backlog24',effort:9}
+             ,{name:'backlog25',effort:12}
 		  ]
-		 ,backlogsTodo:	[
+		 ,TASK:	[
 		      {name:'backlog4', effort:9}
              ,{name:'backlog5', effort:9}
+	     ]
+		 ,BUG:[
+		      {name:'backlog14', effort:9}
+             ,{name:'backlog15', effort:9}
 	     ]
 	  }
     ,{    prjName: '顽皮鳄鱼爱洗澡'
 		 ,prdMgrImage:'2.jpg'
-		 ,backlogsOk:	[
+		 ,backlogsTODO:	[
 		      {name:'backlog5', effort:10}
              ,{name:'backlog6',effort:8}
       	  ]
-		 ,backlogsTodo:	[
+		 ,backlogsOK:	[
+		      {name:'backlog26', effort:10}
+             ,{name:'backlog27',effort:8}
+      	  ]
+		 ,TASK:	[
 		      {name:'backlog7', effort:9}
+	     ]
+		 ,BUG:[
+		      {name:'backlog17', effort:9}
+             ,{name:'backlog18', effort:9}
 	     ]
 	  }
     ,{    prjName: '机械迷城'
 		 ,prdMgrImage:'3.jpg'
-		 ,backlogsOk:	[
+		 ,backlogsTODO:	[
 		      {name:'backlog8', effort:10}
              ,{name:'backlog9',effort:8}
       	  ]
-		 ,backlogsTodo:	[
+		 ,backlogsOK:	[
+		      {name:'backlog28', effort:10}
+             ,{name:'backlog29',effort:8}
+      	  ]
+		 ,TASK:	[
 		      {name:'backlog10', effort:9}
+	     ]
+		 ,BUG:[
+		      {name:'backlog19', effort:9}
+             ,{name:'backlog20', effort:9}
 	     ]
 	  }
   ,{    prjName: '地域边境'
 		 ,prdMgrImage:'4.jpg'
-		 ,backlogsOk:	[
+		 ,backlogsTODO:	[
 		      {name:'backlog11', effort:10}
              ,{name:'backlog12',effort:8}
       	  ]
-		 ,backlogsTodo:	[
+		 ,backlogsOK:	[
+		      {name:'backlog31', effort:10}
+             ,{name:'backlog32',effort:8}
+      	  ]
+		 ,TASK:	[
 		      {name:'backlog13', effort:9}
 	     ]
+		 ,BUG:[
+		      {name:'backlog21', effort:9}
+             ,{name:'backlog21', effort:9}
+	     ]
 	  }
-    ];
+    ]; */
 }])
 
 angular.module('controllers.dashboard')  
@@ -456,7 +527,9 @@ angular.module('controllers.dashboard')
 				    mgrImage: '@',
 					prjName: '@',
 					items1: '=',
-					items2: '='
+					items2: '=',
+					items3: '=',
+					items4: '='
 				},
 				templateUrl:'templates/prj-card.html'
 	}
@@ -489,16 +562,95 @@ angular.module('controllers.dashboard')
      "<div class='well'>"
    +"  <div class='row'>"	
    +" 		<div class='col-md-3'>"	
-   +"       <img ng-src='img/{{mgrImage}}'  class='img-circle'>"
+   +"       <img ng-src='uploads/{{mgrImage}}'  class='img-circle droplet-preview'>"
    +"     </div>"
    +" 		<div class='col-md-9' style='text-align: center;'>"
    +" 		<a ui-sref='projects.list'>{{prjName}}</a><br>"
-   +"       OK:<card-list placement='bottom' list-template='templates/card-list.html' items='items1'> </card-list>"
-   +"       TODO:<card-list placement='bottom' list-template='templates/card-list.html' items='items2'> </card-list>"
+   +"       BacklogsTODO:<card-list placement='bottom' list-template='templates/card-list.html' items='items1'> </card-list>"
+   +"       BacklogsOK:<card-list placement='bottom' list-template='templates/card-list.html' items='items2'> </card-list>"
+   +"       Task:<card-list placement='bottom' list-template='templates/card-list.html' items='items3'> </card-list>"
+   +"       BUG:<card-list placement='bottom' list-template='templates/card-list.html' items='items4'> </card-list>"
    +" 		</div>"
    +"  </div>"
    +"</div>");
 }]);
+
+angular.module('controllers.issues', 
+['ui.router'
+, 'services.i18nNotifications'
+, 'resources.users'
+, 'resources.issues'
+])  
+
+.controller('IssuesMainCtrl',   [
+               'crudContrllersHelp','$scope','$state',   '$stateParams',  '$log','Project','User','globalData',
+	function ( crudContrllersHelp,$scope,   $state,   $stateParams,  $log, Project,User,globalData) {
+	   crudContrllersHelp.initMain('Issue','name','name',$scope);
+       if(!globalData.exchangeData){
+				 $scope.users =[];
+	   }else{
+		   Project.getById(globalData.exchangeData.projectId).then(function(prj){
+			     $log.debug('IssuesMainCtrl look for prj',prj);
+				  User.getByObjectIds(prj.teamMembers).then(function(ds){
+					    $scope.users= ds;
+					    $log.debug('IssuesMainCtrl the prj members:',ds);
+				  });
+		   });
+		}   
+	   $scope.checkDate= function(item){
+			var now = new Date();
+			if(!item.regDate)
+				item.regDate=now;
+			if(!item.closeDate)
+				item.closeDate= now.setDate(now.getDate()+14);
+		}
+
+	}
+])
+.controller('IssuesListCtrl',   [
+                 'crudContrllersHelp','$scope', '$state', '$stateParams', 
+	function ( crudContrllersHelp, $scope,   $state,   $stateParams) {
+		crudContrllersHelp.initList('Issue','name','name',$scope);
+	}
+])
+.controller('IssuesDetailCtrl',   [
+                 'crudContrllersHelp','$scope','$stateParams', '$state',
+	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
+		crudContrllersHelp.initDetail('Issue','name','name',$scope);
+	}
+])
+
+.controller('IssuesCreateCtrl',   [
+                    '$scope', '$stateParams','Issue','globalData',
+	function ( $scope,   $stateParams,    Issue ,globalData) {
+		$scope.item = new Issue();
+		$scope.isNew=true;
+		$scope.checkDate($scope.item);
+		if(!!globalData.exchangeData){
+		   $scope.item.targetType=globalData.exchangeData.targetType;
+		   $scope.item.target=globalData.exchangeData.target;
+		   $scope.item.projectId=globalData.exchangeData.projectId;
+	       $scope.item.backlogId=globalData.exchangeData.backlogId;
+		   $scope.item.state='TODO';
+		   globalData.exchangeData=null;
+		}  
+	}
+])
+
+.controller('IssuesEditCtrl',   [
+                '$scope', '$stateParams', '$state', 'Project','User',
+	function (  $scope,   $stateParams,   $state,Project,User) {
+		$scope.isNew=false
+		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.checkDate($scope.item)
+		if(!$scope.item.projectId) return
+		Project.getById($scope.item.projectId).then(function(prj){
+		      User.getByObjectIds(prj.teamMembers).then(function(ds){
+				    $scope.users=ds
+			  })
+		   })
+	}
+])
 
 angular.module('controllers.messages', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
@@ -697,83 +849,6 @@ function ($http,  $q, $log, $scope,$timeout,$modal,  Task , MyEvent, security,gl
 	*/
 
 
-angular.module('controllers.issues', 
-['ui.router'
-, 'services.i18nNotifications'
-, 'resources.users'
-, 'resources.issues'
-])  
-
-.controller('IssuesMainCtrl',   [
-               'crudContrllersHelp','$scope','$state',   '$stateParams',  '$log','Project','User','globalData',
-	function ( crudContrllersHelp,$scope,   $state,   $stateParams,  $log, Project,User,globalData) {
-	   crudContrllersHelp.initMain('Issue','name','name',$scope);
-       if(!globalData.exchangeData){
-				 $scope.users =[];
-	   }else{
-		   Project.getById(globalData.exchangeData.projectId).then(function(prj){
-			     $log.debug('IssuesMainCtrl look for prj',prj);
-				  User.getByObjectIds(prj.teamMembers).then(function(ds){
-					    $scope.users= ds;
-					    $log.debug('IssuesMainCtrl the prj members:',ds);
-				  });
-		   });
-		}   
-	   $scope.checkDate= function(item){
-			var now = new Date();
-			if(!item.regDate)
-				item.regDate=now;
-			if(!item.closeDate)
-				item.closeDate= now.setDate(now.getDate()+14);
-		}
-
-	}
-])
-.controller('IssuesListCtrl',   [
-                 'crudContrllersHelp','$scope', '$state', '$stateParams', 
-	function ( crudContrllersHelp, $scope,   $state,   $stateParams) {
-		crudContrllersHelp.initList('Issue','name','name',$scope);
-	}
-])
-.controller('IssuesDetailCtrl',   [
-                 'crudContrllersHelp','$scope','$stateParams', '$state',
-	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
-		crudContrllersHelp.initDetail('Issue','name','name',$scope);
-	}
-])
-
-.controller('IssuesCreateCtrl',   [
-                    '$scope', '$stateParams','Issue','globalData',
-	function ( $scope,   $stateParams,    Issue ,globalData) {
-		$scope.item = new Issue();
-		$scope.isNew=true;
-		$scope.checkDate($scope.item);
-		if(!!globalData.exchangeData){
-		   $scope.item.targetType=globalData.exchangeData.targetType;
-		   $scope.item.target=globalData.exchangeData.target;
-		   $scope.item.projectId=globalData.exchangeData.projectId;
-	       $scope.item.backlogId=globalData.exchangeData.backlogId;
-		   $scope.item.state='TODO';
-		   globalData.exchangeData=null;
-		}  
-	}
-])
-
-.controller('IssuesEditCtrl',   [
-                '$scope', '$stateParams', '$state', 'Project','User',
-	function (  $scope,   $stateParams,   $state,Project,User) {
-		$scope.isNew=false
-		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.checkDate($scope.item)
-		if(!$scope.item.projectId) return
-		Project.getById($scope.item.projectId).then(function(prj){
-		      User.getByObjectIds(prj.teamMembers).then(function(ds){
-				    $scope.users=ds
-			  })
-		   })
-	}
-])
-
 angular.module('controllers.projects', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
 , 'resources.projects'
@@ -862,147 +937,6 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 
 	}
 ])
-
-angular.module('resources.backlogs', ['mongoResourceHttp'])
-.factory('Backlog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-  var res = $mongoResourceHttp('backlogs');
-
-  res.forProject = function (projectId,state) {
-	  var q={projectId:projectId};
-	  if(!!state) q.state=state;
-      return res.query(q,{strict:true});
-  };
-  res.forSprint= function (sprintId,state) {
-	  var q={sprintId:sprintId};
-	  if(!!state) q.state=state;
-      return res.query(q,{strict:true});
-  }
-  
-  return res;
-}])
-
-angular.module('resources.issues', ['mongoResourceHttp'])
-
-angular.module('resources.issues').factory('Issue', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var res = $mongoResourceHttp('issues');
-
-
-  return res;
-}]);
-
-angular.module('resources.messages', ['mongoResourceHttp'])
-
-.factory('Message', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var resource = $mongoResourceHttp('messages');
-  /*resource.prototype.getFullName = function () {
-    return this.lastName + " " + this.firstName + " (" + this.email + ")";
-  };*/
-
-  return resource;
-}]);
-
-angular.module('resources.myevents', ['mongoResourceHttp'])
-.factory('MyEvent', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-  var res = $mongoResourceHttp('myevents');
-  res.load= function (userId,projectId,taskId) {
-	  var q={userId:userId};
-	  if(!!projectId) q.projectId=projectId;
-	  if(!!taskId) q.taskId=taskId;
-      return res.query(q,{strict:true});
-  }
- 
-  return res;
-}]);
-
-angular.module('resources.projects', ['mongoResourceHttp']);
-angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var Project = $mongoResourceHttp('projects');
-
-  Project.forProductMgr = function(userId) {
-	return Project.query({productOwnerId:userId},{strict:true});
-  };
-
-  Project.prototype.isProductOwner = function (userId) {
-    return this.productOwnerId === userId;
-  };
-
-  Project.prototype.isDevMaster = function (userId) {
-    return this.devMasterId === userId;
-  };
-
-  Project.prototype.isDevTeamMember = function (userId) {
-    return this.teamMembers.indexOf(userId) >= 0;
-  };
-
-
-  Project.prototype.getRoles = function (userId) {
-    var roles = [];
-    if (this.isProductOwner(userId)) {
-      roles.push('产品经理');
-    } else {
-      if (this.isDevMaster(userId)){
-        roles.push('开发组长');
-      }
-      if (this.isDevTeamMember(userId)){
-        roles.push('开发成员');
-      }
-    }
-    return roles;
-  };
-
-  return Project;
-}]);
-
-angular.module('resources.sprints', ['mongoResourceHttp'])
-.factory('Sprint', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-  var res = $mongoResourceHttp('sprints');
-  res.forProject = function (projectId,state) {
-	  var q={projectId:projectId};
-	  if(!!state) q.state=state;
-      return res.query(q,{strict:true});
-  }
-  
-  return res;
-}]);
-
-angular.module('resources.tasks', ['mongoResourceHttp']);
-angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var res = $mongoResourceHttp('tasks');
-
-  //res.statesEnum = ['TODO', 'DOING', 'BLOCKED', 'TEST', 'DONE', 'OK'];
-
-  res.forSprint= function (sprintId,state) {
-	  var q={sprintId:sprintId};
-	  if(!!state) q.state=state;
-      return res.query(q,{strict:true});
-  }
-  res.forProject = function (projectId) {
-    return res.query({projectId:projectId},{strict:true});
-  };
-  
-  res.forUser = function (userId,state) {
-      var q={assignedUserId:userId};
-	  if(!!state) q.state=state;
-      return res.query(q,{strict:true});
-  };
-
-  return res;
-}]);
-
-angular.module('resources.users', ['mongoResourceHttp']);
-angular.module('resources.users').factory('User', ['$mongoResourceHttp', function ($mongoResourceHttp) {
-
-  var res = $mongoResourceHttp('users');
-  /*res.prototype.getFullName = function () {
-    return this.lastName + " " + this.firstName + " (" + this.email + ")";
-  };*/
-
-  return res;
-}]);
 
 angular.module('controllers.users', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
@@ -1135,6 +1069,149 @@ angular.module('controllers.users')
     }
   }
 }])
+
+angular.module('resources.backlogs', ['mongoResourceHttp'])
+.factory('Backlog', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+  var res = $mongoResourceHttp('backlogs');
+
+  res.forProject = function (projectId,state) {
+	  var q={projectId:projectId};
+	  if(!!state) q.state=state;
+      return res.query(q,{strict:true});
+  };
+  res.forSprint= function (sprintId,state) {
+	  var q={sprintId:sprintId};
+	  if(!!state) q.state=state;
+      return res.query(q,{strict:true});
+  }
+  
+  return res;
+}])
+
+angular.module('resources.issues', ['mongoResourceHttp'])
+
+angular.module('resources.issues').factory('Issue', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var res = $mongoResourceHttp('issues');
+  res.forProject = function (projectId) {
+    return res.query({projectId:projectId},{strict:true});
+  };
+
+  return res;
+}]);
+
+angular.module('resources.messages', ['mongoResourceHttp'])
+
+.factory('Message', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var resource = $mongoResourceHttp('messages');
+  /*resource.prototype.getFullName = function () {
+    return this.lastName + " " + this.firstName + " (" + this.email + ")";
+  };*/
+
+  return resource;
+}]);
+
+angular.module('resources.myevents', ['mongoResourceHttp'])
+.factory('MyEvent', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+  var res = $mongoResourceHttp('myevents');
+  res.load= function (userId,projectId,taskId) {
+	  var q={userId:userId};
+	  if(!!projectId) q.projectId=projectId;
+	  if(!!taskId) q.taskId=taskId;
+      return res.query(q,{strict:true});
+  }
+ 
+  return res;
+}]);
+
+angular.module('resources.projects', ['mongoResourceHttp']);
+angular.module('resources.projects').factory('Project', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var Project = $mongoResourceHttp('projects');
+
+  Project.forProductMgr = function(userId) {
+	return Project.query({productOwnerId:userId},{strict:true});
+  };
+
+  Project.prototype.isProductOwner = function (userId) {
+    return this.productOwnerId === userId;
+  };
+
+  Project.prototype.isDevMaster = function (userId) {
+    return this.devMasterId === userId;
+  };
+
+  Project.prototype.isDevTeamMember = function (userId) {
+    return this.teamMembers.indexOf(userId) >= 0;
+  };
+
+
+  Project.prototype.getRoles = function (userId) {
+    var roles = [];
+    if (this.isProductOwner(userId)) {
+      roles.push('产品经理');
+    } else {
+      if (this.isDevMaster(userId)){
+        roles.push('开发组长');
+      }
+      if (this.isDevTeamMember(userId)){
+        roles.push('开发成员');
+      }
+    }
+    return roles;
+  };
+
+  return Project;
+}]);
+
+angular.module('resources.sprints', ['mongoResourceHttp'])
+.factory('Sprint', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+  var res = $mongoResourceHttp('sprints');
+  res.forProject = function (projectId,state) {
+	  var q={projectId:projectId};
+	  if(!!state) q.state=state;
+      return res.query(q,{strict:true});
+  }
+  
+  return res;
+}]);
+
+angular.module('resources.tasks', ['mongoResourceHttp']);
+angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var res = $mongoResourceHttp('tasks');
+
+  //res.statesEnum = ['TODO', 'DOING', 'BLOCKED', 'TEST', 'DONE', 'OK'];
+
+  res.forSprint= function (sprintId,state) {
+	  var q={sprintId:sprintId};
+	  if(!!state) q.state=state;
+      return res.query(q,{strict:true});
+  }
+  res.forProject = function (projectId) {
+    return res.query({projectId:projectId},{strict:true});
+  };
+  
+  res.forUser = function (userId,state) {
+      var q={assignedUserId:userId};
+	  if(!!state) q.state=state;
+      return res.query(q,{strict:true});
+  };
+
+  return res;
+}]);
+
+angular.module('resources.users', ['mongoResourceHttp']);
+angular.module('resources.users').factory('User', ['$mongoResourceHttp', function ($mongoResourceHttp) {
+
+  var res = $mongoResourceHttp('users');
+  /*res.prototype.getFullName = function () {
+    return this.lastName + " " + this.firstName + " (" + this.email + ")";
+  };*/
+
+  return res;
+}]);
 
 angular.module('controllers.backlogs', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
