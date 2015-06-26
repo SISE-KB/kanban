@@ -1,0 +1,16 @@
+<div>
+		    <table class="table ">
+              <thead>
+                 <tr>
+                   <th>名称</th>
+                   <th>预计工时</th>
+                 </tr>
+              </thead>
+              <tbody>
+                 <tr ng-repeat='item in items'>
+                  <td >{{item.name}}</td>  
+				  <td ><span class="badge">{{item.estimation}}</span></td>
+                </tr>
+              </tbody>
+            </table>
+</div>

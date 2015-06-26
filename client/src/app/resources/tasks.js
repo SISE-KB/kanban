@@ -9,9 +9,12 @@ angular.module('resources.tasks').factory('Task', ['$mongoResourceHttp', functio
 	  var q={sprintId:sprintId};
 	  if(!!state) q.state=state;
       return res.query(q,{strict:true});
-  }
-  res.forProject = function (projectId) {
-    return res.query({projectId:projectId},{strict:true});
+  };
+  
+  res.forProject = function (projectId,state) {
+	   var q={projectId:projectId};
+	   if(!!state) q.state=state;
+       return res.query(q,{strict:true});
   };
   
   res.forUser = function (userId,state) {

@@ -26,14 +26,16 @@ gulp.task('copy-static', function () {
     gulp.src('src/*.*').pipe(gulp.dest('dist')),
     merge(
       gulp.src('assets/**/*.*'),
-      gulp.src(['libs/angular.js', 'libs/angular-ui-router.js','libs/angular-messages.js'
+   /*   gulp.src(['libs/angular.js', 'libs/angular-ui-router.js','libs/angular-messages.js'
        ,'libs/angular-aria.js','libs/angular-animate.js' 
        ,'libs/angular-sanitize.js'
        ,'libs/angular-locale_zh-cn.js'])
-	  .pipe(concat('angular.js'))
-	  .pipe(uglify()),
-	   gulp.src('libs/jquery.min.js'),
-      gulp.src('libs/ui-bootstrap-tpls.min.js'),
+	  .pipe(concat('angular.js'))*/
+	  gulp.src('libs/angular-ext/*.js').pipe(concat('my-angular-ext.js')).pipe(uglify()) ,
+	  gulp.src('libs/calendar/*.js').pipe(concat('my-calendar.js')) .pipe(uglify()),
+	  gulp.src('libs/*.js').pipe(uglify())
+	).pipe(gulp.dest('dist')),
+     /* ,gulp.src('libs/ui-bootstrap-tpls.min.js'),
       gulp.src('libs/ui-select.js'),
       gulp.src('libs/marked.js'),
       gulp.src('libs/angular-marked.js'),
@@ -42,14 +44,13 @@ gulp.task('copy-static', function () {
       gulp.src('libs/ng-droplet.js'),
 	  gulp.src('libs/fullcalendar.min.js'),
 	  gulp.src('libs/calendar.js')
-   )
-   .pipe(gulp.dest('dist')),
+   )*/
+
    merge(
       gulp.src('src/common/**/*.tpl.html'),
       gulp.src('src/app/**/*.tpl.html')
-   )
-   .pipe(gulp.dest('dist/views'))
-  );
+   ).pipe(gulp.dest('dist/views'))
+);
 });
 
 gulp.task('clean', function (done) {

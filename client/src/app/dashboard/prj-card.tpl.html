@@ -1,0 +1,15 @@
+<div class='well'>
+  <div class='row'>
+ 	 <div class='col-md-3'>
+       <img ng-src='uploads/{{mgrImage}}'  class='img-circle droplet-preview'>
+     </div>"
+ 		<div class='col-md-9' style='text-align: center;'>
+ 		<a ui-sref='projects.list'>{{prjName}}</a><br>
+           <backlog-list list-template='views/dashboard/backlogs.tpl.html'
+           items1='items1' items2='items2' items3='items3' items4='items4'></backlog-list>
+           <br>
+          <item-list pic='13.png' placement='bottom' list-template='views/dashboard/item-list.tpl.html' items='tasks'> </item-list>
+          <item-list pic='14.png' placement='bottom' list-template='views/dashboard/item-list.tpl.html' items='issues'> </item-list>
+ 		</div>
+  </div>
+</div>

@@ -3,12 +3,6 @@ angular.module('security.authorization', ['security.service'])
   requireAdminUser: ['securityAuthorization', function(securityAuthorization) {
     return securityAuthorization.requireAdminUser()
   }],
- /*  getMyDevProjects: ['securityAuthorization', function(securityAuthorization) {
-     return securityAuthorization.getMyDevProjects()
-   }],
-   getMyPrdMgrPrjs: ['securityAuthorization', function(securityAuthorization) {
-     return securityAuthorization.getMyPrdMgrPrjs()
-   }],*/
   requireAuthenticatedUser: ['securityAuthorization', function(securityAuthorization) {
     return securityAuthorization.requireAuthenticatedUser()
   }],
@@ -16,28 +10,7 @@ angular.module('security.authorization', ['security.service'])
   $get: [  '$http', 'security', 'securityRetryQueue','SERVER_CFG','globalData',
     function($http,  security,   queue,               SERVER_CFG,globalData) {
     var service = {
-	/*  getMyPrdMgrPrjs: function() {
-		var userId= !security.currentUser ? '':security.currentUser.id;
-		var req= SERVER_CFG.URL+'/api/projects/mgrby';
-		console.log("myPrdMgrPrjs",req);
-		var p=$http.post(req,{userId:userId}).then(function(response) {
-		    //console.log("/api/projects/mgrby",response.data);
-            return response.data;
-        });
-        return p;
-			  
-      },
-	  getMyDevProjects: function() {
-		var userId= !security.currentUser ? '':security.currentUser.id;
-		var req= SERVER_CFG.URL+'/api/projects/devby';
-		console.log("getMyDevProjects",req);
-		var p=$http.post(req,{userId:userId}).then(function(response) {
-		    //console.log("/api/projects/foruser",response.data);
-            return response.data;
-        });
-        return p;
-			  
-      },*/
+	
       requireAuthenticatedUser: function() {
         var promise = security.requestCurrentUser().then(function(userInfo) {
 			console.log('requireAuthenticatedUser： return：',userInfo)

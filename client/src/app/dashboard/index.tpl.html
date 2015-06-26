@@ -1,39 +1,16 @@
 <div  class="container"  ng-controller="DashboardCtrl">
 	<div ng-repeat="item in projects" class="col-md-4">		
-		   <project-card mgr-image="{{item.mgrImage}}" 
+		  <project-card mgr-image="{{item.mgrImage}}" 
 		     prj-name="{{item.name}}"  
-		     items1="item.todoItems"
-			 items2="item.okItems"
-		     items3="item.tasks"
-			 items4="item.issues">
-		  </project-card>	
-	</div>
-</div>
-<script type="text/ng-template" id="templates/card-list.html">
-        <div>
-		    <table class="table ">
-              <thead>
-                 <tr>
-                   <th>名称</th>
-                   <th>工作时长</th>
-                 </tr>
-              </thead>
-              <tbody>
-                 <tr ng-repeat='item in items'>
-                  <td >{{item.name}}</td>  
-				  <td ><span class="badge">{{item.estimation}}</span></td>
-                </tr>
-              </tbody>
-            </table>
-        </div>
-  </script>
-<script type="text/ng-template" id="templates/backlogs-list.html">
-        <div>
-           <ul>
-			  已完成：<li ng-repeat='item in items2'>{{item.name}} 
-			  <span class="badge">{{item.effort}}</span></li>
-			  剩余项：<li ng-repeat='item in items1'>{{item.name}} 
-			  <span class="badge">{{item.effort}}</span></li>
-		   </ul>
-        </div>
-  </script>
+		     items1="item.backlogs.TODO"  items2="item.backlogs.DOING"  items3="item.backlogs.DONE" items4="item.backlogs.OK"
+			  tasks="item.tasks"
+			  issues="item.issues"
+			>
+		  </project-card> 
+
+  
+
+  
+
+
+

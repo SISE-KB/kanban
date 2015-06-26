@@ -13,6 +13,17 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
     .state('dashboard',  {
 	      url: '/',	
 	      controller: 'DashboardCtrl',
+	  /*    resolve: {
+			  projectsStats: ['$q','globalData',
+			            function($q,   globalData){
+							var deferred = $q.defer();  
+							globalData.sendApiRequest('projects/stats').then(function(data){
+								console.log(data);
+					            deferred.resolve(data);
+				            });	
+				           return deferred.promise;     
+		               }]
+		   },   */ 
           templateUrl: 'views/dashboard/index.tpl.html'
     }) 
     .state('home',  {

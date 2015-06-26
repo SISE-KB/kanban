@@ -19,9 +19,9 @@ function($http, $q, $state, queue, $modal,$rootScope,$injector) {
   // Login form dialog stuff
   var loginDialog = null;
   function openLoginDialog() {
-    if ( loginDialog ) {
+   /* if ( loginDialog ) {
         throw new Error('Trying to open a dialog that is already open!');
-    }
+    }*/
     loginDialog = $modal.open({ templateUrl:'views/security/login/form.tpl.html', controller: 'LoginFormController'});
     loginDialog.result.then(onLoginDialogClose);
   }

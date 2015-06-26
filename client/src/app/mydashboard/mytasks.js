@@ -31,7 +31,7 @@ function ($http,  $q, $log, $scope,$timeout,$modal,  Task , MyEvent, security,gl
     $scope.mytasks=[];
     
     function onDialogClose(success) {
-		$log.debug('onDialogClose',success);
+	//	$log.debug('onDialogClose',success);
 		dialog = null;
 		return success;
 	}
@@ -110,10 +110,10 @@ function ($http,  $q, $log, $scope,$timeout,$modal,  Task , MyEvent, security,gl
             eventObject.start = date;
             if(cls.indexOf("my")>=0){
 				eventObject.color="black";
-				eventObject.textColor="yellow";
-			}else{
-				eventObject.color="blue";
 				eventObject.textColor="white";
+			}else{
+				eventObject.color="white";
+				eventObject.textColor="black";
 			 }
                eventObject.userId=curUserId;
               // console.log('curUserId',curUserId);
@@ -124,21 +124,5 @@ function ($http,  $q, $log, $scope,$timeout,$modal,  Task , MyEvent, security,gl
 	  }
    });	
 }])
-/*
-    $scope.renderCalender = function(calendar) {
-      $log.debug('renderCalender');
-      if(uiCalendarConfig.calendars[calendar]){
-        uiCalendarConfig.calendars[calendar].fullCalendar('render');
-      }
-    };
 
-    $scope.eventRender = function( event, element, view ) { 
-        element.attr({'tooltip': event.title,
-                      'tooltip-append-to-body': true});
-        $compile(element)($scope);
-    };
-    $scope. eventSources= [
-			{events:loadData, color: 'black',textColor: 'yellow' }
-	];
-	*/
 
