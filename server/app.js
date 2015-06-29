@@ -3,26 +3,24 @@ var express = require('express')
    ,logger = require('morgan')
    ,session = require('express-session')
    ,debug = require('debug')('kb:main')
-   ,config=require('./config')
    ,security=require('./security')
 
 
+var config=null;
+var myenv=process.env.NODE_ENV
+if("production"==myenv){
+	config=require('./config-production')
+}
+else config=require('./config-test')
+
 var app = express()
 var server = require('http').createServer(app)
-/*var io = require('socket.io')(server)
-io.on('connection', function (socket) {
-  debug('==connection==')
-  socket.on('message', function (data) {
-    socket.broadcast.emit('message', data)
-  })
-})*/
 
-//app.use(logger('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use(session({ 
-	secret: config.server.cookieSecret,
+	secret: config.cookieSecret,
 	resave: false,
     saveUninitialized: true
  }))

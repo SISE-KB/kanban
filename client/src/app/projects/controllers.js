@@ -44,7 +44,10 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
                 'crudContrllersHelp','$scope','$stateParams', '$state',
 	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
 		crudContrllersHelp.initDetail('Project','tags','name',$scope);
-
+        $scope.canEdit=function(prj){
+			return !!$scope.currentUser&&
+			($scope.currentUser.isAdmin||$scope.isProductMgr(prj));
+		}
 
 	}
 ])

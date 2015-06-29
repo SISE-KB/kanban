@@ -8,36 +8,26 @@ angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngDroplet','ngDra
 .config(['$stateProvider','$urlRouterProvider', 'securityAuthorizationProvider',
 function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
   $urlRouterProvider.otherwise('/');
- // $locationProvider.html5Mode(true);     
   $stateProvider
     .state('dashboard',  {
-	      url: '/',	
-	      controller: 'DashboardCtrl',
-	  /*    resolve: {
-			  projectsStats: ['$q','globalData',
-			            function($q,   globalData){
-							var deferred = $q.defer();  
-							globalData.sendApiRequest('projects/stats').then(function(data){
-								console.log(data);
-					            deferred.resolve(data);
-				            });	
-				           return deferred.promise;     
-		               }]
-		   },   */ 
-          templateUrl: 'views/dashboard/index.tpl.html'
-    }) 
-    .state('home',  {
-	     url: '/home',	
-	    controller: 'HomeCtrl',
-        template: '<div><h1>个人工作看板，正在开发......</h1><span>产品代表：{{myPrdMgrPrjs}};参与开发：{{myDevPrjs}}</span><div>'
+	      url: '/'
+	    ,templateUrl: 'views/dashboard/index.tpl.html'
+	     ,resolve: {
+			  projectsStatData: ['globalData',
+			            function( globalData){
+							return globalData.sendApiRequest('projects/stats');
+			           }]
+		   } 
+	 , controller: 'DashboardCtrl'
+         
     }) 
     .state('upload',  {
-	    url: '/upload',	
-	    resolve: {
+	    url: '/upload'
+	   ,resolve: {
 	       currentUser: securityAuthorizationProvider.requireAuthenticatedUser// null if not login
-	    },
-      templateUrl: 'views/upload.tpl.html',
-      controller: 'UploadCtrl'
+	    }
+      ,templateUrl: 'views/upload.tpl.html'
+     , controller: 'UploadCtrl'
     })
    			
 }])
@@ -50,15 +40,11 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
       $rootScope.$on('user:authenticated', function(event,user){
 		  $log.info('user:authenticated',user);
 		  globalData.setCurrentUser(user);
+		  $rootScope.currentUser=user;
 	 });	  
    }
 ])
-.controller('HomeCtrl', [
-            '$scope','globalData',
-  function ( $scope,  globalData) {
-	  $scope.myDevPrjs=globalData.devPrjs;
-      $scope.myPrdMgrPrjs=globalData.mgrPrjs;
- }])
+
 .controller('AppCtrl', [
            '$scope', 'i18nNotifications', 'localizedMessages',
  function($scope, i18nNotifications, localizedMessages) {

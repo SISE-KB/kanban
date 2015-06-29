@@ -12,11 +12,7 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
 				templateUrl: 'views/projects/backlogs/index.tpl.html',
 				controller: 'BacklogsListCtrl'
 		})
-		/*.state('backlogs-edit', {
-				url: '/backlogs/:backlogId/:projectId',
-				templateUrl: 'views/projects/backlogs/edit.tpl.html',
-				controller:  'BacklogsEditCtrl'
-		})*/
+		
  }])
 
  .controller('BacklogsListCtrl', [
@@ -34,6 +30,7 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
 		 });
 	 	
 	 	$scope.myPrjs=globalData.mgrPrjs;
+	 	 $log.debug('myPrjs:',$scope.myPrjs);
 	    var dialog=null;
 	    
 	    function onDialogClose(success) {
@@ -50,9 +47,8 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
   
 	    $scope.edit = function (item) {
 			 $scope.item=item;
-			 $log.debug('edit:',$scope.item);
 			
-			//$scope.$state.go('backlogs-edit',  {backlogId:item._id,projectId:projectId})
+
 			 dialog = $modal.open({ templateUrl:'views/projects/backlogs/edit.tpl.html'
 					                    , controller: 'BacklogsEditCtrl'});
              dialog.result.then(onDialogClose);
@@ -123,25 +119,6 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
 		$scope.cancel= function() {
            dialog.close(false);
         };
-   /*   
-	    $scope.onSave = function (item) {
-			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item['name']});
-			$scope.$state.go('backlogs-list', $scope.$stateParams) 
-		};
-	    $scope.onError = function() {
-			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
-		}
-		$scope.onRemove = function(item) {
-			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item['name']});
-			$scope.$state.go('backlogs-list', $scope.$stateParams) 
-		};
-		$scope.remove = function(item, $index, $event) {
-			$event.stopPropagation()
-			item.$remove().then(function() {
-				$scope.onRemove(item)
-			}, function() {
-				i18nNotifications.pushForCurrentRoute('crud.user.remove.error', 'danger',  {id : item['name']});
-			});
-		};*/
+   
 	   
   }])

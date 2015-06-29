@@ -17,7 +17,8 @@ npm-debug.log
 *.bak
 
 # Things
-README.html
+config-product.js
 *.tgz
 docs/
 uploads
+

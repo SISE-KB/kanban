@@ -1,11 +1,11 @@
 var mongoose     = require('mongoose')
   , parseArgs = require('minimist')
-  , config  = require('../config')
+  , config  = require('../config-test')
  
 
 function connectDB(cb){
 	var degug= parseArgs(process.argv)['debug']
-	var dbUrl =config.mongo.MongoDB
+	var dbUrl =config.MongoDB
 	dbUrl=dbUrl||'mongodb://127.0.0.1/test'
 	if(!!degug) {
 	  mongoose.set('debug', true)  

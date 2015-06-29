@@ -28,6 +28,10 @@ angular.module('controllers.users', ['ui.router','ngMessages'
                'crudContrllersHelp', '$scope','$stateParams', '$state',
 	function ( crudContrllersHelp,$scope,  $stateParams,    $state) {
 		crudContrllersHelp.initDetail('User','code','name',$scope);
+		$scope.canEdit=function(user){
+			return !!$scope.currentUser&&
+			             ($scope.currentUser.isAdmin||user._id==$scope.currentUser.id);
+		}
 		
 	}
 ])
@@ -47,15 +51,6 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 +"\r\n"
 +"`红色提醒`\r\n"
 +"\r\n"
-+"**Code**:\r\n"
-+"\r\n"
-+"```js\r\n"
-+"var express = require('express')\r\n"
-+"var multer  = require('multer')\r\n"
-+"\r\n"
-+"var app = express()\r\n"
-+"app.use(multer({ dest: './uploads/'}))\r\n"
-+"```\r\n"
 +"\r\n"
 +"[详细参考](http://www.ituring.com.cn/article/775).";
 	}

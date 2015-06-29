@@ -1,45 +1,44 @@
 <div class="col-md-12">
 		　<div> TODO<span class="badge">{{items1.length}}</span>
 		  </div>
-		<div ng-sortable="todoConfig">
+		
 			<div ng-repeat="item in items1"  >
 						<h4><span class="label label-info" >
-							({{item.priority}})-{{item.name|trim:18}}
+							({{item.priority}})-{{item.name|trim:24}}
 						</span></h4>
-						 
-				</div>
-		</div>
+			</div>
+
 </div>
 <div class="col-md-12">
 	　　<div >DOING<span class="badge">{{items2.length}}</span>
 	     </div>
-		<div  ng-sortable="doingConfig">
+	
 			<div   ng-repeat="item in items2" >
 					<h4><span class="label label-warning">
-						({{item.priority}})-{{item.name|trim:18}}
+						({{item.priority}})-{{item.name|trim:24}}
 					</span></h4>
 			</div>
-		</div>
+		
 </div>
 <div class="col-md-12">
 		<div>DONE<span class="badge">{{items3.length}}</span>
 		</div>
-		<div ng-sortable="doneConfig">
+		
 			<div  ng-repeat="item in items3" >
 						<h4><span class="label label-success">
 							({{item.priority}})-{{item.name|trim:18}}
 						</span></h4>
 			</div>
-		</div>
+
 </div>
 <div class="col-md-12">
 		<div >OK<span class="badge">{{items4.length}}</span>
 		</div>
-		<div  ng-sortable="okConfig">
-					<div  ng-repeat="item in items4" >
+	
+		<div  ng-repeat="item in items4" >
 						<h3><span class="label label-success">
 							({{item.priority}})-{{item.name|trim:20}}
 						</span></h3>
-					</div>
 		</div>
+
 </div>

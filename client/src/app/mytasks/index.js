@@ -1,7 +1,7 @@
 angular.module('controllers.mytasks', ['ui.router','ui.calendar','resources.tasks','resources.myevents'])
 .config(['$stateProvider', function ($stateProvider) {
   $stateProvider.state('mytasks', {
-    templateUrl:'views/mydashboard/list.tpl.html',
+    templateUrl:'views/mytasks/list.tpl.html',
     controller:'MyDashboardCtrl',
   })
 }])
@@ -57,7 +57,7 @@ function ($http,  $q, $log, $scope,$timeout,$modal,  Task , MyEvent, security,gl
 	}
 	$scope.edit = function (item) {
 		globalData.exchange=item;
-		dialog = $modal.open({ templateUrl:'views/mydashboard/edit.tpl.html'
+		dialog = $modal.open({ templateUrl:'views/mytasks/edit.tpl.html'
 					              , controller: 'ModalInstanceCtrl'});
 		return  dialog.result.then(onDialogClose);
 	};
@@ -112,8 +112,8 @@ function ($http,  $q, $log, $scope,$timeout,$modal,  Task , MyEvent, security,gl
 				eventObject.color="black";
 				eventObject.textColor="white";
 			}else{
-				eventObject.color="white";
-				eventObject.textColor="black";
+				eventObject.color="yellow";
+				eventObject.textColor="red";
 			 }
                eventObject.userId=curUserId;
               // console.log('curUserId',curUserId);

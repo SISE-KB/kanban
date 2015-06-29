@@ -8,36 +8,26 @@ angular.module('app', [ 'ngAnimate','ngMessages', 'ui.router','ngDroplet','ngDra
 .config(['$stateProvider','$urlRouterProvider', 'securityAuthorizationProvider',
 function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
   $urlRouterProvider.otherwise('/');
- // $locationProvider.html5Mode(true);     
   $stateProvider
     .state('dashboard',  {
-	      url: '/',	
-	      controller: 'DashboardCtrl',
-	  /*    resolve: {
-			  projectsStats: ['$q','globalData',
-			            function($q,   globalData){
-							var deferred = $q.defer();  
-							globalData.sendApiRequest('projects/stats').then(function(data){
-								console.log(data);
-					            deferred.resolve(data);
-				            });	
-				           return deferred.promise;     
-		               }]
-		   },   */ 
-          templateUrl: 'views/dashboard/index.tpl.html'
-    }) 
-    .state('home',  {
-	     url: '/home',	
-	    controller: 'HomeCtrl',
-        template: '<div><h1>个人工作看板，正在开发......</h1><span>产品代表：{{myPrdMgrPrjs}};参与开发：{{myDevPrjs}}</span><div>'
+	      url: '/'
+	    ,templateUrl: 'views/dashboard/index.tpl.html'
+	     ,resolve: {
+			  projectsStatData: ['globalData',
+			            function( globalData){
+							return globalData.sendApiRequest('projects/stats');
+			           }]
+		   } 
+	 , controller: 'DashboardCtrl'
+         
     }) 
     .state('upload',  {
-	    url: '/upload',	
-	    resolve: {
+	    url: '/upload'
+	   ,resolve: {
 	       currentUser: securityAuthorizationProvider.requireAuthenticatedUser// null if not login
-	    },
-      templateUrl: 'views/upload.tpl.html',
-      controller: 'UploadCtrl'
+	    }
+      ,templateUrl: 'views/upload.tpl.html'
+     , controller: 'UploadCtrl'
     })
    			
 }])
@@ -50,15 +40,11 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
       $rootScope.$on('user:authenticated', function(event,user){
 		  $log.info('user:authenticated',user);
 		  globalData.setCurrentUser(user);
+		  $rootScope.currentUser=user;
 	 });	  
    }
 ])
-.controller('HomeCtrl', [
-            '$scope','globalData',
-  function ( $scope,  globalData) {
-	  $scope.myDevPrjs=globalData.devPrjs;
-      $scope.myPrdMgrPrjs=globalData.mgrPrjs;
- }])
+
 .controller('AppCtrl', [
            '$scope', 'i18nNotifications', 'localizedMessages',
  function($scope, i18nNotifications, localizedMessages) {
@@ -321,18 +307,8 @@ angular.module('app').factory('globalData',
      }
   ]);
 
-angular.module('controllers',[
- 'controllers.messages'
-,'controllers.users'
-,'controllers.projects'
-,'controllers.backlogs'
-,'controllers.sprints'
-,'controllers.issues'
-,'controllers.dashboard'
-,'controllers.mytasks'
-])
 angular.module('resources', [
- 'resources.messages'
+ //'resources.messages'
 ,'resources.users'
 ,'resources.projects'
 ,'resources.backlogs'
@@ -341,14 +317,22 @@ angular.module('resources', [
 ,'resources.myevents'
 ])
 
-angular.module('app')
-.value('SERVER_CFG',{URL:'http://127.0.0.1:3000'})
+angular.module('controllers',[
+ //'controllers.messages'
+,'controllers.users'
+,'controllers.projects'
+,'controllers.backlogs'
+,'controllers.sprints'
+,'controllers.issues'
+,'controllers.dashboard'
+,'controllers.mytasks'
+])
 .config(['stateBuilderProvider', 
 function (stateBuilderProvider) {
    stateBuilderProvider.statesFor('User') 
    stateBuilderProvider.statesFor('Project')   	
    stateBuilderProvider.statesFor('Issue') 	
-   stateBuilderProvider.statesFor('Message') 	
+  // stateBuilderProvider.statesFor('Message') 	
 }])
 .config(['uiSelectConfig', function(uiSelectConfig) {
   uiSelectConfig.theme = 'bootstrap';
@@ -415,15 +399,19 @@ angular.module('controllers.dashboard', ['ui.router','ui.bootstrap','ngMessages'
 , 'resources.tasks'
 , 'resources.issues'
 ])  
-.controller('DashboardCtrl',   
-              [ '$scope','globalData',
-	function ($scope, globalData) {
-		 globalData.sendApiRequest('projects/stats').then(function(data){
-				console.log(data);
-		       $scope.projects=data;
-		      
-	   });  
-}]);
+/*globalData.sendApiRequest('projects/stats').then(function(data){
+				 $scope.projectsStatData=data;//2 calls!?
+	   });  */
+
+.controller('DashboardCtrl', [ 
+                          '$scope','projectsStatData',
+         function($scope,projectsStatData){
+		   console.log(projectsStatData.length);
+		   $scope.projectsStatData=projectsStatData;
+		   //$scope.myDevPrjs=globalData.devPrjs;
+         // $scope.myPrdMgrPrjs=globalData.mgrPrjs;
+	   }
+])
 
 
 
@@ -624,7 +612,7 @@ angular.module('controllers.messages', ['ui.router','ngMessages'
 angular.module('controllers.mytasks', ['ui.router','ui.calendar','resources.tasks','resources.myevents'])
 .config(['$stateProvider', function ($stateProvider) {
   $stateProvider.state('mytasks', {
-    templateUrl:'views/mydashboard/list.tpl.html',
+    templateUrl:'views/mytasks/list.tpl.html',
     controller:'MyDashboardCtrl',
   })
 }])
@@ -680,7 +668,7 @@ function ($http,  $q, $log, $scope,$timeout,$modal,  Task , MyEvent, security,gl
 	}
 	$scope.edit = function (item) {
 		globalData.exchange=item;
-		dialog = $modal.open({ templateUrl:'views/mydashboard/edit.tpl.html'
+		dialog = $modal.open({ templateUrl:'views/mytasks/edit.tpl.html'
 					              , controller: 'ModalInstanceCtrl'});
 		return  dialog.result.then(onDialogClose);
 	};
@@ -735,8 +723,8 @@ function ($http,  $q, $log, $scope,$timeout,$modal,  Task , MyEvent, security,gl
 				eventObject.color="black";
 				eventObject.textColor="white";
 			}else{
-				eventObject.color="white";
-				eventObject.textColor="black";
+				eventObject.color="yellow";
+				eventObject.textColor="red";
 			 }
                eventObject.userId=curUserId;
               // console.log('curUserId',curUserId);
@@ -796,7 +784,10 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
                 'crudContrllersHelp','$scope','$stateParams', '$state',
 	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
 		crudContrllersHelp.initDetail('Project','tags','name',$scope);
-
+        $scope.canEdit=function(prj){
+			return !!$scope.currentUser&&
+			($scope.currentUser.isAdmin||$scope.isProductMgr(prj));
+		}
 
 	}
 ])
@@ -1016,6 +1007,10 @@ angular.module('controllers.users', ['ui.router','ngMessages'
                'crudContrllersHelp', '$scope','$stateParams', '$state',
 	function ( crudContrllersHelp,$scope,  $stateParams,    $state) {
 		crudContrllersHelp.initDetail('User','code','name',$scope);
+		$scope.canEdit=function(user){
+			return !!$scope.currentUser&&
+			             ($scope.currentUser.isAdmin||user._id==$scope.currentUser.id);
+		}
 		
 	}
 ])
@@ -1035,15 +1030,6 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 +"\r\n"
 +"`红色提醒`\r\n"
 +"\r\n"
-+"**Code**:\r\n"
-+"\r\n"
-+"```js\r\n"
-+"var express = require('express')\r\n"
-+"var multer  = require('multer')\r\n"
-+"\r\n"
-+"var app = express()\r\n"
-+"app.use(multer({ dest: './uploads/'}))\r\n"
-+"```\r\n"
 +"\r\n"
 +"[详细参考](http://www.ituring.com.cn/article/775).";
 	}
@@ -1132,11 +1118,7 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
 				templateUrl: 'views/projects/backlogs/index.tpl.html',
 				controller: 'BacklogsListCtrl'
 		})
-		/*.state('backlogs-edit', {
-				url: '/backlogs/:backlogId/:projectId',
-				templateUrl: 'views/projects/backlogs/edit.tpl.html',
-				controller:  'BacklogsEditCtrl'
-		})*/
+		
  }])
 
  .controller('BacklogsListCtrl', [
@@ -1154,6 +1136,7 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
 		 });
 	 	
 	 	$scope.myPrjs=globalData.mgrPrjs;
+	 	 $log.debug('myPrjs:',$scope.myPrjs);
 	    var dialog=null;
 	    
 	    function onDialogClose(success) {
@@ -1170,9 +1153,8 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
   
 	    $scope.edit = function (item) {
 			 $scope.item=item;
-			 $log.debug('edit:',$scope.item);
 			
-			//$scope.$state.go('backlogs-edit',  {backlogId:item._id,projectId:projectId})
+
 			 dialog = $modal.open({ templateUrl:'views/projects/backlogs/edit.tpl.html'
 					                    , controller: 'BacklogsEditCtrl'});
              dialog.result.then(onDialogClose);
@@ -1243,26 +1225,7 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
 		$scope.cancel= function() {
            dialog.close(false);
         };
-   /*   
-	    $scope.onSave = function (item) {
-			i18nNotifications.pushForNextRoute('crud.save.success', 'success', {id : item['name']});
-			$scope.$state.go('backlogs-list', $scope.$stateParams) 
-		};
-	    $scope.onError = function() {
-			i18nNotifications.pushForCurrentRoute('crud.save.error', 'danger')
-		}
-		$scope.onRemove = function(item) {
-			i18nNotifications.pushForCurrentRoute('crud.remove.success', 'success', {id : item['name']});
-			$scope.$state.go('backlogs-list', $scope.$stateParams) 
-		};
-		$scope.remove = function(item, $index, $event) {
-			$event.stopPropagation()
-			item.$remove().then(function() {
-				$scope.onRemove(item)
-			}, function() {
-				i18nNotifications.pushForCurrentRoute('crud.user.remove.error', 'danger',  {id : item['name']});
-			});
-		};*/
+   
 	   
   }])
 

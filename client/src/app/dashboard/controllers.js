@@ -5,13 +5,17 @@ angular.module('controllers.dashboard', ['ui.router','ui.bootstrap','ngMessages'
 , 'resources.tasks'
 , 'resources.issues'
 ])  
-.controller('DashboardCtrl',   
-              [ '$scope','globalData',
-	function ($scope, globalData) {
-		 globalData.sendApiRequest('projects/stats').then(function(data){
-				console.log(data);
-		       $scope.projects=data;
-		      
-	   });  
-}]);
+/*globalData.sendApiRequest('projects/stats').then(function(data){
+				 $scope.projectsStatData=data;//2 calls!?
+	   });  */
+
+.controller('DashboardCtrl', [ 
+                          '$scope','projectsStatData',
+         function($scope,projectsStatData){
+		   console.log(projectsStatData.length);
+		   $scope.projectsStatData=projectsStatData;
+		   //$scope.myDevPrjs=globalData.devPrjs;
+         // $scope.myPrdMgrPrjs=globalData.mgrPrjs;
+	   }
+])
 

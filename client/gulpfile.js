@@ -31,7 +31,7 @@ gulp.task('copy-static', function () {
        ,'libs/angular-sanitize.js'
        ,'libs/angular-locale_zh-cn.js'])
 	  .pipe(concat('angular.js'))*/
-	  gulp.src('libs/angular-ext/*.js').pipe(concat('my-angular-ext.js')).pipe(uglify()) ,
+	  gulp.src('libs/angular-ext/*.js').pipe(concat('my-angular-ext.js')) ,
 	  gulp.src('libs/calendar/*.js').pipe(concat('my-calendar.js')) .pipe(uglify()),
 	  gulp.src('libs/*.js').pipe(uglify())
 	).pipe(gulp.dest('dist')),
