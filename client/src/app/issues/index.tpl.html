@@ -2,8 +2,12 @@
  <div class="col-md-3">
     <div class="well well-small">
       <ul class="nav nav-list">
-		 <input type="text" name="query" ng-model="query" placeholder="过滤条件 ..." > 
+		<input type="text" name="query" ng-model="query" placeholder="用名称查远端 ..." > 
 		<button class="btn btn-default" ng-click="search()">查询</button>
+		 <br>
+		 <input type="text" name="txtFilter" ng-model="curProjectName" placeholder="本地项目过滤..." > 
+        
+	
         <!--<li ui-sref-active="active"><a ui-sref="issues.list">所有消息</a></li>-->
         <li class="nav-header">最近访问</li>
         <li ng-repeat="item in visited" ui-sref-active="active">

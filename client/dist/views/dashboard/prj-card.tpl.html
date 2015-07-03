@@ -4,7 +4,7 @@
        <img ng-src='uploads/{{mgrImage}}'  class='img-circle droplet-preview'>
      </div>"
  		<div class='col-md-9' style='text-align: center;'>
- 		<a ui-sref='projects.list'>{{prjName}}</a><br>
+ 		<a ui-sref='projects.detail({itemId:id})'>{{prjName}}</a><br>
            <backlog-list list-template='views/dashboard/backlogs.tpl.html'
            items1='items1' items2='items2' items3='items3' items4='items4'></backlog-list>
            <br>

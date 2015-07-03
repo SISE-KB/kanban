@@ -12,7 +12,7 @@
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="item in data" ng-click="view(item)">
+    <tr ng-repeat="item in data | filter:curProjectName" ng-click="view(item)">
         <td>{{item.name}}</td>
 		<td>{{item.type}}</td>
 		<td>{{item.state}}</td>

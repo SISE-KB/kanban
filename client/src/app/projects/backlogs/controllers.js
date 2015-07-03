@@ -26,7 +26,7 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
 		     $scope.todoItems = globalData.toResourcesArray(Backlog,data.TODO ); 
 		     $scope.doingItems = globalData.toResourcesArray(Backlog,data.DOING );
 		     $scope.doneItems = globalData.toResourcesArray(Backlog,data.DONE);
-		     $scope.okItems =globalData.toResourcesArray(Backlog,data.OK);
+		     $scope.okItems = globalData.toResourcesArray(Backlog,data.OK);
 		 });
 	 	
 	 	$scope.myPrjs=globalData.mgrPrjs;
@@ -35,24 +35,22 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
 	    
 	    function onDialogClose(success) {
 			   $log.debug('onDialogClose',success);
-			    dialog = null;
-			    if(success&&$scope.item) {
+			   if(success&&$scope.item) {
 			        $log.debug('UPDTATE:',$scope.item);
 			        $scope.item.$update();
-		         }
+		        }
+		        dialog = null;
 		        return success;
 	    }
 
 
   
 	    $scope.edit = function (item) {
-			 $scope.item=item;
-			
-
+			 //$scope.item=item;
 			 dialog = $modal.open({ templateUrl:'views/projects/backlogs/edit.tpl.html'
 					                    , controller: 'BacklogsEditCtrl'});
              dialog.result.then(onDialogClose);
-              globalData.exchange=[dialog,item];
+             globalData.exchange=[dialog,item];
 		};
 
 
@@ -72,16 +70,17 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
 +"\r\n"
 +"```js\r\n"
 +"var express = require('express')\r\n"
-+"var multer  = require('multer')\r\n"
 +"\r\n"
 +"var app = express()\r\n"
-+"app.use(multer({ dest: './uploads/'}))\r\n"
 +"```\r\n"
 +"\r\n"
 +"[详细参考](http://www.ituring.com.cn/article/775)."
                     
-              $scope.item.$save();
-              $scope.todoItems.push($scope.item);
+              $scope.item.$save().then(function(data){
+				  $scope.item=data;
+				  console.log($scope.item);
+                  $scope.todoItems.push($scope.item);
+			  });
 		}
 			
 		$scope.updateState = function (item) {
@@ -111,7 +110,8 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
        
        var dialog=globalData.exchange[0];
        $scope.item=globalData.exchange[1];
-       globalData.exchange=null;
+       
+      // globalData.exchange=null;
        $scope.save=function() {
 			dialog.close(true);
 	    }	

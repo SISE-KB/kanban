@@ -6,13 +6,29 @@ angular.module('controllers.issues',
 ])  
 
 .controller('IssuesMainCtrl',   [
-               'crudContrllersHelp','$scope','$state',   '$stateParams',  '$log','Project','User','globalData',
-	function ( crudContrllersHelp,$scope,   $state,   $stateParams,  $log, Project,User,globalData) {
+               'crudContrllersHelp','$scope',  '$log','Project','User','globalData',
+	function ( crudContrllersHelp,  $scope,    $log,   Project,  User,   globalData) {
 	   crudContrllersHelp.initMain('Issue','name','name',$scope);
+	   $scope.curProjectName=null;
+	  /* $scope.$watch('curProjectId', function(val) {
+		   console.log(val);
+           $scope.projectChanged( $scope.curProjectId);
+       });*/
+	   $scope.projectChanged=function (prjId){
+		    if(!prjId) return ;
+		   
+	   }
        if(!globalData.exchangeData){
 				 $scope.users =[];
-	   }else{
-		   Project.getById(globalData.exchangeData.projectId).then(function(prj){
+				 globalData.sendApiRequest('projects/load').then(function(data){
+				     $scope.projects=data;
+				     if(data.length>0){
+						  $scope.curProjectName=data[0].name;
+					  }
+				  });   
+	    }else{
+		    
+		    Project.getById(globalData.exchangeData.projectId).then(function(prj){
 			     $log.debug('IssuesMainCtrl look for prj',prj);
 				  User.getByObjectIds(prj.teamMembers).then(function(ds){
 					    $scope.users= ds;

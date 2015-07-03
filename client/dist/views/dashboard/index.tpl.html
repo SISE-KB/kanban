@@ -1,6 +1,6 @@
 <div  class="container"  >
 	<div ng-repeat="item in projectsStatData" class="col-md-4">		
-		  <project-card mgr-image="{{item.mgrImage}}" 
+		  <project-card id="id" mgr-image="{{item.mgrImage}}" 
 		     prj-name="{{item.name}}"  
 		     items1="item.backlogs.TODO"  items2="item.backlogs.DOING"  items3="item.backlogs.DONE" items4="item.backlogs.OK"
 			  tasks="item.tasks"

@@ -23,11 +23,11 @@
             <div class="col-md-6">
 				<div>
 					<label>产品代表:</label>
-					<br><p ng-repeat="u in users|filter:item.productOwnerId">{{u.name}}&lt;{{u.mobileNo}}&gt;</p>
+					<br><p ng-repeat="u in users | filter:{_id:item.productOwnerId}">{{u.name}}&lt;{{u.mobileNo}}&gt;</p>
 				</div>
 				<div>
 					<label>开发组长:</label>
-					<br><p ng-repeat="u in users|filter:item.devMasterId">{{u.name}}&lt;{{u.mobileNo}}&gt;</p>
+					<br><p ng-repeat="u in users|filter:{_id:item.devMasterId}">{{u.name}}&lt;{{u.mobileNo}}&gt;</p>
 				</div>
 				<div >
 			 		   <label>状态:</label>
