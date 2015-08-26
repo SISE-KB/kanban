@@ -24,7 +24,8 @@
         <td>{{item.isActive?'是':'否'}}</td>
         <td ng-if="isAdmin()">
 			<button class="btn btn-danger remove" ng-click="remove(item, $index, $event)">删　除</button>
-			<button class="btn btn-default" ng-click="edit(item)">修　改</button>		
+			<button class="btn btn-default" ng-click="edit(item)">修　改</button>	
+			<button class="btn btn-default" ng-click="showTasks(item)">任务列表</button>		
 		</td>
     </tr>
     </tbody>

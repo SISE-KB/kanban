@@ -1,10 +1,27 @@
 angular.module('controllers.mytasks', ['ui.router','ui.calendar','resources.tasks','resources.myevents'])
 .config(['$stateProvider', function ($stateProvider) {
-  $stateProvider.state('mytasks', {
+	$stateProvider.state('userTasks',{
+		   url: "/userTasks/:userId",
+		   templateUrl:'views/mytasks/userTaskList.tpl.html',
+           controller:'userTasksCtrl'
+	});
+   $stateProvider.state('mytasks', {
     templateUrl:'views/mytasks/list.tpl.html',
-    controller:'MyDashboardCtrl',
-  })
+    controller:'MyDashboardCtrl'
+  });
 }])
+.controller('userTasksCtrl', 
+                        ['$scope','$stateParams','$log',
+    function ( $scope,$stateParams,$log) {
+	  $log.debug('$stateParams:',$scope.$stateParams);
+	  $scope.userId=$stateParams.userId;
+	  
+	  $scope.tasks=[
+	        {name:'T1',state:'TODO'}
+		  ,{name:'T2',state:'OK'} 
+	  ];
+      
+}])  
 .controller('ModalInstanceCtrl', [
                '$scope', '$log','$modalInstance','globalData',
     function ($scope,    $log,  $modalInstance,   globalData) {
@@ -22,6 +39,7 @@ angular.module('controllers.mytasks', ['ui.router','ui.calendar','resources.task
 		$modalInstance.close(false);//dismiss('cancel');
 	};
 }])
+
 .controller('MyDashboardCtrl', 
         ['$http','$q','$log','$scope','$timeout','$modal','Task','MyEvent','security','globalData',
 function ($http,  $q, $log, $scope,$timeout,$modal,  Task , MyEvent, security,globalData) {

@@ -3,8 +3,8 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 ,'directives.dropdownSelect'
 , 'resources.users'])  
 .controller('UsersMainCtrl',   [
-               'crudContrllersHelp','$scope', '$state', '$stateParams', 
-	function ( crudContrllersHelp,$scope,   $state,   $stateParams) {
+               'crudContrllersHelp','$scope', 
+	function ( crudContrllersHelp,$scope) {
 		
 		crudContrllersHelp.initMain('User','code','name',$scope);
 		$scope.availableSkills=['协调','后端编码','前端编码','2D做图','3D建模','文档写作','测试'];
@@ -14,15 +14,16 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 			if(!item.regDate)
 				item.regDate=now;
 		}
-
-	}
-])
+}])
 .controller('UsersListCtrl',   [
-                'crudContrllersHelp','$scope', '$state', '$stateParams',
-	function ( crudContrllersHelp, $scope,   $state,   $stateParams) {
+                'crudContrllersHelp','$scope',
+	function ( crudContrllersHelp, $scope) {
 		crudContrllersHelp.initList('User','code','name',$scope);
+	    $scope.showTasks = function (item) {
+			//console.log('user',item);
+	        $scope.$state.go('userTasks' , {userId:item._id});
+	   }   
 	}
-	
 ])
 .controller('UsersDetailCtrl',   [
                'crudContrllersHelp', '$scope','$stateParams', '$state',
@@ -68,5 +69,11 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 		   //console.log($scope.imgs);
 		});
 	
+	}
+])
+.controller('UsersListTasksCtrl',   [
+                '$scope', '$http','SERVER_CFG', 
+	function (  $scope,$http,SERVER_CFG ) {
+		$scope.item = $scope.findById( $scope.$stateParams.itemId);
 	}
 ]);

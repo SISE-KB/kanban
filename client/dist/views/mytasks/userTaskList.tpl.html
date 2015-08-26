@@ -1,0 +1,17 @@
+<h2>{{userId}}</h2>
+<table class="table table-bordered table-condensed table-striped table-hover">
+    <thead>
+    <tr>
+		 <th>状态</th>
+      	<th>任务描述</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="item in tasks" >
+        <td>{{item.state}}</td>
+	    <td>{{item.name}}</td>
+    </tr>
+    </tbody>
+</table>
+
+

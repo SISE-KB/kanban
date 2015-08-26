@@ -410,7 +410,7 @@ angular.module('controllers.dashboard', ['ui.router','ui.bootstrap','ngMessages'
 .controller('DashboardCtrl', [ 
                           '$scope','projectsStatData',
          function($scope,projectsStatData){
-		   console.log(projectsStatData.length);
+		   //console.log(projectsStatData.length);
 		   $scope.projectsStatData=projectsStatData;
 		   //$scope.myDevPrjs=globalData.devPrjs;
          // $scope.myPrdMgrPrjs=globalData.mgrPrjs;
@@ -631,11 +631,28 @@ angular.module('controllers.messages', ['ui.router','ngMessages'
 
 angular.module('controllers.mytasks', ['ui.router','ui.calendar','resources.tasks','resources.myevents'])
 .config(['$stateProvider', function ($stateProvider) {
-  $stateProvider.state('mytasks', {
+	$stateProvider.state('userTasks',{
+		   url: "/userTasks/:userId",
+		   templateUrl:'views/mytasks/userTaskList.tpl.html',
+           controller:'userTasksCtrl'
+	});
+   $stateProvider.state('mytasks', {
     templateUrl:'views/mytasks/list.tpl.html',
-    controller:'MyDashboardCtrl',
-  })
+    controller:'MyDashboardCtrl'
+  });
 }])
+.controller('userTasksCtrl', 
+                        ['$scope','$stateParams','$log',
+    function ( $scope,$stateParams,$log) {
+	  $log.debug('$stateParams:',$scope.$stateParams);
+	  $scope.userId=$stateParams.userId;
+	  
+	  $scope.tasks=[
+	        {name:'T1',state:'TODO'}
+		  ,{name:'T2',state:'OK'} 
+	  ];
+      
+}])  
 .controller('ModalInstanceCtrl', [
                '$scope', '$log','$modalInstance','globalData',
     function ($scope,    $log,  $modalInstance,   globalData) {
@@ -653,6 +670,7 @@ angular.module('controllers.mytasks', ['ui.router','ui.calendar','resources.task
 		$modalInstance.close(false);//dismiss('cancel');
 	};
 }])
+
 .controller('MyDashboardCtrl', 
         ['$http','$q','$log','$scope','$timeout','$modal','Task','MyEvent','security','globalData',
 function ($http,  $q, $log, $scope,$timeout,$modal,  Task , MyEvent, security,globalData) {
@@ -1002,8 +1020,8 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 ,'directives.dropdownSelect'
 , 'resources.users'])  
 .controller('UsersMainCtrl',   [
-               'crudContrllersHelp','$scope', '$state', '$stateParams', 
-	function ( crudContrllersHelp,$scope,   $state,   $stateParams) {
+               'crudContrllersHelp','$scope', 
+	function ( crudContrllersHelp,$scope) {
 		
 		crudContrllersHelp.initMain('User','code','name',$scope);
 		$scope.availableSkills=['协调','后端编码','前端编码','2D做图','3D建模','文档写作','测试'];
@@ -1013,15 +1031,16 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 			if(!item.regDate)
 				item.regDate=now;
 		}
-
-	}
-])
+}])
 .controller('UsersListCtrl',   [
-                'crudContrllersHelp','$scope', '$state', '$stateParams',
-	function ( crudContrllersHelp, $scope,   $state,   $stateParams) {
+                'crudContrllersHelp','$scope',
+	function ( crudContrllersHelp, $scope) {
 		crudContrllersHelp.initList('User','code','name',$scope);
+	    $scope.showTasks = function (item) {
+			//console.log('user',item);
+	        $scope.$state.go('userTasks' , {userId:item._id});
+	   }   
 	}
-	
 ])
 .controller('UsersDetailCtrl',   [
                'crudContrllersHelp', '$scope','$stateParams', '$state',
@@ -1067,6 +1086,12 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 		   //console.log($scope.imgs);
 		});
 	
+	}
+])
+.controller('UsersListTasksCtrl',   [
+                '$scope', '$http','SERVER_CFG', 
+	function (  $scope,$http,SERVER_CFG ) {
+		$scope.item = $scope.findById( $scope.$stateParams.itemId);
 	}
 ]);
 

@@ -12,7 +12,7 @@ angular.module('controllers.dashboard', ['ui.router','ui.bootstrap','ngMessages'
 .controller('DashboardCtrl', [ 
                           '$scope','projectsStatData',
          function($scope,projectsStatData){
-		   console.log(projectsStatData.length);
+		   //console.log(projectsStatData.length);
 		   $scope.projectsStatData=projectsStatData;
 		   //$scope.myDevPrjs=globalData.devPrjs;
          // $scope.myPrdMgrPrjs=globalData.mgrPrjs;
