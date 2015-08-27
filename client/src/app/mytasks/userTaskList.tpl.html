@@ -1,15 +1,21 @@
-<h2>{{userId}}</h2>
+<h2>{{user.name}}</h2>
 <table class="table table-bordered table-condensed table-striped table-hover">
     <thead>
     <tr>
 		 <th>状态</th>
       	<th>任务描述</th>
+      	<th>截至日期</th>
+      	<th>预计(小时)</th>
+      	<th>剩余(小时)</th>
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="item in tasks" >
-        <td>{{item.state}}</td>
-	    <td>{{item.name}}</td>
+    <tr ng-repeat="item in tasks | orderBy:'state'" >
+        <td class="col-md-2">{{item.state}}</td>
+	    <td class="col-md-6">{{item.name}}</td>
+	    <td class="col-md-2">{{item.deadline | date:'yyyy/MM/dd'}}</td>
+        <td class="col-md-1">{{item.estimation}}</td>
+        <td class="col-md-1">{{item.remaining}}</td>
     </tr>
     </tbody>
 </table>

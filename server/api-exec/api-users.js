@@ -1,7 +1,7 @@
 var debug = require('debug')('kb:api:userS')
 
  var User=require('../models/users')
-//	,Project=require('../models/projects')
+	   ,Task=require('../models/tasks')
 
 exports.exec = function(req, res) {
    var sname=req.params.service
@@ -19,7 +19,13 @@ exports.exec = function(req, res) {
 			     debug('load',data)
 	             res.json(data)
 	           })
-	           break     
+	           break    
+	       case "loadTasks":
+	   		   Task.find({assignedUserId:req.body.userId}).then(function(data){
+			     debug('loadTasks',data)
+	             res.json(data)
+	           })
+	           break    
 	        default:
 	            res.json({state: 'NONE'} )
 	            break   

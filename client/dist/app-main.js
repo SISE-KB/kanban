@@ -642,15 +642,21 @@ angular.module('controllers.mytasks', ['ui.router','ui.calendar','resources.task
   });
 }])
 .controller('userTasksCtrl', 
-                        ['$scope','$stateParams','$log',
-    function ( $scope,$stateParams,$log) {
-	  $log.debug('$stateParams:',$scope.$stateParams);
-	  $scope.userId=$stateParams.userId;
-	  
-	  $scope.tasks=[
+                        ['$scope','$http','$log','globalData',
+    function ( $scope,$http,$log,globalData) {
+	 // $log.debug('$stateParams:',$scope.$stateParams);
+	  $scope.user=globalData.exchangeData;
+	  $http.post('/api/users/loadTasks' ,{userId:$scope.user._id} )
+		               .then(function(resp){
+		                     var data=resp.data;
+	 	                     $log.debug('return tasks:',data);
+	 	                      $scope.tasks=data;
+		                     //return data;
+		                });    
+	/*  $scope.tasks=[
 	        {name:'T1',state:'TODO'}
 		  ,{name:'T2',state:'OK'} 
-	  ];
+	  ];*/
       
 }])  
 .controller('ModalInstanceCtrl', [
@@ -1033,11 +1039,12 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 		}
 }])
 .controller('UsersListCtrl',   [
-                'crudContrllersHelp','$scope',
-	function ( crudContrllersHelp, $scope) {
+                'crudContrllersHelp','$scope','globalData',
+	function ( crudContrllersHelp, $scope,globalData) {
 		crudContrllersHelp.initList('User','code','name',$scope);
 	    $scope.showTasks = function (item) {
 			//console.log('user',item);
+			globalData.exchangeData=item;
 	        $scope.$state.go('userTasks' , {userId:item._id});
 	   }   
 	}

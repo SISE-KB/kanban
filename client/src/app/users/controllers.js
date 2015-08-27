@@ -16,11 +16,12 @@ angular.module('controllers.users', ['ui.router','ngMessages'
 		}
 }])
 .controller('UsersListCtrl',   [
-                'crudContrllersHelp','$scope',
-	function ( crudContrllersHelp, $scope) {
+                'crudContrllersHelp','$scope','globalData',
+	function ( crudContrllersHelp, $scope,globalData) {
 		crudContrllersHelp.initList('User','code','name',$scope);
 	    $scope.showTasks = function (item) {
 			//console.log('user',item);
+			globalData.exchangeData=item;
 	        $scope.$state.go('userTasks' , {userId:item._id});
 	   }   
 	}

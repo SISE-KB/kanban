@@ -8,14 +8,16 @@
     <thead>
     <tr>
         <th class="col-md-6">名称</th>
-        <th class="col-md-2">预计</th>
-        <th class="col-md-2">剩余</th>
+        <th class="col-md-2">状态</th>
+        <th class="col-md-1">预计</th>
+        <th class="col-md-1">剩余</th>
          <th class="col-md-2">操作</th>
     </tr>
     </thead>
     <tbody>
     <tr ng-repeat="task in tasks" ng-click="edit(task)">
         <td >{{task.name}}</td>
+        <td >{{task.state}}</td>
         <td>{{task.estimation}}</td>
         <td>{{task.remaining}}</td>
         <td>
