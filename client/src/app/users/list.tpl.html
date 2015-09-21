@@ -16,8 +16,8 @@
     </thead>
     <tbody>
     <tr ng-repeat="item in data	| filter:txtFilter" >
-        <td> <a ng-click="view(item)">{{item.name}}</a></td>
-		<td>{{item.code}}</td>
+        <td> <a ng-click="view(item)">{{item.code}}</a></td>
+	<td>{{item.name}}</td>
         <td>{{item.mobileNo}}</td>
         <td>{{item.type}}</td>
         <td>{{item.isAdmin?'是':'否'}}</td>
