@@ -21,11 +21,12 @@
 		<td>{{item.state}}</td>
 		<td>{{item.planDate | date:'yyyy/MM/dd'}}</td>
         <td>
+		<button class="btn btn-default" ng-click="edit(item)" ng-if="isProductMgr(item)">修　改</button>	
 		  <button class="btn btn-default" ng-click="backlogs(item)" ng-if="isProductMgr(item)">交付件清单</button>
 		  <button class="btn btn-default" ng-click="sprints(item)" ng-if="isDevMgr(item)">开发计划</button>
 		  <button class="btn btn-default" ng-click="issues(item)" >登记问题</button>
 		<!--  <button class="btn btn-default success" ng-click=""  ng-if="isAdmin()">复制样板</button>-->
-		  <button class="btn btn-default" ng-click="edit(item)" ng-if="isAdmin()">修　改</button>	
+		  
           <button class="btn btn-danger remove" ng-click="remove(item, $index, $event)" ng-if="isAdmin()">删除</button>
         </td>
     </tr>

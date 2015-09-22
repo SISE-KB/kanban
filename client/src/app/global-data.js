@@ -6,6 +6,7 @@ angular.module('app').factory('globalData',
         var gData={};
         gData.mgrPrjs=[];
         gData.devPrjs=[];
+       // gData.gFilter=''; 
          	
        	gData.removeItemFromArray=function(arrs,item){
 		   var fnd=-1;
@@ -20,11 +21,11 @@ angular.module('app').factory('globalData',
 		};
         gData.sendApiRequest=function(req,args){
 		   args=!args?{}:args;
-		   $log.debug(req,args);
+		   //$log.debug(req,args);
 		   return $http.post(apiUrl+req ,args )
 		               .then(function(resp){
 		                     var data=resp.data;
-	 	                     $log.debug('return data:',data);
+	 	                    // $log.debug('return data:',data);
 		                     return data;
 		                });     
        	} ;

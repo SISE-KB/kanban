@@ -1,6 +1,6 @@
 <div class="well">
       <h4>{{item.name}}
-        <button class="btn" ng-click="edit()" ng-if="canEdit(item)">修　改</button>
+        <button class="btn" ng-click="edit()" ng-if="isProductMgr(item)">修　改</button>
         <button class="btn" ng-click="list()">列　表</button>
       </h4>
       

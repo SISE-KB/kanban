@@ -10,12 +10,19 @@ angular.module('controllers.dashboard', ['ui.router','ui.bootstrap','ngMessages'
 	   });  */
 
 .controller('DashboardCtrl', [ 
-                          '$scope','projectsStatData',
-         function($scope,projectsStatData){
-		   //console.log(projectsStatData.length);
-		   $scope.projectsStatData=projectsStatData;
-		   //$scope.myDevPrjs=globalData.devPrjs;
-         // $scope.myPrdMgrPrjs=globalData.mgrPrjs;
+                 '$scope','globalData',//'projectsStatData',
+         function($scope,globalData){
+                   $scope.gFilter='';
+		   
+		  // $scope.projectsStatData=projectsStatData;
+		$scope.filter=function(){
+		   
+                   console.log('query:'+$scope.gFilter);
+                   globalData.sendApiRequest('projects/stats',{tag: $scope.gFilter}).then(function (data){
+                      $scope.projectsStatData=data;
+                   })  
+
+		}
 	   }
 ])
 

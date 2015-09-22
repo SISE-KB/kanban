@@ -12,12 +12,12 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
     .state('dashboard',  {
 	      url: '/'
 	    ,templateUrl: 'views/dashboard/index.tpl.html'
-	     ,resolve: {
+	   /*  ,resolve: {
 			  projectsStatData: ['globalData',
 			            function( globalData){
 							return globalData.sendApiRequest('projects/stats');
 			           }]
-		   } 
+		   } */
 	 , controller: 'DashboardCtrl'
          
     }) 
@@ -35,12 +35,18 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
     function ($rootScope,     $state,     $stateParams,    $log,    security,    globalData) {
       $rootScope.$state = $state;
       $rootScope.$stateParams = $stateParams;
+     // $rootScope.gFilter=''; 	
       $rootScope.isAuthenticated = security.isAuthenticated;
       $rootScope.isAdmin = security.isAdmin;
       $rootScope.$on('user:authenticated', function(event,user){
 		  $log.info('user:authenticated',user);
 		  globalData.setCurrentUser(user);
 		  $rootScope.currentUser=user;
+	 });
+      $rootScope.$on('user:logout', function(event,user){
+		  $log.info('user:logout',user);
+		  globalData.setCurrentUser(null);
+		  $rootScope.currentUser=null;
 	 });	  
    }
 ])
@@ -63,7 +69,7 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
 }])
 .controller('HeaderCtrl', [
             '$scope', 'security','httpRequestTracker',
-  function ( $scope,   security,  httpRequestTracker) {
+  function ($scope,   security,  httpRequestTracker) {
 
   
   $scope.hasPendingRequests = function () {

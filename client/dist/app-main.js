@@ -12,12 +12,12 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
     .state('dashboard',  {
 	      url: '/'
 	    ,templateUrl: 'views/dashboard/index.tpl.html'
-	     ,resolve: {
+	   /*  ,resolve: {
 			  projectsStatData: ['globalData',
 			            function( globalData){
 							return globalData.sendApiRequest('projects/stats');
 			           }]
-		   } 
+		   } */
 	 , controller: 'DashboardCtrl'
          
     }) 
@@ -35,12 +35,18 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
     function ($rootScope,     $state,     $stateParams,    $log,    security,    globalData) {
       $rootScope.$state = $state;
       $rootScope.$stateParams = $stateParams;
+     // $rootScope.gFilter=''; 	
       $rootScope.isAuthenticated = security.isAuthenticated;
       $rootScope.isAdmin = security.isAdmin;
       $rootScope.$on('user:authenticated', function(event,user){
 		  $log.info('user:authenticated',user);
 		  globalData.setCurrentUser(user);
 		  $rootScope.currentUser=user;
+	 });
+      $rootScope.$on('user:logout', function(event,user){
+		  $log.info('user:logout',user);
+		  globalData.setCurrentUser(null);
+		  $rootScope.currentUser=null;
 	 });	  
    }
 ])
@@ -63,7 +69,7 @@ function ($stateProvider,$urlRouterProvider,securityAuthorizationProvider) {
 }])
 .controller('HeaderCtrl', [
             '$scope', 'security','httpRequestTracker',
-  function ( $scope,   security,  httpRequestTracker) {
+  function ($scope,   security,  httpRequestTracker) {
 
   
   $scope.hasPendingRequests = function () {
@@ -253,6 +259,7 @@ angular.module('app').factory('globalData',
         var gData={};
         gData.mgrPrjs=[];
         gData.devPrjs=[];
+       // gData.gFilter=''; 
          	
        	gData.removeItemFromArray=function(arrs,item){
 		   var fnd=-1;
@@ -267,11 +274,11 @@ angular.module('app').factory('globalData',
 		};
         gData.sendApiRequest=function(req,args){
 		   args=!args?{}:args;
-		   $log.debug(req,args);
+		   //$log.debug(req,args);
 		   return $http.post(apiUrl+req ,args )
 		               .then(function(resp){
 		                     var data=resp.data;
-	 	                     $log.debug('return data:',data);
+	 	                    // $log.debug('return data:',data);
 		                     return data;
 		                });     
        	} ;
@@ -408,12 +415,19 @@ angular.module('controllers.dashboard', ['ui.router','ui.bootstrap','ngMessages'
 	   });  */
 
 .controller('DashboardCtrl', [ 
-                          '$scope','projectsStatData',
-         function($scope,projectsStatData){
-		   //console.log(projectsStatData.length);
-		   $scope.projectsStatData=projectsStatData;
-		   //$scope.myDevPrjs=globalData.devPrjs;
-         // $scope.myPrdMgrPrjs=globalData.mgrPrjs;
+                 '$scope','globalData',//'projectsStatData',
+         function($scope,globalData){
+                   $scope.gFilter='';
+		   
+		  // $scope.projectsStatData=projectsStatData;
+		$scope.filter=function(){
+		   
+                   console.log('query:'+$scope.gFilter);
+                   globalData.sendApiRequest('projects/stats',{tag: $scope.gFilter}).then(function (data){
+                      $scope.projectsStatData=data;
+                   })  
+
+		}
 	   }
 ])
 
@@ -467,7 +481,7 @@ angular.module('controllers.dashboard')
 				},
 				templateUrl:'views/dashboard/backlog-btn.tpl.html',
 				controller: function ($scope) {
-					console.log($scope.items2);
+					//console.log($scope.items2);
 					var makeConfig =function(state) {
 			            return {
 				          animation: 150,
@@ -496,10 +510,7 @@ angular.module('controllers.issues',
 	function ( crudContrllersHelp,  $scope,    $log,   Project,  User,   globalData) {
 	   crudContrllersHelp.initMain('Issue','name','name',$scope);
 	   $scope.curProjectName=null;
-	  /* $scope.$watch('curProjectId', function(val) {
-		   console.log(val);
-           $scope.projectChanged( $scope.curProjectId);
-       });*/
+
 	   $scope.projectChanged=function (prjId){
 		    if(!prjId) return ;
 		   
@@ -508,9 +519,9 @@ angular.module('controllers.issues',
 				 $scope.users =[];
 				 globalData.sendApiRequest('projects/load').then(function(data){
 				     $scope.projects=data;
-				     if(data.length>0){
+				    /* if(data.length>0){
 						  $scope.curProjectName=data[0].name;
-					  }
+					  }*/
 				  });   
 	    }else{
 		    
@@ -574,58 +585,6 @@ angular.module('controllers.issues',
 				    $scope.users=ds
 			  })
 		   })
-	}
-])
-
-angular.module('controllers.messages', ['ui.router','ngMessages'
-, 'services.i18nNotifications'
-, 'directives.dropdownMultiselect'
-, 'resources.messages'])  
-.controller('MessagesMainCtrl',   [
-                'crudContrllersHelp','$scope', '$state', '$stateParams','Message',
-	function ( crudContrllersHelp,  $scope,    $state,    $stateParams,  Message) {
-
-		crudContrllersHelp.initMain('Message','title','title',$scope);
-		
-		$scope.availableTags=["娱乐","科技"]
-			
-		$scope.checkDate= function(item){
-			var now = new Date(Date.now())
-			if(!item.recDate)
-				item.recDate=now
-			if(!item.closeDate)
-				item.closeDate= now.setDate(now.getDate()+14)
-		}
-
-	}
-])
-.controller('MessagesListCtrl',   [
-                'crudContrllersHelp','$scope', '$state', '$stateParams', 
-	function (  crudContrllersHelp,$scope,   $state,   $stateParams) {
-		crudContrllersHelp.initList('Message','title','title',$scope);
-	}
-])
-.controller('MessagesDetailCtrl',   [
-                'crudContrllersHelp','$scope','$stateParams', '$state',
-	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
-		crudContrllersHelp.initDetail('Message','title','title',$scope);
-	}
-])
-
-.controller('MessagesCreateCtrl',   [
-                '$scope', 'Message',
-	function (  $scope,   Message) {
-		$scope.item = new Message()
-		$scope.checkDate($scope.item)
-	}
-])
-
-.controller('MessagesEditCtrl',   [
-                '$scope', '$stateParams', '$state',
-	function (  $scope,   $stateParams,   $state) {
-		$scope.item = $scope.findById( $stateParams.itemId)
-		$scope.item.tags=$scope.item.tags||[]
-		$scope.checkDate($scope.item)
 	}
 ])
 
@@ -782,6 +741,58 @@ function ($http,  $q, $log, $scope,$timeout,$modal,  Task , MyEvent, security,gl
 
 
 
+angular.module('controllers.messages', ['ui.router','ngMessages'
+, 'services.i18nNotifications'
+, 'directives.dropdownMultiselect'
+, 'resources.messages'])  
+.controller('MessagesMainCtrl',   [
+                'crudContrllersHelp','$scope', '$state', '$stateParams','Message',
+	function ( crudContrllersHelp,  $scope,    $state,    $stateParams,  Message) {
+
+		crudContrllersHelp.initMain('Message','title','title',$scope);
+		
+		$scope.availableTags=["娱乐","科技"]
+			
+		$scope.checkDate= function(item){
+			var now = new Date(Date.now())
+			if(!item.recDate)
+				item.recDate=now
+			if(!item.closeDate)
+				item.closeDate= now.setDate(now.getDate()+14)
+		}
+
+	}
+])
+.controller('MessagesListCtrl',   [
+                'crudContrllersHelp','$scope', '$state', '$stateParams', 
+	function (  crudContrllersHelp,$scope,   $state,   $stateParams) {
+		crudContrllersHelp.initList('Message','title','title',$scope);
+	}
+])
+.controller('MessagesDetailCtrl',   [
+                'crudContrllersHelp','$scope','$stateParams', '$state',
+	function ( crudContrllersHelp, $scope,$stateParams,   $state) {
+		crudContrllersHelp.initDetail('Message','title','title',$scope);
+	}
+])
+
+.controller('MessagesCreateCtrl',   [
+                '$scope', 'Message',
+	function (  $scope,   Message) {
+		$scope.item = new Message()
+		$scope.checkDate($scope.item)
+	}
+])
+
+.controller('MessagesEditCtrl',   [
+                '$scope', '$stateParams', '$state',
+	function (  $scope,   $stateParams,   $state) {
+		$scope.item = $scope.findById( $stateParams.itemId)
+		$scope.item.tags=$scope.item.tags||[]
+		$scope.checkDate($scope.item)
+	}
+])
+
 angular.module('controllers.projects', ['ui.router','ngMessages'
 , 'services.i18nNotifications'
 , 'resources.projects'
@@ -795,7 +806,22 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
          .then(function(data){
 			 $scope.users=data;
 		}) ;
-		 crudContrllersHelp.initMain('Project','tags','name',$scope);     
+	 crudContrllersHelp.initMain('Project','tags','name',$scope);   
+         $scope.isProductMgr=function(item) {
+		    if(!globalData.currentUser) return false;
+			return item.productOwnerId==globalData.currentUser.id||globalData.currentUser.isAdmin
+		}
+	$scope.isDevMgr=function(item) {
+			if(!globalData.currentUser) return false;
+			return item.devMasterId==globalData.currentUser.id||globalData.currentUser.isAdmin
+		}
+	/*$scope.isOwner=function(item) {
+			if(!globalData.currentUser) return false;
+			return globalData.currentUser.isAdmin
+                             ||item.devMasterId==globalData.currentUser.id
+                             ||item.productOwnerId==globalData.currentUser.id
+                               
+		} */ 
 	}
 ])
 .controller('ProjectsListCtrl',   [
@@ -813,14 +839,7 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 				                            ,projectId:item.$id(),backlogId:null}
 			$state.go('issues.create')
 		}
-		$scope.isProductMgr=function(item) {
-		    if(!globalData.currentUser) return false;
-			return item.productOwnerId==globalData.currentUser.id
-		}
-		$scope.isDevMgr=function(item) {
-			if(!globalData.currentUser) return false;
-			return item.devMasterId==globalData.currentUser.id
-		}
+		
 
 	}
 ])

@@ -11,7 +11,22 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
          .then(function(data){
 			 $scope.users=data;
 		}) ;
-		 crudContrllersHelp.initMain('Project','tags','name',$scope);     
+	 crudContrllersHelp.initMain('Project','tags','name',$scope);   
+         $scope.isProductMgr=function(item) {
+		    if(!globalData.currentUser) return false;
+			return item.productOwnerId==globalData.currentUser.id||globalData.currentUser.isAdmin
+		}
+	$scope.isDevMgr=function(item) {
+			if(!globalData.currentUser) return false;
+			return item.devMasterId==globalData.currentUser.id||globalData.currentUser.isAdmin
+		}
+	/*$scope.isOwner=function(item) {
+			if(!globalData.currentUser) return false;
+			return globalData.currentUser.isAdmin
+                             ||item.devMasterId==globalData.currentUser.id
+                             ||item.productOwnerId==globalData.currentUser.id
+                               
+		} */ 
 	}
 ])
 .controller('ProjectsListCtrl',   [
@@ -29,14 +44,7 @@ angular.module('controllers.projects', ['ui.router','ngMessages'
 				                            ,projectId:item.$id(),backlogId:null}
 			$state.go('issues.create')
 		}
-		$scope.isProductMgr=function(item) {
-		    if(!globalData.currentUser) return false;
-			return item.productOwnerId==globalData.currentUser.id
-		}
-		$scope.isDevMgr=function(item) {
-			if(!globalData.currentUser) return false;
-			return item.devMasterId==globalData.currentUser.id
-		}
+		
 
 	}
 ])

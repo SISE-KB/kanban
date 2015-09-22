@@ -1,15 +1,16 @@
-<div  class="container"  >
-	<div ng-repeat="item in projectsStatData" class="col-md-4">		
-		  <project-card id="id" mgr-image="{{item.mgrImage}}" 
+<div  class="container">
+<input type="text" name="query" ng-model="gFilter" placeholder="用关键字查询..." /> 
+<button class="btn btn-default" ng-click="filter()">查询</button><br>
+<div ng-repeat="item in projectsStatData" class="col-md-4">		
+    <project-card id="id" mgr-image="{{item.mgrImage}}" 
 		     prj-name="{{item.name}}"  
 		     items1="item.backlogs.TODO"  items2="item.backlogs.DOING"  items3="item.backlogs.DONE" items4="item.backlogs.OK"
-			  tasks="item.tasks"
-			  issues="item.issues"
-			>
-		  </project-card> 
+		  tasks="item.tasks"
+		  issues="item.issues">
+   </project-card> 
 
-  
-
+ </div>  
+ </div>  
   
 
 

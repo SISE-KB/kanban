@@ -10,10 +10,7 @@ angular.module('controllers.issues',
 	function ( crudContrllersHelp,  $scope,    $log,   Project,  User,   globalData) {
 	   crudContrllersHelp.initMain('Issue','name','name',$scope);
 	   $scope.curProjectName=null;
-	  /* $scope.$watch('curProjectId', function(val) {
-		   console.log(val);
-           $scope.projectChanged( $scope.curProjectId);
-       });*/
+
 	   $scope.projectChanged=function (prjId){
 		    if(!prjId) return ;
 		   
@@ -22,9 +19,9 @@ angular.module('controllers.issues',
 				 $scope.users =[];
 				 globalData.sendApiRequest('projects/load').then(function(data){
 				     $scope.projects=data;
-				     if(data.length>0){
+				    /* if(data.length>0){
 						  $scope.curProjectName=data[0].name;
-					  }
+					  }*/
 				  });   
 	    }else{
 		    

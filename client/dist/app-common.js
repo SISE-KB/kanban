@@ -404,7 +404,9 @@ function($http, $q, $state, queue, $modal,$rootScope,$injector) {
     // Logout the current user and redirect
     logout: function(redirectTo) {
       $http.post('/logout').then(function() {
-        service.currentUser = null;
+        
+        $rootScope.$broadcast('user:logout', service.currentUser);
+	service.currentUser = null;
         redirect(redirectTo);
       });
     },

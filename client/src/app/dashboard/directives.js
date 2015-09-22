@@ -47,7 +47,7 @@ angular.module('controllers.dashboard')
 				},
 				templateUrl:'views/dashboard/backlog-btn.tpl.html',
 				controller: function ($scope) {
-					console.log($scope.items2);
+					//console.log($scope.items2);
 					var makeConfig =function(state) {
 			            return {
 				          animation: 150,

@@ -91,7 +91,9 @@ exports.exec = function(req, res) {
 	           })
 	           break  
 	       case "stats":
-				Project.find().select('name productOwnerId').then(function(data){
+				debug('filter:',req.body.tag)
+                                tag=new RegExp(req.body.tag);//state:'TODO',
+				Project.find({tags:tag}).select('name productOwnerId').then(function(data){
 					if(data.length<1){
 						res.json([])
 					}else{
