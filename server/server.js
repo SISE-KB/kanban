@@ -21,7 +21,7 @@ mongoose.connect(config.mongoDB, function(err) {
     console.log( ' connection mongoDB error. ', err)
     throw(err)
   } else{
-    console.log( 'mongoDB connected.')
+    console.log(config.mongoDB, 'mongoDB connected.')
     User.find({isAdmin:true},function(err,data){
 	  if(data&&data.length<1) User.create({
 		  isAdmin:true

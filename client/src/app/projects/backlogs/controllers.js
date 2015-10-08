@@ -8,9 +8,9 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
  function($stateProvider){
 	$stateProvider
 		.state('backlogs', {
-				url: "/backlogs/:projectId",
-				templateUrl: 'views/projects/backlogs/index.tpl.html',
-				controller: 'BacklogsListCtrl'
+			url: "/backlogs/:projectId",
+			templateUrl: 'views/projects/backlogs/index.tpl.html',
+			controller: 'BacklogsListCtrl'
 		})
 		
  }])
@@ -18,48 +18,50 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
  .controller('BacklogsListCtrl', [
               '$scope', '$log','$modal','Backlog','globalData',
     function($scope,     $log, $modal , Backlog,  globalData){
-		var projectId = $scope.$stateParams.projectId;
-		//$scope.projectId=projectId;
-        globalData.sendApiRequest("backlogs/stats",{projectId:projectId})
-       .then(function(data){
-		     $log.debug(data);
-		     $scope.todoItems = globalData.toResourcesArray(Backlog,data.TODO ); 
-		     $scope.doingItems = globalData.toResourcesArray(Backlog,data.DOING );
-		     $scope.doneItems = globalData.toResourcesArray(Backlog,data.DONE);
-		     $scope.okItems = globalData.toResourcesArray(Backlog,data.OK);
-		 });
+	var projectId = $scope.$stateParams.projectId;
+	globalData.sendApiRequest("backlogs/stats",{projectId:projectId})
+       	  .then(function(data){
+	     $log.debug(data);
+	     $scope.todoItems = globalData.toResourcesArray(Backlog,data.TODO ); 
+	     $scope.doingItems = globalData.toResourcesArray(Backlog,data.DOING );
+	     $scope.doneItems = globalData.toResourcesArray(Backlog,data.DONE);
+	     $scope.okItems = globalData.toResourcesArray(Backlog,data.OK);
+	 });
 	 	
-	 	$scope.myPrjs=globalData.mgrPrjs;
-	 	 $log.debug('myPrjs:',$scope.myPrjs);
-	    var dialog=null;
+	$scope.myPrjs=globalData.mgrPrjs;
+	//$log.debug('myPrjs:',$scope.myPrjs);
+	var dialog=null;
 	    
-	    function onDialogClose(success) {
-			   $log.debug('onDialogClose',success);
-			   if(success&&$scope.item) {
-			        $log.debug('UPDTATE:',$scope.item);
-			        $scope.item.$update();
-		        }
-		        dialog = null;
-		        return success;
-	    }
+	function onDialogClose(success) {
+	   if(!$scope.item)
+		$scope.item = globalData.exchange[1]
+	   $log.debug('onDialogClose',success);
+	   if(success) {
+	        $log.debug('UPDTATE:',$scope.item);
+	        $scope.item.$update();
+	   }
+	   dialog = null;
+	   globalData.exchange = null;
+	   return success;
+	}
 
 
   
-	    $scope.edit = function (item) {
-			 //$scope.item=item;
-			 dialog = $modal.open({ templateUrl:'views/projects/backlogs/edit.tpl.html'
-					                    , controller: 'BacklogsEditCtrl'});
-             dialog.result.then(onDialogClose);
-             globalData.exchange=[dialog,item];
-		};
+	$scope.edit = function (item) {
+	  $scope.item=item
+	  dialog = $modal.open({ templateUrl:'views/projects/backlogs/edit.tpl.html'
+	                    , controller: 'BacklogsEditCtrl'});
+          dialog.result.then(onDialogClose);
+          globalData.exchange=[dialog,item];
+	};
 
 
-		$scope.addBacklog = function () {
-			  $scope.item = new Backlog();
-			  $scope.item.state="TODO";
-              $scope.item.projectId=projectId;
-              $scope.item.name=$scope.newText;
-              $scope.item.desc=
+	$scope.addBacklog = function () {
+	    $scope.item = new Backlog();
+	    $scope.item.state="TODO";
+            $scope.item.projectId=projectId;
+            $scope.item.name=$scope.newText;
+            $scope.item.desc=
 "# 一级标题\r\n"
 +"\r\n"
 +"## 二级标题\r\n"
@@ -76,23 +78,23 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
 +"\r\n"
 +"[详细参考](http://www.ituring.com.cn/article/775)."
                     
-              $scope.item.$save().then(function(data){
-				  $scope.item=data;
-				  console.log($scope.item);
+           $scope.item.$save().then(function(data){
+		  $scope.item=data;
+	//	  console.log($scope.item);
                   $scope.todoItems.push($scope.item);
-			  });
-		}
+	   });
+	}
 			
-		$scope.updateState = function (item) {
-			globalData.sendApiRequest("backlogs/update",{id:item._id,state:item.state});
-		};
+	$scope.updateState = function (item) {
+		globalData.sendApiRequest("backlogs/update",{id:item._id,state:item.state});
+	};
 	
-		var makeConfig =function(state) {
-			return {
+	var makeConfig =function(state) {
+		return {
 				animation: 150,
 				group: {name : state,put: ['TODO','DOING','DONE','OK']},
 				onAdd: function(item){
-					$log.debug("onAdd--",item.model.name);
+					//$log.debug("onAdd--",item.model.name);
 					item.model.state=state;
 					$scope.updateState(item.model);
 				}	
@@ -105,18 +107,20 @@ angular.module('controllers.backlogs', ['ui.router','ngMessages'
   }])
 
   .controller('BacklogsEditCtrl', [
-             '$scope', 'globalData',
-    function($scope, globalData){
+             '$scope','$log', 'globalData',
+    function($scope,$log, globalData){
        
        var dialog=globalData.exchange[0];
        $scope.item=globalData.exchange[1];
        
       // globalData.exchange=null;
        $scope.save=function() {
-			dialog.close(true);
-	    }	
+          // $log.debug("$scope.save--dialog.close(true)");
+           globalData.exchange[1]=$scope.item
+	   dialog.close(true);
+        }	
 	
-		$scope.cancel= function() {
+	$scope.cancel= function() {
            dialog.close(false);
         };
    

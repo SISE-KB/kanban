@@ -2,4 +2,4 @@
 cd ../client
 gulp
 cd ../server
-npm test
+npm start
